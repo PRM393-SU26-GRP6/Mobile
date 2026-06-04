@@ -20,7 +20,7 @@ class AppLocalizations {
 
   static const Map<String, Map<String, String>> _localizedValues = {
     'en': {
-      'appTitle': 'PRM Web',
+      'appTitle': 'PitchBook',
       'homeTitle': 'App Settings',
       'intro': 'Architecture-ready starter for scalable development.',
       'languageLabel': 'Language',
@@ -32,7 +32,7 @@ class AppLocalizations {
       'themeDark': 'Dark',
     },
     'vi': {
-      'appTitle': 'PRM Web',
+      'appTitle': 'PitchBook',
       'homeTitle': 'Cai dat ung dung',
       'intro': 'Bo khung kien truc de mo rong, de maintain va fix bug.',
       'languageLabel': 'Ngon ngu',

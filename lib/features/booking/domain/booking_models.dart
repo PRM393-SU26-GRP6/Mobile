@@ -42,6 +42,11 @@ class Venue {
     required this.amenities,
     required this.openHours,
     required this.fields,
+    this.imageUrls = const [],
+    this.reviews = const [],
+    this.latitude,
+    this.longitude,
+    this.distance,
   });
 
   final String id;
@@ -55,18 +60,73 @@ class Venue {
   final List<String> amenities;
   final String openHours;
   final List<FieldInfo> fields;
+  final List<String> imageUrls;
+  final List<ReviewInfo> reviews;
+  final double? latitude;
+  final double? longitude;
+  final double? distance;
+
+  Venue copyWith({
+    String? id,
+    String? name,
+    String? address,
+    double? rating,
+    int? reviewCount,
+    int? priceFrom,
+    int? priceTo,
+    List<String>? types,
+    List<String>? amenities,
+    String? openHours,
+    List<FieldInfo>? fields,
+    List<String>? imageUrls,
+    List<ReviewInfo>? reviews,
+    double? latitude,
+    double? longitude,
+    double? distance,
+  }) {
+    return Venue(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      address: address ?? this.address,
+      rating: rating ?? this.rating,
+      reviewCount: reviewCount ?? this.reviewCount,
+      priceFrom: priceFrom ?? this.priceFrom,
+      priceTo: priceTo ?? this.priceTo,
+      types: types ?? this.types,
+      amenities: amenities ?? this.amenities,
+      openHours: openHours ?? this.openHours,
+      fields: fields ?? this.fields,
+      imageUrls: imageUrls ?? this.imageUrls,
+      reviews: reviews ?? this.reviews,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      distance: distance ?? this.distance,
+    );
+  }
 }
 
 class SlotInfo {
-  const SlotInfo({
-    required this.id,
-    required this.time,
-    required this.status,
-  });
+  const SlotInfo({required this.id, required this.time, required this.status});
 
   final String id;
   final String time;
   final SlotStatus status;
+}
+
+class ReviewInfo {
+  const ReviewInfo({
+    required this.id,
+    required this.userName,
+    required this.rating,
+    required this.comment,
+    required this.createdAt,
+  });
+
+  final String id;
+  final String userName;
+  final int rating;
+  final String comment;
+  final DateTime? createdAt;
 }
 
 class CartItem {

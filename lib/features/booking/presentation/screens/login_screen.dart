@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../data/auth_api_client.dart';
 import '../../data/auth_models.dart';
+import '../widgets/auth/auth_brand_header.dart';
+import '../widgets/auth/auth_mode_switch.dart';
+import '../widgets/auth/auth_submit_button.dart';
+import '../widgets/auth/login_form.dart';
+import '../widgets/auth/register_form.dart';
+import '../widgets/auth/role_switch.dart';
 import '../widgets/booking_ui.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -53,14 +59,8 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            response.message.isNotEmpty
-                ? response.message
-                : 'Đăng nhập thành công',
-          ),
-        ),
+      _showMessage(
+        response.message.isNotEmpty ? response.message : 'Đăng nhập thành công',
       );
       widget.onAuthenticated?.call(response);
       widget.onLogin();
@@ -89,14 +89,8 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            response.message.isNotEmpty
-                ? response.message
-                : 'Đăng ký thành công',
-          ),
-        ),
+      _showMessage(
+        response.message.isNotEmpty ? response.message : 'Đăng ký thành công',
       );
       widget.onAuthenticated?.call(response);
       widget.onLogin();
@@ -106,22 +100,6 @@ class _LoginScreenState extends State<LoginScreen> {
       _showError('Không kết nối được API đăng ký: $error');
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
-    }
-  }
-
-  void _showError(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red.shade700),
-    );
-  }
-
-  void _submit() {
-    if (_isSubmitting) return;
-    if (_isRegisterMode) {
-      _register();
-    } else {
-      _login();
     }
   }
 
@@ -139,30 +117,12 @@ class _LoginScreenState extends State<LoginScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(22, 58, 22, 24),
           children: [
-            const _BrandHeader(),
+            const AuthBrandHeader(),
             const SizedBox(height: 28),
-            SegmentedButton<bool>(
-              segments: const [
-                ButtonSegment(
-                  value: false,
-                  label: Text('Đăng nhập'),
-                  icon: Icon(Icons.login_outlined),
-                ),
-                ButtonSegment(
-                  value: true,
-                  label: Text('Đăng ký'),
-                  icon: Icon(Icons.person_add_alt_1_outlined),
-                ),
-              ],
-              selected: {_isRegisterMode},
-              onSelectionChanged: _isSubmitting
-                  ? null
-                  : (values) {
-                      setState(() {
-                        _isRegisterMode = values.first;
-                        _formKey.currentState?.reset();
-                      });
-                    },
+            AuthModeSwitch(
+              isRegisterMode: _isRegisterMode,
+              enabled: !_isSubmitting,
+              onChanged: _setRegisterMode,
             ),
             const SizedBox(height: 24),
             Text(
@@ -174,147 +134,85 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 8),
             Text(subtitle, style: const TextStyle(color: bookingMuted)),
             const SizedBox(height: 24),
-            SegmentedButton<String>(
-              segments: const [
-                ButtonSegment(
-                  value: 'Người chơi',
-                  label: Text('Người chơi'),
-                  icon: Icon(Icons.sports_soccer),
-                ),
-                ButtonSegment(
-                  value: 'Chủ sân',
-                  label: Text('Chủ sân'),
-                  icon: Icon(Icons.storefront_outlined),
-                ),
-              ],
-              selected: {_role},
-              onSelectionChanged: _isSubmitting
-                  ? null
-                  : (values) => setState(() => _role = values.first),
+            RoleSwitch(
+              role: _role,
+              enabled: !_isSubmitting,
+              onChanged: (role) => setState(() => _role = role),
             ),
             const SizedBox(height: 16),
-            if (_isRegisterMode) ...[
-              _AuthTextField(
-                controller: _fullNameController,
-                label: 'Họ và tên',
-                icon: Icons.badge_outlined,
-                hint: 'Nguyễn Văn A',
-                validator: (value) => _required(value, 'Vui lòng nhập họ tên'),
+            if (_isRegisterMode)
+              RegisterForm(
+                fullNameController: _fullNameController,
+                emailController: _emailController,
+                phoneController: _phoneController,
+                passwordController: _passwordController,
+                confirmPasswordController: _confirmPasswordController,
+                hidePassword: _hidePassword,
+                hideConfirmPassword: _hideConfirmPassword,
+                onTogglePassword: _togglePassword,
+                onToggleConfirmPassword: _toggleConfirmPassword,
+                fullNameValidator: (value) =>
+                    _required(value, 'Vui lòng nhập họ tên'),
+                emailValidator: _emailValidator,
+                phoneValidator: _phoneValidator,
+                passwordValidator: _passwordValidator,
+                confirmPasswordValidator: _confirmPasswordValidator,
+              )
+            else
+              LoginForm(
+                emailController: _emailController,
+                passwordController: _passwordController,
+                hidePassword: _hidePassword,
+                onTogglePassword: _togglePassword,
+                emailValidator: _emailValidator,
+                passwordValidator: _loginPasswordValidator,
               ),
-              const SizedBox(height: 12),
-            ],
-            _AuthTextField(
-              controller: _emailController,
-              label: 'Email',
-              icon: Icons.email_outlined,
-              hint: 'ban@example.com',
-              keyboardType: TextInputType.emailAddress,
-              validator: _emailValidator,
-            ),
-            const SizedBox(height: 12),
-            if (_isRegisterMode) ...[
-              _AuthTextField(
-                controller: _phoneController,
-                label: 'Số điện thoại',
-                icon: Icons.phone_outlined,
-                hint: '0901234567',
-                keyboardType: TextInputType.phone,
-                validator: _phoneValidator,
-              ),
-              const SizedBox(height: 12),
-            ],
-            _AuthTextField(
-              controller: _passwordController,
-              label: 'Mật khẩu',
-              icon: Icons.lock_outline,
-              hint: '••••••••',
-              obscureText: _hidePassword,
-              validator: _isRegisterMode
-                  ? _passwordValidator
-                  : _loginPasswordValidator,
-              suffix: IconButton(
-                onPressed: () => setState(() => _hidePassword = !_hidePassword),
-                icon: Icon(
-                  _hidePassword
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                ),
-              ),
-            ),
-            if (_isRegisterMode) ...[
-              const SizedBox(height: 12),
-              _AuthTextField(
-                controller: _confirmPasswordController,
-                label: 'Nhập lại mật khẩu',
-                icon: Icons.lock_reset_outlined,
-                hint: '••••••••',
-                obscureText: _hideConfirmPassword,
-                validator: _confirmPasswordValidator,
-                suffix: IconButton(
-                  onPressed: () => setState(
-                    () => _hideConfirmPassword = !_hideConfirmPassword,
-                  ),
-                  icon: Icon(
-                    _hideConfirmPassword
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined,
-                  ),
-                ),
-              ),
-            ],
-            if (!_isRegisterMode) ...[
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Checkbox(value: true, onChanged: (_) {}),
-                  const Text('Ghi nhớ đăng nhập'),
-                  const Spacer(),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text('Quên mật khẩu?'),
-                  ),
-                ],
-              ),
-            ],
             const SizedBox(height: 18),
-            FilledButton(
-              onPressed: _isSubmitting ? null : _submit,
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(52),
-                backgroundColor: bookingPrimary,
-                foregroundColor: Colors.white,
-                textStyle: const TextStyle(fontWeight: FontWeight.w900),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
-                ),
-              ),
-              child: _isSubmitting
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: Colors.white,
-                      ),
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(_isRegisterMode ? 'Đăng ký' : 'Đăng nhập'),
-                        const SizedBox(width: 8),
-                        Icon(
-                          _isRegisterMode
-                              ? Icons.person_add_alt_1
-                              : Icons.arrow_forward,
-                          size: 18,
-                        ),
-                      ],
-                    ),
+            AuthSubmitButton(
+              isRegisterMode: _isRegisterMode,
+              isSubmitting: _isSubmitting,
+              onPressed: _submit,
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void _setRegisterMode(bool value) {
+    setState(() {
+      _isRegisterMode = value;
+      _formKey.currentState?.reset();
+    });
+  }
+
+  void _togglePassword() {
+    setState(() => _hidePassword = !_hidePassword);
+  }
+
+  void _toggleConfirmPassword() {
+    setState(() => _hideConfirmPassword = !_hideConfirmPassword);
+  }
+
+  void _submit() {
+    if (_isSubmitting) return;
+    if (_isRegisterMode) {
+      _register();
+    } else {
+      _login();
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red.shade700),
     );
   }
 
@@ -380,87 +278,5 @@ class _LoginScreenState extends State<LoginScreen> {
       return 'Mật khẩu nhập lại không khớp';
     }
     return null;
-  }
-}
-
-class _BrandHeader extends StatelessWidget {
-  const _BrandHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Row(
-      children: [
-        CircleAvatar(
-          radius: 27,
-          backgroundColor: bookingPrimary,
-          foregroundColor: Colors.white,
-          child: Text('⚽', style: TextStyle(fontSize: 26)),
-        ),
-        SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'PitchBook',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                  color: bookingText,
-                ),
-              ),
-              Text(
-                'Đặt sân bóng nhanh trong vài chạm',
-                style: TextStyle(color: bookingMuted),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _AuthTextField extends StatelessWidget {
-  const _AuthTextField({
-    required this.controller,
-    required this.label,
-    required this.icon,
-    required this.hint,
-    this.keyboardType,
-    this.obscureText = false,
-    this.validator,
-    this.suffix,
-  });
-
-  final TextEditingController controller;
-  final String label;
-  final IconData icon;
-  final String hint;
-  final TextInputType? keyboardType;
-  final bool obscureText;
-  final String? Function(String?)? validator;
-  final Widget? suffix;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      obscureText: obscureText,
-      validator: validator,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        prefixIcon: Icon(icon),
-        suffixIcon: suffix,
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: bookingLine),
-        ),
-      ),
-    );
   }
 }

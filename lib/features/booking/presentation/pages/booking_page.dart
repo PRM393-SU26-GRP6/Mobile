@@ -16,6 +16,7 @@ import '../screens/splash_screen.dart';
 import '../screens/success_screen.dart';
 import '../screens/venue_detail_screen.dart';
 import '../screens/venue_list_screen.dart';
+import '../widgets/navigation/pitch_bottom_nav.dart';
 
 class BookingPage extends StatefulWidget {
   const BookingPage({required this.settings, super.key});
@@ -62,7 +63,14 @@ class _BookingPageState extends State<BookingPage> {
   void _openVenue(Venue venue) {
     setState(() {
       _selectedVenue = venue;
-      _selectedField = venue.fields.first;
+      _selectedField = venue.fields.isEmpty
+          ? FieldInfo(
+              id: '${venue.id}-default-field',
+              name: 'Sân mặc định',
+              type: venue.types.isEmpty ? '5' : venue.types.first,
+              price: venue.priceFrom,
+            )
+          : venue.fields.first;
       _screen = BookingScreen.venueDetail;
     });
   }
@@ -129,7 +137,7 @@ class _BookingPageState extends State<BookingPage> {
         ),
       ),
       bottomNavigationBar: showNav
-          ? _PitchBottomNav(
+          ? PitchBottomNav(
               screen: _screen,
               cartCount: _cart.length,
               onChange: _go,
@@ -202,7 +210,7 @@ class _BookingPageState extends State<BookingPage> {
           onBack: () => _go(BookingScreen.conversations),
         );
       case BookingScreen.map:
-        return MapScreen(onSelectVenue: () => _openVenue(bookingVenues.first));
+        return MapScreen(onSelectVenue: _openVenue);
       case BookingScreen.account:
         return AccountScreen(
           settings: widget.settings,
@@ -211,80 +219,5 @@ class _BookingPageState extends State<BookingPage> {
           onLogout: _logout,
         );
     }
-  }
-}
-
-class _PitchBottomNav extends StatelessWidget {
-  const _PitchBottomNav({
-    required this.screen,
-    required this.cartCount,
-    required this.onChange,
-  });
-
-  final BookingScreen screen;
-  final int cartCount;
-  final ValueChanged<BookingScreen> onChange;
-
-  @override
-  Widget build(BuildContext context) {
-    return NavigationBar(
-      selectedIndex: _indexFor(screen),
-      onDestinationSelected: (index) {
-        onChange(
-          [
-            BookingScreen.venueList,
-            BookingScreen.map,
-            BookingScreen.cart,
-            BookingScreen.conversations,
-            BookingScreen.account,
-          ][index],
-        );
-      },
-      destinations: [
-        const NavigationDestination(
-          icon: Icon(Icons.home_outlined),
-          selectedIcon: Icon(Icons.home),
-          label: 'Sân',
-        ),
-        const NavigationDestination(
-          icon: Icon(Icons.map_outlined),
-          selectedIcon: Icon(Icons.map),
-          label: 'Bản đồ',
-        ),
-        NavigationDestination(
-          icon: Badge(
-            label: Text('$cartCount'),
-            isLabelVisible: cartCount > 0,
-            child: const Icon(Icons.shopping_cart_outlined),
-          ),
-          selectedIcon: Badge(
-            label: Text('$cartCount'),
-            isLabelVisible: cartCount > 0,
-            child: const Icon(Icons.shopping_cart),
-          ),
-          label: 'Giỏ',
-        ),
-        const NavigationDestination(
-          icon: Icon(Icons.chat_bubble_outline),
-          selectedIcon: Icon(Icons.chat_bubble),
-          label: 'Chat',
-        ),
-        const NavigationDestination(
-          icon: Icon(Icons.person_outline),
-          selectedIcon: Icon(Icons.person),
-          label: 'Tôi',
-        ),
-      ],
-    );
-  }
-
-  int _indexFor(BookingScreen screen) {
-    return switch (screen) {
-      BookingScreen.map => 1,
-      BookingScreen.cart => 2,
-      BookingScreen.conversations => 3,
-      BookingScreen.account => 4,
-      _ => 0,
-    };
   }
 }

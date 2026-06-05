@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../data/booking_mock_data.dart';
+import '../../data/venue_api_client.dart';
 import '../../domain/booking_models.dart';
 import '../widgets/booking_ui.dart';
+import '../widgets/venue_detail/date_option.dart';
+import '../widgets/venue_detail/venue_detail_content.dart';
 
 class VenueDetailScreen extends StatefulWidget {
   const VenueDetailScreen({
@@ -29,12 +32,107 @@ class VenueDetailScreen extends StatefulWidget {
 }
 
 class _VenueDetailScreenState extends State<VenueDetailScreen> {
-  String _date = '2026-06-05';
+  final VenueApiClient _api = VenueApiClient();
+  late Venue _venue;
+  late String _date;
+  List<SlotInfo> _slots = bookingSlots;
+  bool _loadingDetail = true;
+  bool _loadingSlots = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _venue = widget.venue;
+    _date = _formatDate(DateTime.now());
+    _loadVenueDetail();
+  }
+
+  @override
+  void didUpdateWidget(covariant VenueDetailScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.venue.id != widget.venue.id) {
+      _venue = widget.venue;
+      _slots = bookingSlots;
+      _loadVenueDetail();
+    }
+  }
+
+  @override
+  void dispose() {
+    _api.dispose();
+    super.dispose();
+  }
+
+  FieldInfo get _activeField {
+    return _venue.fields.firstWhere(
+      (field) => field.id == widget.selectedField.id,
+      orElse: () => _venue.fields.first,
+    );
+  }
+
+  Future<void> _loadVenueDetail() async {
+    setState(() {
+      _loadingDetail = true;
+      _error = null;
+    });
+
+    try {
+      final detail = await _api.getVenueDetailData(widget.venue.id);
+      if (!mounted) return;
+      final fields = detail.venue.fields.isEmpty
+          ? widget.venue.fields
+          : detail.venue.fields;
+      final selected =
+          fields.any((field) => field.id == widget.selectedField.id)
+          ? widget.selectedField
+          : fields.first;
+
+      setState(() {
+        _venue = detail.venue.copyWith(fields: fields);
+        _loadingDetail = false;
+      });
+
+      if (selected.id != widget.selectedField.id) {
+        widget.onFieldChanged(selected);
+      }
+      await _loadSlots(selected);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _venue = widget.venue;
+        _slots = bookingSlots;
+        _loadingDetail = false;
+        _error = error.toString();
+      });
+    }
+  }
+
+  Future<void> _loadSlots(FieldInfo field) async {
+    if (field.id.contains('default-field')) {
+      setState(() => _slots = bookingSlots);
+      return;
+    }
+
+    setState(() => _loadingSlots = true);
+    try {
+      final slots = await _api.getFieldSlots(fieldId: field.id, date: _date);
+      if (!mounted) return;
+      setState(() {
+        _slots = slots.isEmpty ? bookingSlots : slots;
+        _loadingSlots = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _slots = bookingSlots;
+        _loadingSlots = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final available = bookingSlots.where((slot) => slot.status == SlotStatus.available).length;
-
     return BookingShell(
       key: ValueKey('venue-${widget.venue.id}'),
       child: Column(
@@ -42,90 +140,35 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
           BookingTopBar(
             title: 'Chi tiết sân',
             onBack: widget.onBack,
-            trailing: BookingCartIcon(count: widget.cart.length, onTap: widget.onGoCart),
+            trailing: BookingCartIcon(
+              count: widget.cart.length,
+              onTap: widget.onGoCart,
+            ),
           ),
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(18, 14, 18, 92),
-              children: [
-                BookingVenuePoster(venue: widget.venue),
-                const SizedBox(height: 16),
-                Text(
-                  widget.venue.name,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
-                ),
-                const SizedBox(height: 8),
-                BookingInfoLine(icon: Icons.place_outlined, text: widget.venue.address),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.star, color: Colors.amber, size: 18),
-                    Text(' ${widget.venue.rating} (${widget.venue.reviewCount} đánh giá)'),
-                    const Spacer(),
-                    const Icon(Icons.schedule, color: bookingPrimary, size: 18),
-                    Text(' ${widget.venue.openHours}'),
-                  ],
-                ),
-                const SizedBox(height: 18),
-                const BookingSectionTitle(title: 'Tiện ích'),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: widget.venue.amenities.map((item) => BookingSoftChip(label: item)).toList(),
-                ),
-                const SizedBox(height: 18),
-                const BookingSectionTitle(title: 'Chọn sân'),
-                ...widget.venue.fields.map(
-                  (field) => _FieldTile(
-                    field: field,
-                    selected: field.id == widget.selectedField.id,
-                    onTap: () => widget.onFieldChanged(field),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Row(
-                  children: [
-                    const BookingSectionTitle(title: 'Khung giờ'),
-                    const Spacer(),
-                    Text('$available slot trống', style: const TextStyle(color: bookingPrimary, fontWeight: FontWeight.w700)),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Expanded(child: _DateChip(label: 'Hôm nay', date: '2026-06-04', value: _date, onTap: _setDate)),
-                    const SizedBox(width: 8),
-                    Expanded(child: _DateChip(label: 'Ngày mai', date: '2026-06-05', value: _date, onTap: _setDate)),
-                    const SizedBox(width: 8),
-                    Expanded(child: _DateChip(label: 'Thứ 7', date: '2026-06-06', value: _date, onTap: _setDate)),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: bookingSlots.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
-                    childAspectRatio: 2.2,
-                  ),
-                  itemBuilder: (context, index) {
-                    final slot = bookingSlots[index];
-                    final id = '${widget.selectedField.id}-$_date-${slot.id}';
-                    final selected = widget.cart.any((item) => item.id == id);
-                    return _SlotButton(
-                      slot: slot,
-                      selected: selected,
-                      onTap: () => widget.onToggleSlot(slot, _date),
-                    );
-                  },
-                ),
-              ],
+            child: RefreshIndicator(
+              onRefresh: _loadVenueDetail,
+              child: VenueDetailContent(
+                venue: _venue,
+                originalVenue: widget.venue,
+                activeField: _activeField,
+                slots: _slots,
+                cart: widget.cart,
+                date: _date,
+                dateOptions: _dateOptions(),
+                loadingDetail: _loadingDetail,
+                loadingSlots: _loadingSlots,
+                showFallbackNotice: _error != null,
+                onSelectField: _selectField,
+                onDateChanged: _setDate,
+                onToggleSlot: widget.onToggleSlot,
+              ),
             ),
           ),
           BookingBottomAction(
-            label: widget.cart.isEmpty ? 'Chọn slot để đặt sân' : 'Xem giỏ (${widget.cart.length})',
+            label: widget.cart.isEmpty
+                ? 'Chọn slot để đặt sân'
+                : 'Xem giỏ (${widget.cart.length})',
             icon: Icons.shopping_cart_outlined,
             enabled: widget.cart.isNotEmpty,
             onPressed: widget.onGoCart,
@@ -135,94 +178,34 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
     );
   }
 
-  void _setDate(String date) => setState(() => _date = date);
-}
-
-class _FieldTile extends StatelessWidget {
-  const _FieldTile({required this.field, required this.selected, required this.onTap});
-
-  final FieldInfo field;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return BookingCard(
-      onTap: onTap,
-      margin: const EdgeInsets.only(bottom: 8),
-      borderColor: selected ? bookingPrimary : bookingLine,
-      child: Row(
-        children: [
-          CircleAvatar(
-            backgroundColor: selected ? bookingPrimary : bookingMint,
-            foregroundColor: selected ? Colors.white : bookingPrimary,
-            child: Text(field.type),
-          ),
-          const SizedBox(width: 12),
-          Expanded(child: Text(field.name, style: const TextStyle(fontWeight: FontWeight.w800))),
-          Text(money(field.price), style: const TextStyle(color: bookingPrimary, fontWeight: FontWeight.w900)),
-        ],
-      ),
-    );
+  void _selectField(FieldInfo field) {
+    widget.onFieldChanged(field);
+    _loadSlots(field);
   }
-}
 
-class _DateChip extends StatelessWidget {
-  const _DateChip({required this.label, required this.date, required this.value, required this.onTap});
-
-  final String label;
-  final String date;
-  final String value;
-  final ValueChanged<String> onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final selected = date == value;
-    return InkWell(
-      onTap: () => onTap(date),
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: selected ? bookingPrimary : Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: selected ? bookingPrimary : bookingLine),
-        ),
-        child: Column(
-          children: [
-            Text(label, style: TextStyle(color: selected ? Colors.white : bookingText, fontWeight: FontWeight.w800, fontSize: 12)),
-            Text(date.substring(5).replaceAll('-', '/'), style: TextStyle(color: selected ? Colors.white70 : bookingMuted, fontSize: 12)),
-          ],
-        ),
-      ),
-    );
+  void _setDate(String date) {
+    setState(() => _date = date);
+    _loadSlots(_activeField);
   }
-}
 
-class _SlotButton extends StatelessWidget {
-  const _SlotButton({required this.slot, required this.selected, required this.onTap});
-
-  final SlotInfo slot;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final disabled = slot.status != SlotStatus.available;
-    final color = selected ? bookingPrimary : disabled ? const Color(0xFFE6ECE8) : Colors.white;
-    final textColor = selected ? Colors.white : disabled ? Colors.grey : bookingText;
-    return InkWell(
-      onTap: disabled ? null : onTap,
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: selected ? bookingPrimary : bookingLine),
-        ),
-        child: Text(slot.time.split(' - ').first, style: TextStyle(color: textColor, fontWeight: FontWeight.w800)),
+  List<DateOption> _dateOptions() {
+    final now = DateTime.now();
+    return [
+      DateOption(label: 'Hôm nay', date: _formatDate(now)),
+      DateOption(
+        label: 'Ngày mai',
+        date: _formatDate(now.add(const Duration(days: 1))),
       ),
-    );
+      DateOption(
+        label: 'Ngày kia',
+        date: _formatDate(now.add(const Duration(days: 2))),
+      ),
+    ];
+  }
+
+  String _formatDate(DateTime date) {
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    return '${date.year}-$month-$day';
   }
 }

@@ -1,8 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../data/booking_mock_data.dart';
+import '../../data/venue_api_client.dart';
+import 'package:prm_web/features/booking/data/venue_api_models.dart';
 import '../../domain/booking_models.dart';
 import '../widgets/booking_ui.dart';
+import '../widgets/venue/venue_filter_bar.dart';
+import '../widgets/venue/venue_list_body.dart';
+import '../widgets/venue/venue_list_header.dart';
 
 class VenueListScreen extends StatefulWidget {
   const VenueListScreen({
@@ -23,202 +30,134 @@ class VenueListScreen extends StatefulWidget {
 }
 
 class _VenueListScreenState extends State<VenueListScreen> {
+  final VenueApiClient _api = VenueApiClient();
   String _query = '';
-  String _type = 'Tất cả';
+  String _type = 'Tat ca';
+  String? _amenityId;
+  Timer? _searchDebounce;
+  List<Venue> _venues = bookingVenues;
+  List<AmenityFilter> _amenities = const [];
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInitialData();
+  }
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    _api.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadInitialData() async {
+    await Future.wait([_loadVenues(), _loadAmenities()]);
+  }
+
+  Future<void> _loadAmenities() async {
+    try {
+      final amenities = await _api.getAmenities();
+      if (!mounted) return;
+      setState(() => _amenities = amenities);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _amenities = const []);
+    }
+  }
+
+  Future<void> _loadVenues() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
+    try {
+      final type = _fieldTypeFor(_type);
+      final page =
+          _query.trim().isNotEmpty && type == null && _amenityId == null
+          ? await _api.searchVenues(query: _query.trim())
+          : await _api.getVenues(
+              query: _query,
+              fieldType: type,
+              amenityId: _amenityId,
+            );
+      if (!mounted) return;
+      setState(() {
+        _venues = page.items;
+        _loading = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _venues = bookingVenues;
+        _loading = false;
+        _error = error.toString();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final venues = bookingVenues.where((venue) {
-      final query = _query.toLowerCase();
-      final matchQuery = query.isEmpty ||
-          venue.name.toLowerCase().contains(query) ||
-          venue.address.toLowerCase().contains(query);
-      final matchType = _type == 'Tất cả' || venue.types.contains(_type);
-      return matchQuery && matchType;
-    }).toList();
-
     return BookingShell(
       key: const ValueKey('venues'),
       child: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
-            child: _HeroHeader(
+            child: VenueListHeader(
               cartCount: widget.cartCount,
               onOpenCart: widget.onOpenCart,
               onOpenNotifications: widget.onOpenNotifications,
             ),
           ),
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(18, 16, 18, 10),
-              child: Column(
-                children: [
-                  TextField(
-                    onChanged: (value) => setState(() => _query = value),
-                    decoration: InputDecoration(
-                      hintText: 'Tìm tên sân hoặc khu vực',
-                      prefixIcon: const Icon(Icons.search),
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(18),
-                        borderSide: const BorderSide(color: bookingLine),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    height: 38,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: ['Tất cả', '5', '7', '11'].map((type) {
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: ChoiceChip(
-                            label: Text(type == 'Tất cả' ? type : 'Sân $type'),
-                            selected: _type == type,
-                            onSelected: (_) => setState(() => _type = type),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ],
-              ),
+            child: VenueFilterBar(
+              selectedType: _type,
+              selectedAmenityId: _amenityId,
+              amenities: _amenities,
+              showApiFallbackNotice: _error != null,
+              onQueryChanged: _onQueryChanged,
+              onTypeChanged: _setType,
+              onAmenityChanged: _setAmenity,
+              onRetry: _loadVenues,
             ),
           ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(18, 0, 18, 24),
-            sliver: SliverList.separated(
-              itemCount: venues.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final venue = venues[index];
-                return _VenueCard(venue: venue, onTap: () => widget.onSelectVenue(venue));
-              },
-            ),
+          VenueListBody(
+            loading: _loading,
+            venues: _venues,
+            onSelectVenue: widget.onSelectVenue,
           ),
         ],
       ),
     );
   }
-}
 
-class _HeroHeader extends StatelessWidget {
-  const _HeroHeader({
-    required this.cartCount,
-    required this.onOpenCart,
-    required this.onOpenNotifications,
-  });
-
-  final int cartCount;
-  final VoidCallback onOpenCart;
-  final VoidCallback onOpenNotifications;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(18, MediaQuery.paddingOf(context).top + 18, 18, 24),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(colors: [bookingPrimaryDark, bookingPrimary]),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Expanded(
-                child: Text('PitchBook', style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w900)),
-              ),
-              IconButton(onPressed: onOpenNotifications, color: Colors.white, icon: const Icon(Icons.notifications_none)),
-              BookingCartIcon(count: cartCount, onTap: onOpenCart, light: true),
-            ],
-          ),
-          const SizedBox(height: 10),
-          const Text('Tìm sân gần bạn', style: TextStyle(color: Colors.white70, fontSize: 16)),
-          const SizedBox(height: 18),
-          const Row(
-            children: [
-              _HeroMetric(value: '24', label: 'sân gần bạn'),
-              SizedBox(width: 10),
-              _HeroMetric(value: '9', label: 'slot trống'),
-              SizedBox(width: 10),
-              _HeroMetric(value: '20%', label: 'ưu đãi'),
-            ],
-          ),
-        ],
-      ),
-    );
+  void _onQueryChanged(String value) {
+    setState(() => _query = value);
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 450), _loadVenues);
   }
-}
 
-class _HeroMetric extends StatelessWidget {
-  const _HeroMetric({required this.value, required this.label});
-
-  final String value;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: Colors.white.withOpacity(0.14), borderRadius: BorderRadius.circular(16)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(value, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900)),
-            Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
-          ],
-        ),
-      ),
-    );
+  void _setType(String type) {
+    setState(() => _type = type);
+    _loadVenues();
   }
-}
 
-class _VenueCard extends StatelessWidget {
-  const _VenueCard({required this.venue, required this.onTap});
+  void _setAmenity(String amenityId) {
+    setState(() {
+      _amenityId = _amenityId == amenityId ? null : amenityId;
+    });
+    _loadVenues();
+  }
 
-  final Venue venue;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return BookingCard(
-      onTap: onTap,
-      padding: EdgeInsets.zero,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          BookingVenuePoster(venue: venue, compact: true),
-          Padding(
-            padding: const EdgeInsets.all(14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(child: Text(venue.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900))),
-                    const Icon(Icons.favorite_border, color: bookingMuted),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                BookingInfoLine(icon: Icons.place_outlined, text: venue.address),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    const Icon(Icons.star, color: Colors.amber, size: 18),
-                    Text(' ${venue.rating} (${venue.reviewCount})', style: const TextStyle(fontWeight: FontWeight.w700)),
-                    const Spacer(),
-                    Text('${money(venue.priceFrom)} - ${money(venue.priceTo)}/giờ', style: const TextStyle(color: bookingPrimary, fontWeight: FontWeight.w900)),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+  String? _fieldTypeFor(String type) {
+    return switch (type) {
+      '5' => 'FiveASide',
+      '7' => 'SevenASide',
+      '11' => 'ElevenASide',
+      _ => null,
+    };
   }
 }

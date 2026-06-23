@@ -1,6 +1,7 @@
 import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/domain/models/login_response_model.dart';
 import 'package:exe101/domain/repositories/user_repository.dart';
+import 'package:exe101/main.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -117,7 +118,7 @@ class RegisterController extends GetxController {
         Get.snackbar('Lỗi', response.message ?? 'Đăng ký thất bại');
       }
     } catch (e) {
-      Get.snackbar('Lỗi', 'Có lỗi xảy ra: $e');
+      Get.snackbar('Lỗi', ApiErrorHandler.getMessage(e));
     } finally {
       isLoading.value = false;
     }

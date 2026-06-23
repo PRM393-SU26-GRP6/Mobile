@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:exe101/core/config/env.dart';
 import 'package:exe101/domain/models/booking_model.dart';
+import 'package:exe101/domain/models/field_model.dart';
 import 'package:exe101/domain/models/login_response_model.dart';
+import 'package:exe101/domain/models/payment_model.dart';
 import 'package:exe101/domain/models/time_slot_model.dart';
 import 'package:exe101/domain/models/venue_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -30,12 +32,12 @@ class ApiService {
   }
 
   Future<Response<T>> put<T>(String url,
-      {Map<String, dynamic> data = const {}}) async {
+      {Map<String, dynamic> data = const {}, required Map<String, String> headers}) async {
     return dio.put(url, data: data);
   }
 
   Future<Response<T>> delete<T>(String url,
-      {Map<String, dynamic> data = const {}}) async {
+      {Map<String, dynamic> data = const {}, required Map<String, String> headers}) async {
     return dio.delete(url, data: data);
   }
 
@@ -270,15 +272,8 @@ class ApiServiceImpl extends ApiService {
 
     if (response.data == null) return null;
 
-    dynamic venueData = response.data!['data'];
-    if (venueData == null) {
-      venueData = response.data;
-    }
-
-    if (venueData is Map<String, dynamic>) {
-      return VenueModel.fromJson(venueData);
-    }
-    return null;
+    Map<String, dynamic> venueData = response.data!['data'];
+    return VenueModel.fromJson(venueData);
   }
 
   // --- Slot APIs ---
@@ -384,8 +379,443 @@ class ApiServiceImpl extends ApiService {
       }
     }
 
-    return items
+      return items
+          .map((json) => BookingDto.fromJson(Map<String, dynamic>.from(json as Map)))
+          .toList();
+  }
+
+  // --- Field APIs (Owner) ---
+
+  Future<FieldModel> createField({
+    required String venueId,
+    required String fieldName,
+    required String fieldType,
+    String? description,
+    double? priceMorning,
+    double? priceAfternoon,
+    double? priceEvening,
+    List<String>? amenities,
+  }) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+
+    final response = await post<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/fields',
+      data: {
+        'venueId': venueId,
+        'fieldName': fieldName,
+        'fieldType': fieldType,
+        'description': description,
+        'priceMorning': priceMorning,
+        'priceAfternoon': priceAfternoon,
+        'priceEvening': priceEvening,
+        'amenities': amenities,
+        'isActive': true,
+      },
+      headers: headers,
+    );
+
+    final data = response.data?['data'] ?? response.data ?? {};
+    return FieldModel.fromJson(data is Map<String, dynamic> ? data : {});
+  }
+
+  Future<FieldModel> updateField({
+    required String fieldId,
+    String? fieldName,
+    String? fieldType,
+    String? description,
+    double? priceMorning,
+    double? priceAfternoon,
+    double? priceEvening,
+    List<String>? amenities,
+    bool? isActive,
+  }) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+
+    final payload = <String, dynamic>{};
+    if (fieldName != null) payload['fieldName'] = fieldName;
+    if (fieldType != null) payload['fieldType'] = fieldType;
+    if (description != null) payload['description'] = description;
+    if (priceMorning != null) payload['priceMorning'] = priceMorning;
+    if (priceAfternoon != null) payload['priceAfternoon'] = priceAfternoon;
+    if (priceEvening != null) payload['priceEvening'] = priceEvening;
+    if (amenities != null) payload['amenities'] = amenities;
+    if (isActive != null) payload['isActive'] = isActive;
+
+    final response = await put<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/fields/$fieldId',
+      data: payload,
+      headers: headers,
+    );
+
+    final data = response.data?['data'] ?? response.data ?? {};
+    return FieldModel.fromJson(data is Map<String, dynamic> ? data : {});
+  }
+
+  Future<List<FieldModel>> getFieldsByOwner() async {
+    final headers = await _authHeaders();
+    final response = await get<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/fields/my-fields',
+      headers: headers,
+    );
+
+    if (response.data == null) return [];
+
+    final dynamic data = response.data;
+    List<dynamic> list = [];
+
+    if (data is List) {
+      list = data as List<dynamic>? ?? [];
+    } else if (data is Map<String, dynamic>) {
+      if (data['data'] is List) {
+        list = data['data'] as List;
+      } else if (data['items'] is List) {
+        list = data['items'] as List;
+      }
+    }
+
+    return list
+        .map((json) => FieldModel.fromJson(Map<String, dynamic>.from(json as Map)))
+        .toList();
+  }
+
+  // --- Owner Venue APIs ---
+
+  Future<List<VenueModel>> getMyVenues({
+    bool? isActive,
+    int page = 1,
+    int pageSize = 10,
+  }) async {
+    final headers = await _authHeaders();
+    final params = <String, dynamic>{
+      'page': page,
+      'pageSize': pageSize,
+    };
+    if (isActive != null) params['isActive'] = isActive;
+
+    final response = await get<dynamic>(
+      '${Env.baseUrl}/api/v1/owner/venues',
+      params: params,
+      headers: headers,
+    );
+
+    if (response.data == null) return [];
+
+    final dynamic data = response.data;
+    List<dynamic> list = [];
+
+    if (data is List) {
+      list = data as List<dynamic>? ?? [];
+    } else if (data is Map<String, dynamic>) {
+      if (data['data'] is List) {
+        list = data['data'] as List;
+      } else if (data['items'] is List) {
+        list = data['items'] as List;
+      }
+    }
+
+    return list
+        .map((json) => VenueModel.fromJson(Map<String, dynamic>.from(json as Map)))
+        .toList();
+  }
+
+  Future<VenueModel> createVenue({
+    required String venueName,
+    required String address,
+    double? latitude,
+    double? longitude,
+    String? description,
+    String? openingHours,
+    String? phoneContact,
+  }) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+
+    final response = await post<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/owner/venues',
+      data: {
+        'venueName': venueName,
+        'address': address,
+        if (latitude != null) 'latitude': latitude,
+        if (longitude != null) 'longitude': longitude,
+        if (description != null) 'description': description,
+        if (openingHours != null) 'openingHours': openingHours,
+        if (phoneContact != null) 'phoneContact': phoneContact,
+      },
+      headers: headers,
+    );
+
+    final data = response.data?['data'] ?? response.data ?? {};
+    return VenueModel.fromJson(data is Map<String, dynamic> ? data : {});
+  }
+
+  Future<VenueModel> updateVenue({
+    required String venueId,
+    String? venueName,
+    String? address,
+    double? latitude,
+    double? longitude,
+    String? description,
+    String? openingHours,
+    String? phoneContact,
+  }) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+
+    final payload = <String, dynamic>{};
+    if (venueName != null) payload['venueName'] = venueName;
+    if (address != null) payload['address'] = address;
+    if (latitude != null) payload['latitude'] = latitude;
+    if (longitude != null) payload['longitude'] = longitude;
+    if (description != null) payload['description'] = description;
+    if (openingHours != null) payload['openingHours'] = openingHours;
+    if (phoneContact != null) payload['phoneContact'] = phoneContact;
+
+    final response = await put<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/owner/venues/$venueId',
+      data: payload,
+      headers: headers,
+    );
+
+    final data = response.data?['data'] ?? response.data ?? {};
+    return VenueModel.fromJson(data is Map<String, dynamic> ? data : {});
+  }
+
+  Future<void> updateVenueStatus(String venueId, bool isActive) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+
+    await put<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/owner/venues/$venueId/status',
+      data: {'isActive': isActive},
+      headers: headers,
+    );
+  }
+
+  Future<FieldModel> createOwnerField({
+    required String venueId,
+    required String fieldName,
+    required String fieldType,
+    String? description,
+    double? priceMorning,
+    double? priceAfternoon,
+    double? priceEvening,
+    List<String>? amenities,
+  }) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+
+    final response = await post<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/owner/venues/$venueId/fields',
+      data: {
+        'fieldName': fieldName,
+        'fieldType': fieldType,
+        if (description != null) 'description': description,
+        if (priceMorning != null) 'priceMorning': priceMorning,
+        if (priceAfternoon != null) 'priceAfternoon': priceAfternoon,
+        if (priceEvening != null) 'priceEvening': priceEvening,
+        if (amenities != null) 'amenities': amenities,
+      },
+      headers: headers,
+    );
+
+    final data = response.data?['data'] ?? response.data ?? {};
+    return FieldModel.fromJson(data is Map<String, dynamic> ? data : {});
+  }
+
+  Future<List<FieldModel>> getOwnerFieldsByVenue(String venueId) async {
+    final headers = await _authHeaders();
+    final response = await get<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/owner/venues/$venueId/fields',
+      headers: headers,
+    );
+
+    if (response.data == null) return [];
+
+    List<dynamic> list = [];
+    final data = response.data!;
+
+    if (data is List) {
+      list = data as List<dynamic>? ?? [];
+    } else if (data['data'] is List) {
+      list = data['data'] as List<dynamic>? ?? [];
+    }
+
+    return list
+        .map((json) => FieldModel.fromJson(Map<String, dynamic>.from(json as Map)))
+        .toList();
+  }
+
+  // --- Owner Booking APIs ---
+
+  Future<List<BookingDto>> getOwnerBookings({
+    String? status,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    final headers = await _authHeaders();
+    final params = <String, dynamic>{
+      'page': page,
+      'pageSize': pageSize,
+    };
+    if (status != null && status.isNotEmpty) params['status'] = status;
+
+    final response = await get<dynamic>(
+      '${Env.baseUrl}/api/v1/owner/bookings',
+      params: params,
+      headers: headers,
+    );
+
+    if (response.data == null) return [];
+
+    final dynamic data = response.data;
+    List<dynamic> list = [];
+
+    if (data is List) {
+      list = data;
+    } else if (data is Map<String, dynamic>) {
+      if (data['data'] is List) {
+        list = data['data'] as List;
+      } else if (data['items'] is List) {
+        list = data['items'] as List;
+      }
+    }
+
+    return list
         .map((json) => BookingDto.fromJson(Map<String, dynamic>.from(json as Map)))
         .toList();
+  }
+
+  Future<List<BookingDto>> getPendingBookings() async {
+    final headers = await _authHeaders();
+    final response = await get<dynamic>(
+      '${Env.baseUrl}/api/v1/owner/bookings/pending',
+      headers: headers,
+    );
+
+    if (response.data == null) return [];
+
+    final dynamic data = response.data;
+    List<dynamic> list = [];
+
+    if (data is List) {
+      list = data;
+    } else if (data is Map<String, dynamic> && data['data'] is List) {
+      list = data['data'] as List;
+    }
+
+    return list
+        .map((json) => BookingDto.fromJson(Map<String, dynamic>.from(json as Map)))
+        .toList();
+  }
+
+  Future<void> acceptBooking(String bookingId) async {
+    final headers = await _authHeaders();
+    await put<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/owner/bookings/$bookingId/accept',
+      headers: headers,
+    );
+  }
+
+  Future<void> rejectBooking(String bookingId, {String? rejectionReason}) async {
+    final headers = await _authHeaders();
+    final params = <String, dynamic>{};
+    if (rejectionReason != null) params['rejectionReason'] = rejectionReason;
+
+    await put<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/owner/bookings/$bookingId/reject',
+      data: params,
+      headers: headers,
+    );
+  }
+
+  Future<void> completeBooking(String bookingId) async {
+    final headers = await _authHeaders();
+    await put<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/owner/bookings/$bookingId/complete',
+      headers: headers,
+    );
+  }
+
+  Future<Map<String, dynamic>> getOwnerStats() async {
+    final headers = await _authHeaders();
+    final response = await get<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/owner/stats',
+      headers: headers,
+    );
+
+    if (response.data == null) return {};
+    return response.data is Map<String, dynamic>
+        ? response.data as Map<String, dynamic>
+        : {};
+  }
+
+  // --- Payment APIs ---
+
+  Future<List<PaymentModel>> getPaymentsByBooking(String bookingId) async {
+    final headers = await _authHeaders();
+    final response = await get<dynamic>(
+      '${Env.baseUrl}/api/v1/payments/booking/$bookingId',
+      headers: headers,
+    );
+
+    if (response.data == null) return [];
+
+    final data = response.data!;
+
+    if (data is! Map<String, dynamic>) return [];
+
+    final listData = data['data'];
+    if (listData is! List) return [];
+
+    return listData
+        .map((json) => PaymentModel.fromJson(Map<String, dynamic>.from(json as Map)))
+        .toList();
+  }
+
+  Future<PaymentModel> createDepositPayment(String bookingId) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+
+    final response = await post<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/payments/deposit',
+      data: {'bookingId': bookingId},
+      headers: headers,
+    );
+
+    final data = response.data?['data'] ?? {};
+    return PaymentModel.fromJson(data is Map<String, dynamic> ? data : {});
+  }
+
+  Future<PaymentModel> createFinalPayment(String bookingId) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+
+    final response = await post<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/payments/final',
+      data: {'bookingId': bookingId},
+      headers: headers,
+    );
+
+    final data = response.data?['data'] ?? {};
+    return PaymentModel.fromJson(data is Map<String, dynamic> ? data : {});
+  }
+
+  Future<SePayQRInfoModel?> getSePayQRInfo(String paymentId) async {
+    final headers = await _authHeaders();
+    final response = await get<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/payments/$paymentId/sepay-qr',
+      headers: headers,
+    );
+
+    if (response.data == null) return null;
+
+    final data = response.data!;
+    if (data is! Map<String, dynamic>) return null;
+    final payload = data['data'] ?? data;
+    if (payload is! Map<String, dynamic>) return null;
+
+    return SePayQRInfoModel.fromJson(payload);
   }
 }

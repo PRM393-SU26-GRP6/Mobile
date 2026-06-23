@@ -1,6 +1,7 @@
 import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/domain/repositories/user_repository.dart';
+import 'package:exe101/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -72,7 +73,7 @@ class OtpController extends GetxController {
         Get.snackbar('Lỗi', response.message ?? 'Mã OTP không hợp lệ');
       }
     } catch (e) {
-      Get.snackbar('Lỗi', 'Có lỗi xảy ra: $e');
+      Get.snackbar('Lỗi', ApiErrorHandler.getMessage(e));
     } finally {
       isLoading.value = false;
     }

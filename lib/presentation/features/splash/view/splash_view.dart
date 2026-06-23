@@ -47,10 +47,10 @@ class SplashView extends GetView<SplashController> {
       width: 140,
       height: 140,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.12),
+        color: Colors.white.withValues(alpha: 0.12),
         shape: BoxShape.circle,
         border: Border.all(
-          color: Colors.white.withOpacity(0.12),
+          color: Colors.white.withValues(alpha: 0.12),
           width: 2,
         ),
       ),

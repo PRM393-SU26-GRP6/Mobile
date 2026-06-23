@@ -9,6 +9,53 @@ import 'package:exe101/presentation/features/auth/controller/auth_controller.dar
 import 'package:exe101/presentation/features/auth/controller/register_controller.dart';
 import 'package:exe101/presentation/features/customer/controller/booking_controller.dart';
 
+class ApiErrorHandler {
+  static String getMessage(dynamic error) {
+    if (error is DioException) {
+      final response = error.response;
+      if (response?.data != null) {
+        if (response!.data is Map) {
+          final data = response.data as Map;
+          if (data['message'] != null) {
+            return data['message'].toString();
+          }
+          if (data['error'] != null) {
+            return data['error'].toString();
+          }
+        }
+      }
+
+      switch (error.type) {
+        case DioExceptionType.connectionTimeout:
+          return 'Kết nối bị timeout. Vui lòng kiểm tra mạng.';
+        case DioExceptionType.sendTimeout:
+          return 'Không thể gửi yêu cầu. Vui lòng thử lại.';
+        case DioExceptionType.receiveTimeout:
+          return 'Server phản hồi chậm. Vui lòng thử lại.';
+        case DioExceptionType.badResponse:
+          final statusCode = error.response?.statusCode ?? 0;
+          if (statusCode == 401) {
+            return 'Email hoặc mật khẩu không đúng';
+          } else if (statusCode == 403) {
+            return 'Bạn không có quyền truy cập';
+          } else if (statusCode == 404) {
+            return 'Không tìm thấy dữ liệu';
+          } else if (statusCode == 500) {
+            return 'Lỗi server. Vui lòng thử lại sau.';
+          }
+          return 'Yêu cầu thất bại (Mã: $statusCode)';
+        case DioExceptionType.cancel:
+          return 'Yêu cầu bị hủy';
+        case DioExceptionType.connectionError:
+          return 'Không thể kết nối server. Vui lòng kiểm tra mạng.';
+        default:
+          return 'Có lỗi xảy ra. Vui lòng thử lại.';
+      }
+    }
+    return error.toString();
+  }
+}
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -26,6 +73,7 @@ void main() {
     requestBody: true,
     responseBody: true,
     error: true,
+    logPrint: (o) => debugPrint(o.toString(), wrapWidth: 2048),
   ));
 
   final apiService = ApiServiceImpl(dio);

@@ -320,7 +320,50 @@ class _LoginFormState extends State<_LoginForm> {
         ),
         const SizedBox(height: 8),
         Obx(() => _buildLoginButton()),
+        const SizedBox(height: 24),
+        _buildMockLoginButtons(),
       ],
+    );
+  }
+
+  Widget _buildMockLoginButtons() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(top: 20),
+      decoration: BoxDecoration(
+        color: Colors.orange.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.orange.shade300, width: 1.5),
+      ),
+      child: Column(
+        children: [
+          Text(
+            '🔧 Dev Mode - Quick Login',
+            style: TextStyle(
+              color: Colors.orange.shade800,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => widget.controller.loginAsMockOwner(),
+              icon: const Icon(Icons.admin_panel_settings, size: 18),
+              label: const Text('Login as Owner (Mock)'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -335,7 +378,7 @@ class _LoginFormState extends State<_LoginForm> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.green.withOpacity(0.18),
+              color: Colors.green.withValues(alpha: 0.18),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
@@ -535,7 +578,7 @@ class _RegisterFormState extends State<_RegisterForm> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                  color: Colors.green.withOpacity(0.2),
+                  color: Colors.green.withValues(alpha: 0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 6))
             ]),

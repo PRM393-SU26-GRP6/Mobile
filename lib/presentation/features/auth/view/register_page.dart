@@ -34,10 +34,10 @@ class RegisterPage extends StatelessWidget {
                   width: 100,
                   height: 100,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.12),
+                    color: Colors.white.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                     border: Border.all(
-                        color: Colors.white.withOpacity(0.12), width: 2),
+                        color: Colors.white.withValues(alpha: 0.12), width: 2),
                   ),
                   child: const Center(
                       child: Icon(Icons.sports_soccer,

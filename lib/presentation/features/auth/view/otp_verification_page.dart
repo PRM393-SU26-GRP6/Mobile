@@ -11,9 +11,7 @@ class OtpVerificationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!Get.isRegistered<OtpController>()) {
-      Get.put(OtpController(
-        userRepository: Get.find<UserRepository>(),
-      ));
+      Get.put(OtpController(userRepository: Get.find<UserRepository>()));
     }
     final controller = Get.find<OtpController>();
 

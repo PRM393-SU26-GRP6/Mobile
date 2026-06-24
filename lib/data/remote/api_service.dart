@@ -13,6 +13,30 @@ class ApiService {
 
   ApiService(this.dio);
 
+  /// Hỗ trợ nhiều dạng response phân trang / trả về:
+  /// - `[ ... ]` (list trực tiếp)
+  /// - `{ "data": [ ... ] }`
+  /// - `{ "data": { "items": [ ... ] } }`
+  /// - `{ "items": [ ... ] }`
+  /// - `{ "results": [ ... ] }`
+  List<dynamic> _extractList(dynamic raw) {
+    if (raw == null) return const [];
+    if (raw is List) return raw;
+    if (raw is Map<String, dynamic>) {
+      final data = raw['data'];
+      if (data is List) return data;
+      if (data is Map<String, dynamic>) {
+        final items = data['items'];
+        if (items is List) return items;
+      }
+      final items = raw['items'];
+      if (items is List) return items;
+      final results = raw['results'];
+      if (results is List) return results;
+    }
+    return const [];
+  }
+
   Future<Response<T>> get<T>(
     String url, {
     Map<String, dynamic> params = const {},
@@ -31,14 +55,22 @@ class ApiService {
     return dio.post(url, data: data, options: options);
   }
 
-  Future<Response<T>> put<T>(String url,
-      {Map<String, dynamic> data = const {}, required Map<String, String> headers}) async {
-    return dio.put(url, data: data);
+  Future<Response<T>> put<T>(
+    String url, {
+    Map<String, dynamic> data = const {},
+    Map<String, String>? headers,
+  }) async {
+    final options = Options(headers: headers);
+    return dio.put(url, data: data, options: options);
   }
 
-  Future<Response<T>> delete<T>(String url,
-      {Map<String, dynamic> data = const {}, required Map<String, String> headers}) async {
-    return dio.delete(url, data: data);
+  Future<Response<T>> delete<T>(
+    String url, {
+    Map<String, dynamic> data = const {},
+    Map<String, String>? headers,
+  }) async {
+    final options = Options(headers: headers);
+    return dio.delete(url, data: data, options: options);
   }
 
   Future<Response<T>> patch<T>(String url,
@@ -222,26 +254,16 @@ class ApiServiceImpl extends ApiService {
       headers: headers,
     );
 
-    final dynamic data = response.data != null
-        ? (response.data is Map<String, dynamic> ? response.data!['data'] : response.data)
-        : null;
-    if (data == null) return [];
+    if (response.data == null) return [];
 
-    List<dynamic> list = [];
-    if (data is List) {
-      list = data;
-    } else if (data is Map<String, dynamic>) {
-      if (data['items'] is List) {
-        list = data['items'] as List;
-      } else if (data['data'] is List) {
-        list = data['data'] as List;
-      } else if (data['results'] is List) {
-        list = data['results'] as List;
-      } else {
-        return [];
+    final list = _extractList(response.data);
+    if (list.isEmpty && response.data is Map<String, dynamic>) {
+      final inner = _extractList((response.data as Map<String, dynamic>)['data']);
+      if (inner.isNotEmpty) {
+        return inner
+            .map((json) => VenueModel.fromJson(Map<String, dynamic>.from(json as Map)))
+            .toList();
       }
-    } else {
-      return [];
     }
 
     return list
@@ -342,16 +364,16 @@ class ApiServiceImpl extends ApiService {
     String? from,
     String? to,
     int page = 1,
-    int pageSize = 5,
+    int pageSize = 20,
   }) async {
     final headers = await _authHeaders();
     final params = <String, dynamic>{
-      'Page': page,
-      'PageSize': pageSize,
+      'page': page,
+      'pageSize': pageSize,
     };
-    if (status != null && status.isNotEmpty) params['Status'] = status;
-    if (from != null && from.isNotEmpty) params['From'] = from;
-    if (to != null && to.isNotEmpty) params['To'] = to;
+    if (status != null && status.isNotEmpty) params['status'] = status;
+    if (from != null && from.isNotEmpty) params['from'] = from;
+    if (to != null && to.isNotEmpty) params['to'] = to;
 
     final response = await get<dynamic>(
       '${Env.baseUrl}/api/v1/bookings/history',
@@ -361,27 +383,11 @@ class ApiServiceImpl extends ApiService {
 
     if (response.data == null) return [];
 
-    final responseBody = response.data!;
+    final items = _extractList(response.data);
 
-    List<dynamic> items = [];
-
-    if (responseBody is List) {
-      items = responseBody;
-    } else if (responseBody is Map<String, dynamic>) {
-      final data = responseBody['data'];
-      if (data is List) {
-        items = data;
-      } else if (data is Map<String, dynamic> && data['items'] is List) {
-        items = data['items'] as List;
-      }
-      if (items.isEmpty && responseBody['items'] is List) {
-        items = responseBody['items'] as List;
-      }
-    }
-
-      return items
-          .map((json) => BookingDto.fromJson(Map<String, dynamic>.from(json as Map)))
-          .toList();
+    return items
+        .map((json) => BookingDto.fromJson(Map<String, dynamic>.from(json as Map)))
+        .toList();
   }
 
   // --- Field APIs (Owner) ---
@@ -453,6 +459,17 @@ class ApiServiceImpl extends ApiService {
     return FieldModel.fromJson(data is Map<String, dynamic> ? data : {});
   }
 
+  Future<void> updateFieldStatus(String fieldId, bool isActive) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+
+    await put<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/owner/fields/$fieldId/status',
+      data: {'isActive': isActive},
+      headers: headers,
+    );
+  }
+
   Future<List<FieldModel>> getFieldsByOwner() async {
     final headers = await _authHeaders();
     final response = await get<Map<String, dynamic>>(
@@ -462,22 +479,34 @@ class ApiServiceImpl extends ApiService {
 
     if (response.data == null) return [];
 
-    final dynamic data = response.data;
-    List<dynamic> list = [];
-
-    if (data is List) {
-      list = data as List<dynamic>? ?? [];
-    } else if (data is Map<String, dynamic>) {
-      if (data['data'] is List) {
-        list = data['data'] as List;
-      } else if (data['items'] is List) {
-        list = data['items'] as List;
-      }
-    }
+    final list = _extractList(response.data);
 
     return list
         .map((json) => FieldModel.fromJson(Map<String, dynamic>.from(json as Map)))
         .toList();
+  }
+
+  Future<FieldModel?> getFieldById(String fieldId) async {
+    final headers = await _authHeaders();
+    final response = await get<dynamic>(
+      '${Env.baseUrl}/api/v1/fields/$fieldId',
+      headers: headers,
+    );
+
+    if (response.data == null) return null;
+
+    if (response.data is Map<String, dynamic>) {
+      final data = response.data['data'];
+      if (data is Map<String, dynamic>) {
+        return FieldModel.fromJson(data);
+      }
+    }
+
+    if (response.data is Map<String, dynamic>) {
+      return FieldModel.fromJson(response.data as Map<String, dynamic>);
+    }
+
+    return null;
   }
 
   // --- Owner Venue APIs ---
@@ -502,18 +531,7 @@ class ApiServiceImpl extends ApiService {
 
     if (response.data == null) return [];
 
-    final dynamic data = response.data;
-    List<dynamic> list = [];
-
-    if (data is List) {
-      list = data as List<dynamic>? ?? [];
-    } else if (data is Map<String, dynamic>) {
-      if (data['data'] is List) {
-        list = data['data'] as List;
-      } else if (data['items'] is List) {
-        list = data['items'] as List;
-      }
-    }
+    final list = _extractList(response.data);
 
     return list
         .map((json) => VenueModel.fromJson(Map<String, dynamic>.from(json as Map)))
@@ -626,21 +644,14 @@ class ApiServiceImpl extends ApiService {
 
   Future<List<FieldModel>> getOwnerFieldsByVenue(String venueId) async {
     final headers = await _authHeaders();
-    final response = await get<Map<String, dynamic>>(
+    final response = await get<dynamic>(
       '${Env.baseUrl}/api/v1/owner/venues/$venueId/fields',
       headers: headers,
     );
 
     if (response.data == null) return [];
 
-    List<dynamic> list = [];
-    final data = response.data!;
-
-    if (data is List) {
-      list = data as List<dynamic>? ?? [];
-    } else if (data['data'] is List) {
-      list = data['data'] as List<dynamic>? ?? [];
-    }
+    final list = _extractList(response.data);
 
     return list
         .map((json) => FieldModel.fromJson(Map<String, dynamic>.from(json as Map)))
@@ -669,18 +680,7 @@ class ApiServiceImpl extends ApiService {
 
     if (response.data == null) return [];
 
-    final dynamic data = response.data;
-    List<dynamic> list = [];
-
-    if (data is List) {
-      list = data;
-    } else if (data is Map<String, dynamic>) {
-      if (data['data'] is List) {
-        list = data['data'] as List;
-      } else if (data['items'] is List) {
-        list = data['items'] as List;
-      }
-    }
+    final list = _extractList(response.data);
 
     return list
         .map((json) => BookingDto.fromJson(Map<String, dynamic>.from(json as Map)))
@@ -696,14 +696,7 @@ class ApiServiceImpl extends ApiService {
 
     if (response.data == null) return [];
 
-    final dynamic data = response.data;
-    List<dynamic> list = [];
-
-    if (data is List) {
-      list = data;
-    } else if (data is Map<String, dynamic> && data['data'] is List) {
-      list = data['data'] as List;
-    }
+    final list = _extractList(response.data);
 
     return list
         .map((json) => BookingDto.fromJson(Map<String, dynamic>.from(json as Map)))
@@ -774,31 +767,52 @@ class ApiServiceImpl extends ApiService {
         .toList();
   }
 
-  Future<PaymentModel> createDepositPayment(String bookingId) async {
+  Future<PaymentModel> createDepositPayment(String bookingId, {String paymentMethod = 'SePay'}) async {
     final headers = await _authHeaders();
     headers['Content-Type'] = 'application/json';
 
     final response = await post<Map<String, dynamic>>(
       '${Env.baseUrl}/api/v1/payments/deposit',
-      data: {'bookingId': bookingId},
+      data: {
+        'bookingId': bookingId,
+        'paymentMethod': paymentMethod,
+      },
       headers: headers,
     );
 
-    final data = response.data?['data'] ?? {};
+    print('=== createDepositPayment Response ===');
+    print('Status: ${response.statusCode}');
+    print('Data: ${response.data}');
+
+    // Check if response is an error
+    if (response.statusCode != 201 && response.statusCode != 200) {
+      throw DioException(
+        requestOptions: response.requestOptions,
+        response: response,
+        message: response.data?['message'] ?? 'Payment creation failed',
+      );
+    }
+
+    // API returns payment directly without 'data' wrapper
+    final data = response.data?['data'] ?? response.data ?? {};
     return PaymentModel.fromJson(data is Map<String, dynamic> ? data : {});
   }
 
-  Future<PaymentModel> createFinalPayment(String bookingId) async {
+  Future<PaymentModel> createFinalPayment(String bookingId, {String paymentMethod = 'SePay'}) async {
     final headers = await _authHeaders();
     headers['Content-Type'] = 'application/json';
 
     final response = await post<Map<String, dynamic>>(
       '${Env.baseUrl}/api/v1/payments/final',
-      data: {'bookingId': bookingId},
+      data: {
+        'bookingId': bookingId,
+        'paymentMethod': paymentMethod,
+      },
       headers: headers,
     );
 
-    final data = response.data?['data'] ?? {};
+    // API returns payment directly without 'data' wrapper
+    final data = response.data?['data'] ?? response.data ?? {};
     return PaymentModel.fromJson(data is Map<String, dynamic> ? data : {});
   }
 
@@ -812,7 +826,6 @@ class ApiServiceImpl extends ApiService {
     if (response.data == null) return null;
 
     final data = response.data!;
-    if (data is! Map<String, dynamic>) return null;
     final payload = data['data'] ?? data;
     if (payload is! Map<String, dynamic>) return null;
 

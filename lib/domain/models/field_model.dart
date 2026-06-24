@@ -7,6 +7,7 @@ class FieldModel {
   final double? priceMorning;
   final double? priceAfternoon;
   final double? priceEvening;
+  final double? pricePerHour;
   final List<String>? amenities;
   final bool? isActive;
   final List<String>? images;
@@ -20,6 +21,7 @@ class FieldModel {
     this.priceMorning,
     this.priceAfternoon,
     this.priceEvening,
+    this.pricePerHour,
     this.amenities,
     this.isActive,
     this.images,
@@ -35,6 +37,7 @@ class FieldModel {
       priceMorning: (json['priceMorning'] as num?)?.toDouble(),
       priceAfternoon: (json['priceAfternoon'] as num?)?.toDouble(),
       priceEvening: (json['priceEvening'] as num?)?.toDouble(),
+      pricePerHour: (json['pricePerHour'] as num?)?.toDouble(),
       amenities: json['amenities'] != null
           ? List<String>.from(json['amenities'])
           : null,
@@ -55,6 +58,7 @@ class FieldModel {
       'priceMorning': priceMorning,
       'priceAfternoon': priceAfternoon,
       'priceEvening': priceEvening,
+      'pricePerHour': pricePerHour,
       'amenities': amenities,
       'isActive': isActive ?? true,
       'images': images,

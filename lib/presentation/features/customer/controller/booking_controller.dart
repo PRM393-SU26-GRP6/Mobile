@@ -12,7 +12,7 @@ class BookingController extends GetxController {
   final error = ''.obs;
 
   int _currentPage = 1;
-  static const int _pageSize = 5;
+  static const int _pageSize = 20;
   String? _status;
   String? _from;
   String? _to;

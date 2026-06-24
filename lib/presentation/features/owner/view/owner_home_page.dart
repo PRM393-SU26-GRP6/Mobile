@@ -145,7 +145,10 @@ class OwnerHomePage extends StatelessWidget {
                               final field = controller.fields[index];
                               return FieldListItem(
                                 field: field,
-                                onTap: () => _showFieldDetails(field.fieldName ?? 'Sân'),
+                                onTap: () => _showFieldDetails(
+                                  field.fieldName ?? 'Sân',
+                                  field.id ?? '',
+                                ),
                                 onEdit: () => _showEditFieldDialog(field.fieldName ?? 'Sân'),
                               );
                             },
@@ -361,8 +364,8 @@ class OwnerHomePage extends StatelessWidget {
     });
   }
 
-  void _showFieldDetails(String fieldName) {
-    Get.snackbar('Chi tiết', 'Xem chi tiết: $fieldName');
+  void _showFieldDetails(String fieldName, String fieldId) {
+    Get.toNamed(AppPages.fieldDetail, arguments: {'fieldId': fieldId});
   }
 
   void _showEditFieldDialog(String fieldName) {

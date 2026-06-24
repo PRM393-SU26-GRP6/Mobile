@@ -1,3 +1,4 @@
+import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/domain/models/booking_model.dart';
 import 'package:exe101/presentation/features/customer/controller/booking_controller.dart';
@@ -343,7 +344,19 @@ class _BookingCard extends StatelessWidget {
       booking.bookingStatus?.toLowerCase() == 'accepted';
 
   void _onDepositTap() {
-    // TODO: xử lý thanh toán cọc
+    Get.toNamed(
+      AppPages.paymentQR,
+      arguments: {
+        'bookingId': booking.id,
+        'venueName': _venueName,
+        'amount': booking.totalPrice,
+      },
+    )?.then((_) {
+      // Refresh booking list when returning from payment page
+      if (Get.isRegistered<BookingController>()) {
+        Get.find<BookingController>().refreshBookings();
+      }
+    });
   }
 
   String get _timeAgo {

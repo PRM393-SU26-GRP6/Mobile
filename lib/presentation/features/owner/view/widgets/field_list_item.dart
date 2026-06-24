@@ -148,6 +148,9 @@ class FieldListItem extends StatelessWidget {
 
   double _getMinPrice() {
     final prices = <double>[];
+    if (field.pricePerHour != null && field.pricePerHour! > 0) {
+      prices.add(field.pricePerHour!);
+    }
     if (field.priceMorning != null && field.priceMorning! > 0) {
       prices.add(field.priceMorning!);
     }

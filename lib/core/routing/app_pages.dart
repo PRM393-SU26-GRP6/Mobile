@@ -6,10 +6,12 @@ import 'package:exe101/presentation/features/auth/view/role_selection_page.dart'
 import 'package:exe101/presentation/features/customer/binding/customer_binding.dart';
 import 'package:exe101/presentation/features/customer/view/customer_home_page.dart';
 import 'package:exe101/presentation/features/customer/view/home/venue_detail_page.dart';
+import 'package:exe101/presentation/features/customer/view/orders/payment_qr_page.dart';
 import 'package:exe101/presentation/features/owner/binding/owner_binding.dart';
 import 'package:exe101/presentation/features/owner/view/add_field_page.dart';
 import 'package:exe101/presentation/features/owner/view/booking_management_page.dart';
 import 'package:exe101/presentation/features/owner/view/create_field_page.dart';
+import 'package:exe101/presentation/features/owner/view/field_detail_page.dart';
 import 'package:exe101/presentation/features/owner/view/owner_home_page.dart';
 import 'package:exe101/presentation/features/owner/view/venue_creation_page.dart';
 import 'package:exe101/presentation/features/splash/binding/splash_binding.dart';
@@ -30,6 +32,8 @@ class AppPages {
   static const String venueCreation = '/owner/venue-creation';
   static const String addField = '/owner/add-field';
   static const String bookingManagement = '/owner/bookings';
+  static const String fieldDetail = '/owner/field-detail';
+  static const String paymentQR = '/payment-qr';
 
   // GetX pages configuration
   static final List<GetPage> pages = [
@@ -91,6 +95,15 @@ class AppPages {
       name: bookingManagement,
       page: () => const BookingManagementPage(),
       binding: OwnerBinding(),
+    ),
+    GetPage(
+      name: fieldDetail,
+      page: () => const FieldDetailPage(),
+      binding: OwnerBinding(),
+    ),
+    GetPage(
+      name: paymentQR,
+      page: () => const PaymentQRPage(),
     ),
   ];
 

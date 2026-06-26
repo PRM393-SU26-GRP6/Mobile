@@ -65,12 +65,6 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
     } on DioException catch (e) {
       String errorMsg = 'Đã xảy ra lỗi';
 
-      // Log full response for debugging
-      print('=== DioException ===');
-      print('Status: ${e.response?.statusCode}');
-      print('Data: ${e.response?.data}');
-      print('Message: ${e.message}');
-
       if (e.response?.data != null && e.response?.data is Map) {
         final data = e.response?.data as Map;
         errorMsg = data['message']?.toString() ?? 
@@ -87,9 +81,6 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
         _isLoading = false;
       });
     } catch (e) {
-      print('=== Catch Error ===');
-      print('Error: $e');
-      print('Type: ${e.runtimeType}');
       setState(() {
         _isError = true;
         _errorMessage = 'Lỗi: ${e.toString()}';

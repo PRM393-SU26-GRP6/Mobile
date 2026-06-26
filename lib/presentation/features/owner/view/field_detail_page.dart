@@ -25,7 +25,28 @@ class FieldDetailPage extends StatelessWidget {
           ),
         ),
         centerTitle: true,
-        // Edit button hidden until functionality is implemented
+        actions: [
+          Obx(() => controller.isLoading.value
+              ? const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  ),
+                )
+              : IconButton(
+                  icon: const Icon(Icons.refresh),
+                  onPressed: () {
+                    if (Get.arguments != null && Get.arguments['fieldId'] != null) {
+                      controller.loadFieldDetail(Get.arguments['fieldId']);
+                    }
+                  },
+                )),
+        ],
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -98,6 +119,8 @@ class FieldDetailPage extends StatelessWidget {
                 const SizedBox(height: 16),
                 _buildAmenitiesCard(field),
               ],
+              const SizedBox(height: 24),
+              _buildSlotManagementButton(field),
             ],
           ),
         );
@@ -262,6 +285,11 @@ class FieldDetailPage extends StatelessWidget {
         (field.priceMorning ??
             (field.priceAfternoon ?? field.priceEvening ?? 0));
 
+    final hasPrice = field.pricePerHour != null ||
+        field.priceMorning != null ||
+        field.priceAfternoon != null ||
+        field.priceEvening != null;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -278,18 +306,21 @@ class FieldDetailPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.attach_money, color: AppColors.primary, size: 20),
-              SizedBox(width: 8),
-              Text(
-                'Giá sân',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+              const Icon(Icons.attach_money, color: AppColors.primary, size: 20),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'Giá sân',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
+              _buildEditPriceButton(field),
             ],
           ),
           const SizedBox(height: 12),
@@ -303,15 +334,149 @@ class FieldDetailPage extends StatelessWidget {
             if (field.priceEvening != null && field.priceEvening! > 0)
               _buildPriceRow('Giá buổi tối (18:00-22:00)', field.priceEvening!),
           ],
-          if (price <= 0)
-            const Text(
-              'Chưa có thông tin giá',
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-                fontStyle: FontStyle.italic,
+          if (!hasPrice || price <= 0)
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber, color: Colors.orange.shade700, size: 20),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Chưa có thông tin giá. Vui lòng cập nhật giá sân.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEditPriceButton(FieldModel field) {
+    return GestureDetector(
+      onTap: () => _showEditPriceDialog(field),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.edit, color: AppColors.primary, size: 14),
+            SizedBox(width: 4),
+            Text(
+              'Sửa',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showEditPriceDialog(FieldModel field) {
+    final morningController = TextEditingController(
+      text: field.priceMorning?.toStringAsFixed(0) ?? '',
+    );
+    final afternoonController = TextEditingController(
+      text: field.priceAfternoon?.toStringAsFixed(0) ?? '',
+    );
+    final eveningController = TextEditingController(
+      text: field.priceEvening?.toStringAsFixed(0) ?? '',
+    );
+
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Cập nhật giá sân'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: morningController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Giá buổi sáng (06:00-12:00)',
+                  prefixText: '',
+                  suffixText: 'đ',
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: afternoonController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Giá buổi chiều (12:00-18:00)',
+                  prefixText: '',
+                  suffixText: 'đ',
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: eveningController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Giá buổi tối (18:00-22:00)',
+                  prefixText: '',
+                  suffixText: 'đ',
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final controller = Get.find<FieldDetailController>();
+              final priceMorning = double.tryParse(morningController.text);
+              final priceAfternoon = double.tryParse(afternoonController.text);
+              final priceEvening = double.tryParse(eveningController.text);
+
+              Get.back();
+
+              try {
+                await controller.apiService.updateField(
+                  fieldId: field.id!,
+                  priceMorning: priceMorning,
+                  priceAfternoon: priceAfternoon,
+                  priceEvening: priceEvening,
+                );
+
+                Get.snackbar('Thành công', 'Đã cập nhật giá sân',
+                    snackPosition: SnackPosition.TOP);
+
+                // Reload field detail
+                controller.loadFieldDetail(field.id!);
+              } catch (e) {
+                Get.snackbar('Lỗi', 'Không thể cập nhật giá sân',
+                    snackPosition: SnackPosition.TOP);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+            ),
+            child: const Text('Lưu'),
+          ),
         ],
       ),
     );
@@ -448,4 +613,74 @@ class FieldDetailPage extends StatelessWidget {
     );
   }
 
+  Widget _buildSlotManagementButton(FieldModel field) {
+    return GestureDetector(
+      onTap: () {
+        Get.toNamed('/owner/slot-management', arguments: {'field': field});
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppColors.buttonGradientStart, AppColors.buttonGradientEnd],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: const BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+              ),
+              child: const Icon(
+                Icons.calendar_month,
+                color: Colors.white,
+                size: 28,
+              ),
+            ),
+            const SizedBox(width: 16),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Quản lý Slots',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Tạo lịch sân, quản lý khung giờ',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.white,
+              size: 20,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

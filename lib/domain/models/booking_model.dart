@@ -41,27 +41,39 @@ class BookingItemDto {
 }
 
 class PaymentDto {
-  final String? paymentId;
+  final String? id;
+  final String? bookingId;
   final double? amount;
-  final String? paymentMethod;
   final String? paymentStatus;
+  final String? paymentType;
+  final String? paymentMethod;
+  final String? transactionCode;
   final DateTime? paidAt;
+  final String? paymentUrl;
 
   PaymentDto({
-    this.paymentId,
+    this.id,
+    this.bookingId,
     this.amount,
-    this.paymentMethod,
     this.paymentStatus,
+    this.paymentType,
+    this.paymentMethod,
+    this.transactionCode,
     this.paidAt,
+    this.paymentUrl,
   });
 
   factory PaymentDto.fromJson(Map<String, dynamic> json) {
     return PaymentDto(
-      paymentId: json["paymentId"],
+      id: json["id"],
+      bookingId: json["bookingId"],
       amount: (json["amount"] as num?)?.toDouble(),
-      paymentMethod: json["paymentMethod"],
       paymentStatus: json["paymentStatus"],
+      paymentType: json["paymentType"],
+      paymentMethod: json["paymentMethod"],
+      transactionCode: json["transactionCode"],
       paidAt: json["paidAt"] != null ? DateTime.parse(json["paidAt"]) : null,
+      paymentUrl: json["paymentUrl"],
     );
   }
 }

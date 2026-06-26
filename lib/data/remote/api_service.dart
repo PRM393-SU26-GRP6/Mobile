@@ -5,6 +5,7 @@ import 'package:exe101/domain/models/field_model.dart';
 import 'package:exe101/domain/models/login_response_model.dart';
 import 'package:exe101/domain/models/payment_model.dart';
 import 'package:exe101/domain/models/time_slot_model.dart';
+import 'package:exe101/domain/models/field_schedule_model.dart';
 import 'package:exe101/domain/models/venue_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -450,7 +451,7 @@ class ApiServiceImpl extends ApiService {
     if (isActive != null) payload['isActive'] = isActive;
 
     final response = await put<Map<String, dynamic>>(
-      '${Env.baseUrl}/api/v1/fields/$fieldId',
+      '${Env.baseUrl}/api/v1/owner/fields/$fieldId',
       data: payload,
       headers: headers,
     );
@@ -780,10 +781,6 @@ class ApiServiceImpl extends ApiService {
       headers: headers,
     );
 
-    print('=== createDepositPayment Response ===');
-    print('Status: ${response.statusCode}');
-    print('Data: ${response.data}');
-
     // Check if response is an error
     if (response.statusCode != 201 && response.statusCode != 200) {
       throw DioException(
@@ -830,5 +827,62 @@ class ApiServiceImpl extends ApiService {
     if (payload is! Map<String, dynamic>) return null;
 
     return SePayQRInfoModel.fromJson(payload);
+  }
+
+  // ==================== SLOT MANAGEMENT ====================
+
+  Future<void> bulkCreateSlots({
+    required String fieldId,
+    required BulkCreateSlotsDto slotsDto,
+  }) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+
+    await post<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/owner/fields/$fieldId/slots/bulk',
+      data: slotsDto.toJson(),
+      headers: headers,
+    );
+  }
+
+  Future<List<FieldScheduleDto>> getFieldSchedule(String fieldId) async {
+    final headers = await _authHeaders();
+    final response = await get<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/owner/fields/$fieldId/schedule',
+      headers: headers,
+    );
+
+    if (response.data == null) return [];
+    final list = _extractList(response.data);
+    return list.map((e) => FieldScheduleDto.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<List<FieldScheduleDto>> updateFieldSchedule({
+    required String fieldId,
+    required List<FieldScheduleRowDto> rows,
+  }) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+
+    final response = await put<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/owner/fields/$fieldId/schedule',
+      data: {'rows': rows.map((e) => e.toJson()).toList()},
+      headers: headers,
+    );
+
+    if (response.data == null) return [];
+    final list = _extractList(response.data);
+    return list.map((e) => FieldScheduleDto.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<void> updateSlotStatus(String slotId, String status) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+
+    await put<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/owner/slots/$slotId/status',
+      data: {'status': status},
+      headers: headers,
+    );
   }
 }

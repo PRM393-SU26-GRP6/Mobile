@@ -13,6 +13,7 @@ import 'package:exe101/presentation/features/owner/view/booking_management_page.
 import 'package:exe101/presentation/features/owner/view/create_field_page.dart';
 import 'package:exe101/presentation/features/owner/view/field_detail_page.dart';
 import 'package:exe101/presentation/features/owner/view/owner_home_page.dart';
+import 'package:exe101/presentation/features/owner/view/slot_management_page.dart';
 import 'package:exe101/presentation/features/owner/view/venue_creation_page.dart';
 import 'package:exe101/presentation/features/splash/binding/splash_binding.dart';
 import 'package:exe101/presentation/features/splash/view/splash_view.dart';
@@ -33,6 +34,7 @@ class AppPages {
   static const String addField = '/owner/add-field';
   static const String bookingManagement = '/owner/bookings';
   static const String fieldDetail = '/owner/field-detail';
+  static const String slotManagement = '/owner/slot-management';
   static const String paymentQR = '/payment-qr';
 
   // GetX pages configuration
@@ -99,6 +101,11 @@ class AppPages {
     GetPage(
       name: fieldDetail,
       page: () => const FieldDetailPage(),
+      binding: OwnerBinding(),
+    ),
+    GetPage(
+      name: slotManagement,
+      page: () => const SlotManagementPage(),
       binding: OwnerBinding(),
     ),
     GetPage(

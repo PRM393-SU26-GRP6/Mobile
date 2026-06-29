@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/domain/models/payment_model.dart';
 import 'package:exe101/presentation/features/customer/controller/booking_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 class PaymentQRPage extends StatefulWidget {
@@ -21,7 +24,9 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
   bool _isLoading = true;
   bool _isError = false;
   String _errorMessage = '';
+  PaymentModel? _payment;
   SePayQRInfoModel? _paymentInfo;
+  Timer? _pollingTimer;
 
   @override
   void initState() {
@@ -45,8 +50,7 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
         return;
       }
 
-      if (payment.paymentStatus.toLowerCase() == 'failed' ||
-          payment.paymentStatus.toLowerCase() == 'error') {
+      if (payment.isFailed) {
         setState(() {
           _isError = true;
           _errorMessage = 'Không thể tạo thanh toán. Vui lòng thử lại sau.';
@@ -59,9 +63,13 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
       final qrInfo = await apiService.getSePayQRInfo(payment.id);
 
       setState(() {
+        _payment = payment;
         _paymentInfo = qrInfo;
         _isLoading = false;
       });
+
+      // Start polling for payment status
+      _startPaymentStatusPolling();
     } on DioException catch (e) {
       String errorMsg = 'Đã xảy ra lỗi';
 
@@ -87,6 +95,62 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
         _isLoading = false;
       });
     }
+  }
+
+  void _startPaymentStatusPolling() {
+    _pollingTimer?.cancel();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
+      if (!mounted || _payment == null) {
+        timer.cancel();
+        return;
+      }
+
+      try {
+        final apiService = Get.find<ApiServiceImpl>();
+        final updatedPayment = await apiService.getPaymentById(_payment!.id);
+
+        if (updatedPayment != null && updatedPayment.isSuccess && mounted) {
+          timer.cancel();
+          _showPaymentSuccessDialog();
+        }
+      } catch (_) {
+        // Silent fail for polling
+      }
+    });
+  }
+
+  void _showPaymentSuccessDialog() {
+    Get.dialog(
+      AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.green, size: 28),
+            SizedBox(width: 8),
+            Text('Thanh toán thành công'),
+          ],
+        ),
+        content: const Text('Thanh toán của bạn đã được xác nhận. Cảm ơn bạn!'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+              Get.back(result: true);
+              if (Get.isRegistered<BookingController>()) {
+                Get.find<BookingController>().refreshBookings();
+              }
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -231,9 +295,83 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
               ),
             ],
           ),
+          if (_payment != null) ...[
+            const Divider(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Mã thanh toán',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Clipboard.setData(ClipboardData(text: _payment!.id));
+                    Get.snackbar(
+                      'Đã sao chép',
+                      'Mã thanh toán đã được sao chép',
+                      snackPosition: SnackPosition.TOP,
+                      duration: const Duration(seconds: 2),
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      Text(
+                        _payment!.id.substring(0, 8).toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.copy, size: 14, color: AppColors.primary),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Phương thức',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                Text(
+                  _getPaymentMethodText(_payment!.paymentMethod),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
+  }
+
+  String _getPaymentMethodText(PaymentMethod method) {
+    switch (method) {
+      case PaymentMethod.cash:
+        return 'Tiền mặt';
+      case PaymentMethod.moMo:
+        return 'MoMo';
+      case PaymentMethod.vnPay:
+        return 'VNPay';
+      case PaymentMethod.sePay:
+        return 'SePay QR';
+    }
   }
 
   Widget _buildQRCard() {
@@ -453,19 +591,31 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () {
-          // Refresh booking list to reflect new payment
-          if (Get.isRegistered<BookingController>()) {
-            Get.find<BookingController>().refreshBookings();
+        onPressed: () async {
+          try {
+            final apiService = Get.find<ApiServiceImpl>();
+            await apiService.updateBookingStatus(bookingId, 'deposited');
+
+            if (Get.isRegistered<BookingController>()) {
+              Get.find<BookingController>().refreshBookings();
+            }
+            Get.back(result: true);
+            Get.snackbar(
+              'Thành công',
+              'Đã xác nhận đặt cọc thành công',
+              snackPosition: SnackPosition.TOP,
+              backgroundColor: Colors.green,
+              colorText: Colors.white,
+            );
+          } catch (e) {
+            Get.snackbar(
+              'Lỗi',
+              'Không thể xác nhận. Vui lòng thử lại.',
+              snackPosition: SnackPosition.TOP,
+              backgroundColor: Colors.red,
+              colorText: Colors.white,
+            );
           }
-          Get.back(result: true);
-          Get.snackbar(
-            'Thông báo',
-            'Vui lòng đợi xác nhận thanh toán từ hệ thống',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.blue,
-            colorText: Colors.white,
-          );
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
@@ -475,7 +625,7 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
           ),
         ),
         child: const Text(
-          'Đã thanh toán',
+          'Xác nhận',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,

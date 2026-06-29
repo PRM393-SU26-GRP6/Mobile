@@ -15,6 +15,7 @@ class VenueModel {
   final List<AmenityModel>? amenities;
   final List<FootballFieldDto>? fields;
   final bool? isActive;
+  final String? ownerId;
   final String? ownerName;
 
   VenueModel({
@@ -34,6 +35,7 @@ class VenueModel {
     this.amenities,
     this.fields,
     this.isActive,
+    this.ownerId,
     this.ownerName,
   });
 
@@ -79,6 +81,7 @@ class VenueModel {
           ? (json["fields"] as List).map((e) => FootballFieldDto.fromJson(e)).toList()
           : null,
       isActive: json["isActive"] as bool?,
+      ownerId: json["ownerId"],
       ownerName: json["ownerName"],
     );
   }

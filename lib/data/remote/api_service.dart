@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:exe101/core/config/env.dart';
 import 'package:exe101/domain/models/booking_model.dart';
+import 'package:exe101/domain/models/chat_model.dart';
 import 'package:exe101/domain/models/field_model.dart';
 import 'package:exe101/domain/models/login_response_model.dart';
 import 'package:exe101/domain/models/payment_model.dart';
@@ -91,6 +92,7 @@ class ApiServiceImpl extends ApiService {
   static const _keyAccessToken = 'access_token';
   static const _keyRefreshToken = 'refresh_token';
   static const _keyUserRole = 'user_role';
+  static const _keyUserId = 'user_id';
 
   Future<Map<String, String>> _authHeaders() async {
     final token = await _readToken();
@@ -211,11 +213,18 @@ class ApiServiceImpl extends ApiService {
     return _storage.read(key: _keyUserRole);
   }
 
+  Future<String?> getUserId() async {
+    return _storage.read(key: _keyUserId);
+  }
+
   // --- Private helpers ---
 
   Future<void> _saveUserRole(UserAuthData? user) async {
-    if (user?.roles != null && user!.roles!.isNotEmpty) {
+    if (user != null && user.roles != null && user.roles!.isNotEmpty) {
       await _storage.write(key: _keyUserRole, value: user.roles!.first);
+    }
+    if (user != null && user.id != null && user.id!.isNotEmpty) {
+      await _storage.write(key: _keyUserId, value: user.id!);
     }
   }
 
@@ -223,6 +232,7 @@ class ApiServiceImpl extends ApiService {
     await _storage.delete(key: _keyAccessToken);
     await _storage.delete(key: _keyRefreshToken);
     await _storage.delete(key: _keyUserRole);
+    await _storage.delete(key: _keyUserId);
   }
 
   // --- Venue APIs ---
@@ -732,6 +742,16 @@ class ApiServiceImpl extends ApiService {
     );
   }
 
+  Future<void> updateBookingStatus(String bookingId, String status) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+    await put<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/bookings/$bookingId/status',
+      data: {'status': status},
+      headers: headers,
+    );
+  }
+
   Future<Map<String, dynamic>> getOwnerStats() async {
     final headers = await _authHeaders();
     final response = await get<Map<String, dynamic>>(
@@ -829,6 +849,38 @@ class ApiServiceImpl extends ApiService {
     return SePayQRInfoModel.fromJson(payload);
   }
 
+  Future<PaymentModel?> getPaymentById(String paymentId) async {
+    final headers = await _authHeaders();
+    final response = await get<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/payments/$paymentId',
+      headers: headers,
+    );
+
+    if (response.data == null) return null;
+
+    final data = response.data!;
+    final payload = data['data'] ?? data;
+    if (payload is! Map<String, dynamic>) return null;
+
+    return PaymentModel.fromJson(payload);
+  }
+
+  Future<SePayCheckoutFormModel?> getSePayCheckout(String paymentId) async {
+    final headers = await _authHeaders();
+    final response = await get<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/payments/$paymentId/sepay-checkout',
+      headers: headers,
+    );
+
+    if (response.data == null) return null;
+
+    final data = response.data!;
+    final payload = data['data'] ?? data;
+    if (payload is! Map<String, dynamic>) return null;
+
+    return SePayCheckoutFormModel.fromJson(payload);
+  }
+
   // ==================== SLOT MANAGEMENT ====================
 
   Future<void> bulkCreateSlots({
@@ -882,6 +934,99 @@ class ApiServiceImpl extends ApiService {
     await put<Map<String, dynamic>>(
       '${Env.baseUrl}/api/v1/owner/slots/$slotId/status',
       data: {'status': status},
+      headers: headers,
+    );
+  }
+
+  // --- Chat APIs ---
+
+  Future<List<ChatRoomModel>> getChatRooms({
+    int pageNumber = 1,
+    int pageSize = 20,
+  }) async {
+    final headers = await _authHeaders();
+    final params = <String, dynamic>{
+      'pageNumber': pageNumber,
+      'pageSize': pageSize,
+    };
+
+    final response = await get<dynamic>(
+      '${Env.baseUrl}/api/v1/chats/rooms',
+      params: params,
+      headers: headers,
+    );
+
+    if (response.data == null) return [];
+
+    final list = _extractList(response.data);
+
+    return list
+        .map((json) => ChatRoomModel.fromJson(Map<String, dynamic>.from(json as Map)))
+        .toList();
+  }
+
+  Future<ChatRoomModel> createChatRoom(CreateChatRoomRequest request) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+
+    final response = await post<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/chats/rooms',
+      data: request.toJson(),
+      headers: headers,
+    );
+
+    final data = response.data?['data'] ?? response.data ?? {};
+    return ChatRoomModel.fromJson(data is Map<String, dynamic> ? data : {});
+  }
+
+  Future<List<MessageModel>> getChatMessages({
+    required String roomId,
+    int pageNumber = 1,
+    int pageSize = 50,
+  }) async {
+    final headers = await _authHeaders();
+    final params = <String, dynamic>{
+      'pageNumber': pageNumber,
+      'pageSize': pageSize,
+    };
+
+    final response = await get<dynamic>(
+      '${Env.baseUrl}/api/v1/chats/rooms/$roomId/messages',
+      params: params,
+      headers: headers,
+    );
+
+    if (response.data == null) return [];
+
+    final list = _extractList(response.data);
+
+    return list
+        .map((json) => MessageModel.fromJson(Map<String, dynamic>.from(json as Map)))
+        .toList();
+  }
+
+  Future<MessageModel> sendMessage({
+    required String roomId,
+    required String messageText,
+  }) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+
+    final response = await post<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/chats/rooms/$roomId/messages',
+      data: {'messageText': messageText},
+      headers: headers,
+    );
+
+    final data = response.data?['data'] ?? response.data ?? {};
+    return MessageModel.fromJson(data is Map<String, dynamic> ? data : {});
+  }
+
+  Future<void> markChatAsRead(String roomId) async {
+    final headers = await _authHeaders();
+
+    await put<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/chats/rooms/$roomId/read',
       headers: headers,
     );
   }

@@ -111,7 +111,7 @@ class SlotManagementController extends GetxController {
     if (_fieldId == null) return;
     if (fromDate.value == null || toDate.value == null) {
       Get.snackbar('Lỗi', 'Vui lòng chọn ngày bắt đầu và kết thúc',
-          snackPosition: SnackPosition.BOTTOM);
+          snackPosition: SnackPosition.TOP);
       return;
     }
 
@@ -131,7 +131,7 @@ class SlotManagementController extends GetxController {
       await apiService.bulkCreateSlots(fieldId: _fieldId!, slotsDto: dto);
 
       Get.snackbar('Thành công', 'Đã tạo slots thành công',
-          snackPosition: SnackPosition.BOTTOM);
+          snackPosition: SnackPosition.TOP);
 
       // Refresh slots list
       await loadSlots();
@@ -141,7 +141,7 @@ class SlotManagementController extends GetxController {
       toDate.value = null;
     } catch (e) {
       errorMessage.value = 'Lỗi khi tạo slots: ${e.toString()}';
-      Get.snackbar('Lỗi', 'Không thể tạo slots', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar('Lỗi', 'Không thể tạo slots', snackPosition: SnackPosition.TOP);
     } finally {
       isCreatingSlots.value = false;
     }
@@ -160,13 +160,13 @@ class SlotManagementController extends GetxController {
       );
 
       Get.snackbar('Thành công', 'Đã lưu lịch sân thành công',
-          snackPosition: SnackPosition.BOTTOM);
+          snackPosition: SnackPosition.TOP);
 
       // Refresh schedule
       await loadSchedule();
     } catch (e) {
       errorMessage.value = 'Lỗi khi lưu lịch sân';
-      Get.snackbar('Lỗi', 'Không thể lưu lịch sân', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar('Lỗi', 'Không thể lưu lịch sân', snackPosition: SnackPosition.TOP);
     } finally {
       isSavingSchedule.value = false;
     }
@@ -194,11 +194,11 @@ class SlotManagementController extends GetxController {
       Get.snackbar(
         'Thành công',
         isActive ? 'Đã mở slot' : 'Đã khóa slot',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
       );
     } catch (e) {
       Get.snackbar('Lỗi', 'Không thể cập nhật trạng thái slot',
-          snackPosition: SnackPosition.BOTTOM);
+          snackPosition: SnackPosition.TOP);
     }
   }
 

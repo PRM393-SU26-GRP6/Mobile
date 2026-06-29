@@ -1,6 +1,11 @@
 import 'package:exe101/core/theme/app_theme.dart';
+import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/domain/models/booking_model.dart';
+import 'package:exe101/domain/models/chat_model.dart';
+import 'package:exe101/presentation/features/customer/view/messages/chat_detail_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:get/get.dart';
 
 class BookingListItem extends StatelessWidget {
   final BookingDto booking;
@@ -17,6 +22,58 @@ class BookingListItem extends StatelessWidget {
     required this.onComplete,
     required this.onTap,
   });
+
+  Future<void> _startChat(BuildContext context) async {
+    // userId trong BookingDto chính là customerId
+    final customerId = booking.userId;
+    if (customerId.isEmpty) {
+      Get.snackbar('Lỗi', 'Không tìm thấy thông tin khách hàng');
+      return;
+    }
+
+    try {
+      Get.dialog(
+        const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+        barrierDismissible: false,
+      );
+
+      final apiService = Get.find<ApiServiceImpl>();
+      final storage = const FlutterSecureStorage(
+        aOptions: AndroidOptions(encryptedSharedPreferences: true),
+      );
+      final ownerId = await storage.read(key: 'user_id');
+
+      if (ownerId == null || ownerId.isEmpty) {
+        Get.back();
+        Get.snackbar('Lỗi', 'Không tìm thấy thông tin người dùng');
+        return;
+      }
+
+      final chatRoom = await apiService.createChatRoom(
+        CreateChatRoomRequest(
+          customerId: customerId,
+          ownerId: ownerId,
+        ),
+      );
+
+      Get.back();
+      Get.to(
+        () => ChatDetailPage(chatRoom: chatRoom),
+        transition: Transition.rightToLeft,
+      );
+    } catch (e) {
+      Get.back();
+      Get.snackbar(
+        'Lỗi',
+        'Không thể bắt đầu cuộc trò chuyện',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -124,6 +181,26 @@ class BookingListItem extends StatelessWidget {
                                 ),
                               ],
                             ),
+                            if (booking.customerName != null) ...[
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.person_outline,
+                                    size: 14,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    booking.customerName!,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ],
                         ),
                       ),
@@ -184,18 +261,54 @@ class BookingListItem extends StatelessWidget {
                 ],
               ),
             ),
-            if (isPending)
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.secondary,
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(12),
-                    bottomRight: Radius.circular(12),
-                  ),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.secondary,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(12),
+                  bottomRight: Radius.circular(12),
                 ),
-                child: Row(
-                  children: [
+              ),
+              child: Row(
+                children: [
+                  if (booking.userId.isNotEmpty) ...[
+                    GestureDetector(
+                      onTap: () => _startChat(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppColors.primary),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.chat_bubble_outline,
+                              size: 16,
+                              color: AppColors.primary,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              'Nhắn tin',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+                  if (isPending) ...[
                     Expanded(
                       child: OutlinedButton(
                         onPressed: onReject,
@@ -232,20 +345,7 @@ class BookingListItem extends StatelessWidget {
                       ),
                     ),
                   ],
-                ),
-              ),
-            if (isAccepted)
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.secondary,
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(12),
-                    bottomRight: Radius.circular(12),
-                  ),
-                ),
-                child: Row(
-                  children: [
+                  if (isAccepted) ...[
                     Expanded(
                       child: ElevatedButton(
                         onPressed: onComplete,
@@ -264,8 +364,9 @@ class BookingListItem extends StatelessWidget {
                       ),
                     ),
                   ],
-                ),
+                ],
               ),
+            ),
           ],
         ),
       ),

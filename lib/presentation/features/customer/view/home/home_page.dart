@@ -79,6 +79,19 @@ class HomePage extends StatelessWidget {
                   onPressed: () {},
                 ),
               ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => Get.toNamed(AppPages.userProfile),
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.person_outline, color: Colors.white),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 12),

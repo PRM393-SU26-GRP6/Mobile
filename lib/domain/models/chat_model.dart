@@ -38,6 +38,29 @@ class ChatRoomModel {
 
   String get displayName => customerName ?? hostName ?? 'Chat';
 
+  String getPartnerName(String? currentUserId) {
+    // Xác định người đang chat cùng dựa trên userId
+    // Nếu mình là customer (customerId == currentUserId) → hiện hostName
+    // Nếu mình là owner (hostId == currentUserId) → hiện customerName
+    if (currentUserId == customerId) {
+      return hostName ?? customerName ?? 'Chat';
+    } else if (currentUserId == hostId) {
+      return customerName ?? hostName ?? 'Chat';
+    }
+    // Fallback
+    return displayName;
+  }
+
+  String getPartnerAvatarText(String? currentUserId) {
+    final name = getPartnerName(currentUserId);
+    if (name.isEmpty || name == 'Chat') return '?';
+    final parts = name.split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
+  }
+
   String get avatarText {
     final name = displayName;
     if (name.isEmpty) return '?';

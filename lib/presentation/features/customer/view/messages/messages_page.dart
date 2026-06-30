@@ -17,11 +17,25 @@ class _MessagesPageState extends State<MessagesPage> {
   List<ChatRoomModel> _chatRooms = [];
   bool _isLoading = true;
   String? _error;
+  String? _currentUserId;
 
   @override
   void initState() {
     super.initState();
+    _loadCurrentUser();
     _loadChatRooms();
+  }
+
+  Future<void> _loadCurrentUser() async {
+    try {
+      final apiService = Get.find<ApiServiceImpl>();
+      final userId = await apiService.getUserId();
+      if (mounted && userId != null) {
+        setState(() {
+          _currentUserId = userId;
+        });
+      }
+    } catch (_) {}
   }
 
   Future<void> _loadChatRooms() async {
@@ -174,7 +188,7 @@ class _MessagesPageState extends State<MessagesPage> {
         radius: 28,
         backgroundColor: AppColors.primary,
         child: Text(
-          room.avatarText,
+          room.getPartnerAvatarText(_currentUserId),
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -183,7 +197,7 @@ class _MessagesPageState extends State<MessagesPage> {
         ),
       ),
       title: Text(
-        room.displayName,
+        room.getPartnerName(_currentUserId),
         style: const TextStyle(
           fontWeight: FontWeight.w600,
           fontSize: 16,

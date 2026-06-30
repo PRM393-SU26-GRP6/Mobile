@@ -92,6 +92,8 @@ class BookingDto {
   final DateTime createdAt;
   final List<BookingItemDto>? items;
   final List<PaymentDto>? payments;
+  final String? customerId;
+  final String? customerName;
 
   BookingDto({
     required this.id,
@@ -107,6 +109,8 @@ class BookingDto {
     required this.createdAt,
     this.items,
     this.payments,
+    this.customerId,
+    this.customerName,
   });
 
   factory BookingDto.fromJson(Map<String, dynamic> json) {
@@ -138,6 +142,8 @@ class BookingDto {
               .map((e) => PaymentDto.fromJson(e))
               .toList()
           : null,
+      customerId: json["customerId"],
+      customerName: json["customerName"],
     );
   }
 

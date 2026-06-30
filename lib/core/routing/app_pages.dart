@@ -4,9 +4,12 @@ import 'package:exe101/presentation/features/auth/view/otp_verification_page.dar
 import 'package:exe101/presentation/features/auth/view/register_page.dart';
 import 'package:exe101/presentation/features/auth/view/role_selection_page.dart';
 import 'package:exe101/presentation/features/customer/binding/customer_binding.dart';
+import 'package:exe101/presentation/features/customer/binding/notification_binding.dart';
 import 'package:exe101/presentation/features/customer/view/customer_home_page.dart';
 import 'package:exe101/presentation/features/customer/view/home/venue_detail_page.dart';
+import 'package:exe101/presentation/features/customer/view/notifications/notifications_page.dart';
 import 'package:exe101/presentation/features/customer/view/orders/payment_qr_page.dart';
+import 'package:exe101/presentation/features/customer/view/profile/user_profile_page.dart';
 import 'package:exe101/presentation/features/owner/binding/owner_binding.dart';
 import 'package:exe101/presentation/features/owner/view/add_field_page.dart';
 import 'package:exe101/presentation/features/owner/view/booking_management_page.dart';
@@ -36,6 +39,8 @@ class AppPages {
   static const String fieldDetail = '/owner/field-detail';
   static const String slotManagement = '/owner/slot-management';
   static const String paymentQR = '/payment-qr';
+  static const String userProfile = '/user-profile';
+  static const String notifications = '/notifications';
 
   // GetX pages configuration
   static final List<GetPage> pages = [
@@ -111,6 +116,16 @@ class AppPages {
     GetPage(
       name: paymentQR,
       page: () => const PaymentQRPage(),
+    ),
+    GetPage(
+      name: userProfile,
+      page: () => const UserProfilePage(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: notifications,
+      page: () => const NotificationsPage(),
+      binding: NotificationBinding(),
     ),
   ];
 

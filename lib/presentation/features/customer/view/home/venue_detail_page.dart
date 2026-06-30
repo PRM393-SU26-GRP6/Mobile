@@ -1,9 +1,13 @@
 import 'package:exe101/core/theme/app_theme.dart';
+import 'package:exe101/data/remote/api_service.dart';
+import 'package:exe101/domain/models/chat_model.dart';
 import 'package:exe101/domain/models/time_slot_model.dart';
 import 'package:exe101/domain/models/venue_model.dart';
 import 'package:exe101/presentation/features/customer/controller/venue_detail_controller.dart';
 import 'package:exe101/presentation/features/customer/view/booking/booking_confirm_dialog.dart';
+import 'package:exe101/presentation/features/customer/view/messages/chat_detail_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 
 class VenueDetailPage extends StatelessWidget {
@@ -178,25 +182,165 @@ class VenueDetailPage extends StatelessWidget {
             _buildInfoRow(Icons.phone_outlined, venue.phoneContact!),
           if (venue.openingHours != null)
             _buildInfoRow(Icons.access_time, venue.openingHours!),
-          if (venue.description != null) ...[
-            const SizedBox(height: 12),
-            Text(
-              venue.description!,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-                height: 1.5,
-              ),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+          if (venue.ownerName != null)
+            _buildInfoRow(Icons.person_outline, 'Chủ sân: ${venue.ownerName}'),
           const SizedBox(height: 16),
           const Divider(color: AppColors.inputBorder, height: 1),
+          const SizedBox(height: 16),
+          _buildChatButton(controller),
         ],
       ),
     );
   }
+
+  Widget _buildChatButton(VenueDetailController controller) {
+    final venue = controller.venue.value;
+    if (venue == null) return const SizedBox.shrink();
+
+    // Hiển thị nút chat nếu có venue (ownerId có thể null, sẽ xử lý sau)
+    return GestureDetector(
+      onTap: () => _startChat(controller),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+        decoration: BoxDecoration(
+          color: AppColors.primary,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.chat_bubble_outline, color: Colors.white, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              venue.ownerId != null ? 'Nhắn tin chủ sân' : 'Liên hệ chủ sân',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _startChat(VenueDetailController controller) async {
+    final venue = controller.venue.value;
+    if (venue == null) return;
+
+    // Nếu chưa có ownerId, thử load lại venue để lấy
+    if (venue.ownerId == null || venue.ownerId!.isEmpty) {
+      try {
+        Get.dialog(
+          const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          ),
+          barrierDismissible: false,
+        );
+
+        final apiService = Get.find<ApiServiceImpl>();
+        final updatedVenue = await apiService.getVenueById(venue.id);
+        Get.back();
+
+        if (updatedVenue == null || updatedVenue.ownerId == null) {
+          Get.snackbar(
+            'Thông báo',
+            'Hiện tại không thể nhắn tin với chủ sân',
+            snackPosition: SnackPosition.TOP,
+          );
+          return;
+        }
+
+        // Update venue với ownerId mới
+        controller.venue.value = updatedVenue;
+
+        await _doStartChat(updatedVenue);
+      } catch (e) {
+        Get.back();
+        Get.snackbar(
+          'Lỗi',
+          'Không thể tải thông tin chủ sân',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+      return;
+    }
+
+    await _doStartChat(venue);
+  }
+
+  Future<void> _doStartChat(VenueModel venue) async {
+    if (venue.ownerId == null || venue.ownerId!.isEmpty) return;
+
+    try {
+      Get.dialog(
+        const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+        barrierDismissible: false,
+      );
+
+      final apiService = Get.find<ApiServiceImpl>();
+      final userData = await _getCurrentUser();
+
+      if (userData == null) {
+        Get.back();
+        Get.snackbar('Lỗi', 'Vui lòng đăng nhập để nhắn tin');
+        return;
+      }
+
+      final chatRoom = await apiService.createChatRoom(
+        CreateChatRoomRequest(
+          customerId: userData['id']!,
+          ownerId: venue.ownerId!,
+          venueId: venue.id,
+        ),
+      );
+
+      Get.back();
+      Get.to(
+        () => ChatDetailPage(chatRoom: chatRoom),
+        transition: Transition.rightToLeft,
+      );
+    } catch (e) {
+      Get.back();
+      Get.snackbar(
+        'Lỗi',
+        'Không thể bắt đầu cuộc trò chuyện',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  Future<Map<String, String>?> _getCurrentUser() async {
+    try {
+      final apiService = Get.find<ApiServiceImpl>();
+      final token = await apiService.getAccessToken();
+      if (token == null) return null;
+
+      final userId = await _storage.read(key: 'user_id');
+      if (userId != null) {
+        return {'id': userId};
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  final _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
 
   Widget _buildInfoRow(IconData icon, String text) {
     return Padding(

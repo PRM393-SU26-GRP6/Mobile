@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:exe101/core/config/env.dart';
 import 'package:exe101/domain/models/booking_model.dart';
+import 'package:exe101/domain/models/chat_model.dart';
 import 'package:exe101/domain/models/field_model.dart';
 import 'package:exe101/domain/models/login_response_model.dart';
+import 'package:exe101/domain/models/notification_model.dart';
 import 'package:exe101/domain/models/payment_model.dart';
 import 'package:exe101/domain/models/time_slot_model.dart';
 import 'package:exe101/domain/models/field_schedule_model.dart';
@@ -91,6 +93,7 @@ class ApiServiceImpl extends ApiService {
   static const _keyAccessToken = 'access_token';
   static const _keyRefreshToken = 'refresh_token';
   static const _keyUserRole = 'user_role';
+  static const _keyUserId = 'user_id';
 
   Future<Map<String, String>> _authHeaders() async {
     final token = await _readToken();
@@ -203,6 +206,46 @@ class ApiServiceImpl extends ApiService {
     await _clearAuth();
   }
 
+  Future<bool> refreshToken() async {
+    final refreshToken = await _storage.read(key: _keyRefreshToken);
+    if (refreshToken == null || refreshToken.isEmpty) return false;
+
+    try {
+      final response = await post<Map<String, dynamic>>(
+        '${Env.baseUrl}/api/v1/auth/refresh-token',
+        data: {'refreshToken': refreshToken},
+      );
+
+      if (response.data == null) return false;
+
+      final data = response.data is Map<String, dynamic>
+          ? response.data as Map<String, dynamic>
+          : null;
+
+      if (data == null) return false;
+
+      final success = data['success'] ?? false;
+      if (!success) return false;
+
+      final authData = data['data'];
+      if (authData is! Map<String, dynamic>) return false;
+
+      final newAccessToken = authData['accessToken'] as String?;
+      final newRefreshToken = authData['refreshToken'] as String?;
+
+      if (newAccessToken != null && newAccessToken.isNotEmpty) {
+        await _storage.write(key: _keyAccessToken, value: newAccessToken);
+      }
+      if (newRefreshToken != null && newRefreshToken.isNotEmpty) {
+        await _storage.write(key: _keyRefreshToken, value: newRefreshToken);
+      }
+
+      return newAccessToken != null && newAccessToken.isNotEmpty;
+    } catch (_) {
+      return false;
+    }
+  }
+
   // --- Token / Role access (public, used by splash & auth controllers) ---
 
   Future<String?> getAccessToken() => _readToken();
@@ -211,11 +254,18 @@ class ApiServiceImpl extends ApiService {
     return _storage.read(key: _keyUserRole);
   }
 
+  Future<String?> getUserId() async {
+    return _storage.read(key: _keyUserId);
+  }
+
   // --- Private helpers ---
 
   Future<void> _saveUserRole(UserAuthData? user) async {
-    if (user?.roles != null && user!.roles!.isNotEmpty) {
+    if (user != null && user.roles != null && user.roles!.isNotEmpty) {
       await _storage.write(key: _keyUserRole, value: user.roles!.first);
+    }
+    if (user != null && user.id != null && user.id!.isNotEmpty) {
+      await _storage.write(key: _keyUserId, value: user.id!);
     }
   }
 
@@ -223,6 +273,7 @@ class ApiServiceImpl extends ApiService {
     await _storage.delete(key: _keyAccessToken);
     await _storage.delete(key: _keyRefreshToken);
     await _storage.delete(key: _keyUserRole);
+    await _storage.delete(key: _keyUserId);
   }
 
   // --- Venue APIs ---
@@ -389,6 +440,37 @@ class ApiServiceImpl extends ApiService {
     return items
         .map((json) => BookingDto.fromJson(Map<String, dynamic>.from(json as Map)))
         .toList();
+  }
+
+  Future<BookingDto?> getBookingById(String bookingId) async {
+    final headers = await _authHeaders();
+    final response = await get<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/bookings/$bookingId',
+      headers: headers,
+    );
+
+    if (response.data == null) return null;
+
+    final data = response.data!['data'] ?? response.data;
+    if (data is! Map<String, dynamic>) return null;
+
+    return BookingDto.fromJson(data);
+  }
+
+  Future<void> cancelBooking(String bookingId, {String? cancellationReason}) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+
+    final params = <String, dynamic>{};
+    if (cancellationReason != null && cancellationReason.isNotEmpty) {
+      params['cancellationReason'] = cancellationReason;
+    }
+
+    await put<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/bookings/$bookingId/cancel',
+      data: params,
+      headers: headers,
+    );
   }
 
   // --- Field APIs (Owner) ---
@@ -732,6 +814,16 @@ class ApiServiceImpl extends ApiService {
     );
   }
 
+  Future<void> updateBookingStatus(String bookingId, String status) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+    await put<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/bookings/$bookingId/status',
+      data: {'status': status},
+      headers: headers,
+    );
+  }
+
   Future<Map<String, dynamic>> getOwnerStats() async {
     final headers = await _authHeaders();
     final response = await get<Map<String, dynamic>>(
@@ -829,6 +921,38 @@ class ApiServiceImpl extends ApiService {
     return SePayQRInfoModel.fromJson(payload);
   }
 
+  Future<PaymentModel?> getPaymentById(String paymentId) async {
+    final headers = await _authHeaders();
+    final response = await get<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/payments/$paymentId',
+      headers: headers,
+    );
+
+    if (response.data == null) return null;
+
+    final data = response.data!;
+    final payload = data['data'] ?? data;
+    if (payload is! Map<String, dynamic>) return null;
+
+    return PaymentModel.fromJson(payload);
+  }
+
+  Future<SePayCheckoutFormModel?> getSePayCheckout(String paymentId) async {
+    final headers = await _authHeaders();
+    final response = await get<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/payments/$paymentId/sepay-checkout',
+      headers: headers,
+    );
+
+    if (response.data == null) return null;
+
+    final data = response.data!;
+    final payload = data['data'] ?? data;
+    if (payload is! Map<String, dynamic>) return null;
+
+    return SePayCheckoutFormModel.fromJson(payload);
+  }
+
   // ==================== SLOT MANAGEMENT ====================
 
   Future<void> bulkCreateSlots({
@@ -884,5 +1008,225 @@ class ApiServiceImpl extends ApiService {
       data: {'status': status},
       headers: headers,
     );
+  }
+
+  // --- Chat APIs ---
+
+  Future<List<ChatRoomModel>> getChatRooms({
+    int pageNumber = 1,
+    int pageSize = 20,
+  }) async {
+    final headers = await _authHeaders();
+    final params = <String, dynamic>{
+      'pageNumber': pageNumber,
+      'pageSize': pageSize,
+    };
+
+    final response = await get<dynamic>(
+      '${Env.baseUrl}/api/v1/chats/rooms',
+      params: params,
+      headers: headers,
+    );
+
+    if (response.data == null) return [];
+
+    final list = _extractList(response.data);
+
+    return list
+        .map((json) => ChatRoomModel.fromJson(Map<String, dynamic>.from(json as Map)))
+        .toList();
+  }
+
+  Future<ChatRoomModel> createChatRoom(CreateChatRoomRequest request) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+
+    final response = await post<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/chats/rooms',
+      data: request.toJson(),
+      headers: headers,
+    );
+
+    final data = response.data?['data'] ?? response.data ?? {};
+    return ChatRoomModel.fromJson(data is Map<String, dynamic> ? data : {});
+  }
+
+  Future<List<MessageModel>> getChatMessages({
+    required String roomId,
+    int pageNumber = 1,
+    int pageSize = 50,
+  }) async {
+    final headers = await _authHeaders();
+    final params = <String, dynamic>{
+      'pageNumber': pageNumber,
+      'pageSize': pageSize,
+    };
+
+    final response = await get<dynamic>(
+      '${Env.baseUrl}/api/v1/chats/rooms/$roomId/messages',
+      params: params,
+      headers: headers,
+    );
+
+    if (response.data == null) return [];
+
+    final list = _extractList(response.data);
+
+    return list
+        .map((json) => MessageModel.fromJson(Map<String, dynamic>.from(json as Map)))
+        .toList();
+  }
+
+  Future<MessageModel> sendMessage({
+    required String roomId,
+    required String messageText,
+  }) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+
+    final response = await post<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/chats/rooms/$roomId/messages',
+      data: {'messageText': messageText},
+      headers: headers,
+    );
+
+    final data = response.data?['data'] ?? response.data ?? {};
+    return MessageModel.fromJson(data is Map<String, dynamic> ? data : {});
+  }
+
+  Future<void> markChatAsRead(String roomId) async {
+    final headers = await _authHeaders();
+
+    await put<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/chats/rooms/$roomId/read',
+      headers: headers,
+    );
+  }
+
+  // --- User Profile APIs ---
+
+  Future<UserAuthData?> getUserProfile() async {
+    final headers = await _authHeaders();
+    final response = await get<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/users/profile',
+      headers: headers,
+    );
+
+    if (response.data == null) return null;
+
+    final data = response.data!['data'] ?? response.data;
+    if (data is! Map<String, dynamic>) return null;
+
+    return UserAuthData.fromJson(data);
+  }
+
+  Future<bool> updateUserProfile({
+    String? fullName,
+    String? phone,
+    String? avatarUrl,
+  }) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+
+    final payload = <String, dynamic>{};
+    if (fullName != null) payload['fullName'] = fullName;
+    if (phone != null) payload['phone'] = phone;
+    if (avatarUrl != null) payload['avatarUrl'] = avatarUrl;
+
+    if (payload.isEmpty) return false;
+
+    try {
+      final response = await put<Map<String, dynamic>>(
+        '${Env.baseUrl}/api/v1/users/profile',
+        data: payload,
+        headers: headers,
+      );
+
+      return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  // --- Notification APIs ---
+
+  Future<List<NotificationModel>> getNotifications({
+    bool unreadOnly = false,
+    int pageNumber = 1,
+    int pageSize = 10,
+  }) async {
+    final headers = await _authHeaders();
+    final params = <String, dynamic>{
+      'unreadOnly': unreadOnly,
+      'pageNumber': pageNumber,
+      'pageSize': pageSize,
+    };
+
+    final response = await get<dynamic>(
+      '${Env.baseUrl}/api/v1/notifications',
+      params: params,
+      headers: headers,
+    );
+
+    if (response.data == null) return [];
+
+    final list = _extractList(response.data);
+    return list
+        .map((json) => NotificationModel.fromJson(json as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<int> getUnreadNotificationCount() async {
+    final headers = await _authHeaders();
+
+    final response = await get<dynamic>(
+      '${Env.baseUrl}/api/v1/notifications/unread-count',
+      headers: headers,
+    );
+
+    if (response.data == null) return 0;
+
+    if (response.data is Map<String, dynamic>) {
+      final data = response.data as Map<String, dynamic>;
+      if (data.containsKey('count')) {
+        return data['count'] as int? ?? 0;
+      }
+    }
+
+    if (response.data is int) {
+      return response.data as int;
+    }
+
+    return 0;
+  }
+
+  Future<bool> markNotificationAsRead(String notificationId) async {
+    final headers = await _authHeaders();
+
+    try {
+      final response = await put<Map<String, dynamic>>(
+        '${Env.baseUrl}/api/v1/notifications/$notificationId/read',
+        headers: headers,
+      );
+
+      return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> markAllNotificationsAsRead() async {
+    final headers = await _authHeaders();
+
+    try {
+      final response = await put<Map<String, dynamic>>(
+        '${Env.baseUrl}/api/v1/notifications/read-all',
+        headers: headers,
+      );
+
+      return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
   }
 }

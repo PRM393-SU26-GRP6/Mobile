@@ -76,13 +76,13 @@ class FieldDetailController extends GetxController {
       Get.snackbar(
         'Thành công',
         newStatus ? 'Sân đã được kích hoạt' : 'Sân đã được tắt',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
       );
     } catch (e) {
       Get.snackbar(
         'Lỗi',
         'Không thể cập nhật trạng thái sân',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
       );
     } finally {
       isToggling.value = false;

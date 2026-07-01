@@ -1,4 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:exe101/core/theme/app_theme.dart';
+import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/domain/models/notification_model.dart';
 import 'package:exe101/domain/repositories/user_repository.dart';
 import 'package:exe101/presentation/features/customer/controller/notification_controller.dart';
@@ -33,8 +35,12 @@ class NotificationsPage extends StatelessWidget {
       return Get.find<NotificationController>();
     }
 
+    // Auto-setup dependencies if not registered
     if (!Get.isRegistered<UserRepository>()) {
-      throw Exception('UserRepository not registered. Please navigate through proper route.');
+      final apiService = Get.isRegistered<ApiServiceImpl>()
+          ? Get.find<ApiServiceImpl>()
+          : ApiServiceImpl(Dio());
+      Get.put<UserRepository>(UserRepository(apiService: apiService));
     }
 
     return Get.put(NotificationController(

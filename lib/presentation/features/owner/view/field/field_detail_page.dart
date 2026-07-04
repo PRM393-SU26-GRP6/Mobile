@@ -71,7 +71,8 @@ class FieldDetailPage extends StatelessWidget {
               _buildStatusCard(field, controller),
               const SizedBox(height: 16),
               _buildPriceCard(field),
-              if (field.description != null && field.description!.isNotEmpty) ...[
+              if (field.description != null &&
+                  field.description!.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 _buildDescriptionCard(field),
               ],
@@ -112,8 +113,7 @@ class FieldDetailPage extends StatelessWidget {
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {
-                if (Get.arguments != null &&
-                    Get.arguments['fieldId'] != null) {
+                if (Get.arguments != null && Get.arguments['fieldId'] != null) {
                   controller.loadFieldDetail(Get.arguments['fieldId']);
                 }
               },
@@ -262,7 +262,7 @@ class FieldDetailPage extends StatelessWidget {
                 onChanged: controller.isToggling.value
                     ? null
                     : (value) => controller.toggleFieldStatus(),
-                activeColor: AppColors.primary,
+                activeThumbColor: AppColors.primary,
               )),
           Obx(() {
             if (controller.isToggling.value) {
@@ -340,8 +340,7 @@ class FieldDetailPage extends StatelessWidget {
               _buildPriceRow(
                   'Giá buổi chiều (12:00-18:00)', field.priceAfternoon!),
             if (field.priceEvening != null && field.priceEvening! > 0)
-              _buildPriceRow(
-                  'Giá buổi tối (18:00-22:00)', field.priceEvening!),
+              _buildPriceRow('Giá buổi tối (18:00-22:00)', field.priceEvening!),
           ],
           if (!hasPrice || price <= 0)
             Container(

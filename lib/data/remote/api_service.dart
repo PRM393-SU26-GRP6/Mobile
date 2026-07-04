@@ -311,16 +311,19 @@ class ApiServiceImpl extends ApiService {
 
     final list = _extractList(response.data);
     if (list.isEmpty && response.data is Map<String, dynamic>) {
-      final inner = _extractList((response.data as Map<String, dynamic>)['data']);
+      final inner =
+          _extractList((response.data as Map<String, dynamic>)['data']);
       if (inner.isNotEmpty) {
         return inner
-            .map((json) => VenueModel.fromJson(Map<String, dynamic>.from(json as Map)))
+            .map((json) =>
+                VenueModel.fromJson(Map<String, dynamic>.from(json as Map)))
             .toList();
       }
     }
 
     return list
-        .map((json) => VenueModel.fromJson(Map<String, dynamic>.from(json as Map)))
+        .map((json) =>
+            VenueModel.fromJson(Map<String, dynamic>.from(json as Map)))
         .toList();
   }
 
@@ -439,7 +442,8 @@ class ApiServiceImpl extends ApiService {
     final items = _extractList(response.data);
 
     return items
-        .map((json) => BookingDto.fromJson(Map<String, dynamic>.from(json as Map)))
+        .map((json) =>
+            BookingDto.fromJson(Map<String, dynamic>.from(json as Map)))
         .toList();
   }
 
@@ -458,7 +462,8 @@ class ApiServiceImpl extends ApiService {
     return BookingDto.fromJson(data);
   }
 
-  Future<void> cancelBooking(String bookingId, {String? cancellationReason}) async {
+  Future<void> cancelBooking(String bookingId,
+      {String? cancellationReason}) async {
     final headers = await _authHeaders();
     headers['Content-Type'] = 'application/json';
 
@@ -566,7 +571,8 @@ class ApiServiceImpl extends ApiService {
     final list = _extractList(response.data);
 
     return list
-        .map((json) => FieldModel.fromJson(Map<String, dynamic>.from(json as Map)))
+        .map((json) =>
+            FieldModel.fromJson(Map<String, dynamic>.from(json as Map)))
         .toList();
   }
 
@@ -618,7 +624,8 @@ class ApiServiceImpl extends ApiService {
     final list = _extractList(response.data);
 
     return list
-        .map((json) => VenueModel.fromJson(Map<String, dynamic>.from(json as Map)))
+        .map((json) =>
+            VenueModel.fromJson(Map<String, dynamic>.from(json as Map)))
         .toList();
   }
 
@@ -738,7 +745,8 @@ class ApiServiceImpl extends ApiService {
     final list = _extractList(response.data);
 
     return list
-        .map((json) => FieldModel.fromJson(Map<String, dynamic>.from(json as Map)))
+        .map((json) =>
+            FieldModel.fromJson(Map<String, dynamic>.from(json as Map)))
         .toList();
   }
 
@@ -767,7 +775,8 @@ class ApiServiceImpl extends ApiService {
     final list = _extractList(response.data);
 
     return list
-        .map((json) => BookingDto.fromJson(Map<String, dynamic>.from(json as Map)))
+        .map((json) =>
+            BookingDto.fromJson(Map<String, dynamic>.from(json as Map)))
         .toList();
   }
 
@@ -783,7 +792,8 @@ class ApiServiceImpl extends ApiService {
     final list = _extractList(response.data);
 
     return list
-        .map((json) => BookingDto.fromJson(Map<String, dynamic>.from(json as Map)))
+        .map((json) =>
+            BookingDto.fromJson(Map<String, dynamic>.from(json as Map)))
         .toList();
   }
 
@@ -795,7 +805,8 @@ class ApiServiceImpl extends ApiService {
     );
   }
 
-  Future<void> rejectBooking(String bookingId, {String? rejectionReason}) async {
+  Future<void> rejectBooking(String bookingId,
+      {String? rejectionReason}) async {
     final headers = await _authHeaders();
     final params = <String, dynamic>{};
     if (rejectionReason != null) params['rejectionReason'] = rejectionReason;
@@ -857,11 +868,13 @@ class ApiServiceImpl extends ApiService {
     if (listData is! List) return [];
 
     return listData
-        .map((json) => PaymentModel.fromJson(Map<String, dynamic>.from(json as Map)))
+        .map((json) =>
+            PaymentModel.fromJson(Map<String, dynamic>.from(json as Map)))
         .toList();
   }
 
-  Future<PaymentModel> createDepositPayment(String bookingId, {String paymentMethod = 'SePay'}) async {
+  Future<PaymentModel> createDepositPayment(String bookingId,
+      {String paymentMethod = 'SePay'}) async {
     final headers = await _authHeaders();
     headers['Content-Type'] = 'application/json';
 
@@ -888,7 +901,8 @@ class ApiServiceImpl extends ApiService {
     return PaymentModel.fromJson(data is Map<String, dynamic> ? data : {});
   }
 
-  Future<PaymentModel> createFinalPayment(String bookingId, {String paymentMethod = 'SePay'}) async {
+  Future<PaymentModel> createFinalPayment(String bookingId,
+      {String paymentMethod = 'SePay'}) async {
     final headers = await _authHeaders();
     headers['Content-Type'] = 'application/json';
 
@@ -913,16 +927,11 @@ class ApiServiceImpl extends ApiService {
       headers: headers,
     );
 
-    print('[DEBUG] getSePayQRInfo response: ${response.data}');
-
     if (response.data == null) return null;
 
     final data = response.data!;
     final payload = data['data'] ?? data;
     if (payload is! Map<String, dynamic>) return null;
-
-    print('[DEBUG] getSePayQRInfo payload: $payload');
-    print('[DEBUG] qrUrl value: ${payload['qrUrl']}');
 
     return SePayQRInfoModel.fromJson(payload);
   }
@@ -1019,7 +1028,9 @@ class ApiServiceImpl extends ApiService {
 
     if (response.data == null) return [];
     final list = _extractList(response.data);
-    return list.map((e) => FieldScheduleDto.fromJson(e as Map<String, dynamic>)).toList();
+    return list
+        .map((e) => FieldScheduleDto.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<List<FieldScheduleDto>> updateFieldSchedule({
@@ -1037,7 +1048,9 @@ class ApiServiceImpl extends ApiService {
 
     if (response.data == null) return [];
     final list = _extractList(response.data);
-    return list.map((e) => FieldScheduleDto.fromJson(e as Map<String, dynamic>)).toList();
+    return list
+        .map((e) => FieldScheduleDto.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<void> updateSlotStatus(String slotId, String status) async {
@@ -1074,7 +1087,8 @@ class ApiServiceImpl extends ApiService {
     final list = _extractList(response.data);
 
     return list
-        .map((json) => ChatRoomModel.fromJson(Map<String, dynamic>.from(json as Map)))
+        .map((json) =>
+            ChatRoomModel.fromJson(Map<String, dynamic>.from(json as Map)))
         .toList();
   }
 
@@ -1114,7 +1128,8 @@ class ApiServiceImpl extends ApiService {
     final list = _extractList(response.data);
 
     return list
-        .map((json) => MessageModel.fromJson(Map<String, dynamic>.from(json as Map)))
+        .map((json) =>
+            MessageModel.fromJson(Map<String, dynamic>.from(json as Map)))
         .toList();
   }
 
@@ -1267,7 +1282,8 @@ class ApiServiceImpl extends ApiService {
     final list = _extractList(response.data);
 
     return list
-        .map((json) => ReviewModel.fromJson(Map<String, dynamic>.from(json as Map)))
+        .map((json) =>
+            ReviewModel.fromJson(Map<String, dynamic>.from(json as Map)))
         .toList();
   }
 

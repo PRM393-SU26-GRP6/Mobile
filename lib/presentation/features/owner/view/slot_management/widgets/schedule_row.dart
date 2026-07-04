@@ -17,10 +17,9 @@ class ScheduleRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dayName = FieldScheduleDto.dayNames[index];
-    final schedule =
-        controller.editingSchedules.length > index
-            ? controller.editingSchedules[index]
-            : null;
+    final schedule = controller.editingSchedules.length > index
+        ? controller.editingSchedules[index]
+        : null;
     final isActive = schedule?.isActive ?? true;
 
     return Container(
@@ -86,7 +85,7 @@ class ScheduleRow extends StatelessWidget {
                     closeTime: value ? '22:00' : null,
                   );
                 },
-                activeColor: AppColors.primary,
+                activeThumbColor: AppColors.primary,
               ),
             ],
           ),

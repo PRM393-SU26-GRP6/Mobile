@@ -98,6 +98,7 @@ class SplashView extends GetView<SplashController> {
     );
   }
 
+  // ignore: unused_element
   Widget _buildExploreButton() {
     return GestureDetector(
       onTap: controller.navigateToLogin,

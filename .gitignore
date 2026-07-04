@@ -15,6 +15,8 @@ migrate_working_dir/
 .env.*
 *.g.dart
 android/app/google-services.json
+android/.gradle/
+android/local.properties
 
 # IntelliJ related
 *.iml

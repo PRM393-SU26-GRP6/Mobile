@@ -1,5 +1,6 @@
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/presentation/features/customer/controller/user_profile_controller.dart';
+import 'package:exe101/presentation/features/customer/view/profile/widgets/profile_action_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -309,7 +310,7 @@ class UserProfilePage extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _buildActionItem(
+          ProfileActionItem(
             icon: Icons.save_outlined,
             label: 'Lưu thay đổi',
             onTap: () async {
@@ -321,61 +322,6 @@ class UserProfilePage extends StatelessWidget {
             isPrimary: true,
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildActionItem({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-    bool isPrimary = false,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: isPrimary
-                      ? AppColors.primary
-                      : AppColors.secondary,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  icon,
-                  size: 18,
-                  color: isPrimary ? Colors.white : AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: isPrimary ? FontWeight.w600 : FontWeight.w500,
-                    color: isPrimary
-                        ? AppColors.primary
-                        : AppColors.textPrimary,
-                  ),
-                ),
-              ),
-              Icon(
-                Icons.chevron_right,
-                size: 20,
-                color: AppColors.textSecondary,
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

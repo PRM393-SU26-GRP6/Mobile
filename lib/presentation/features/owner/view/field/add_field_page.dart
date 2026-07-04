@@ -1,7 +1,6 @@
-import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/presentation/features/owner/controller/add_field_controller.dart';
-import 'package:exe101/presentation/features/owner/controller/owner_home_controller.dart';
+import 'package:exe101/presentation/features/owner/view/field/widgets/exit_confirmation_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -28,7 +27,7 @@ class AddFieldPage extends StatelessWidget {
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => _showExitConfirmation(context, controller),
+          onPressed: () => showExitConfirmationDialog(context, controller),
         ),
       ),
       body: SafeArea(
@@ -527,7 +526,7 @@ class AddFieldPage extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 TextButton(
-                  onPressed: () => _showFinishDialog(controller),
+                  onPressed: () => showFinishDialog(controller),
                   child: const Text(
                     'Xong',
                     style: TextStyle(
@@ -614,86 +613,5 @@ class AddFieldPage extends StatelessWidget {
         borderRadius: 10,
       );
     }
-  }
-
-  void _showExitConfirmation(BuildContext context, AddFieldController controller) {
-    if (controller.createdFields.isEmpty) {
-      Get.until((route) => route.settings.name == AppPages.ownerHome || route.isFirst);
-      _refreshOwnerHome();
-      return;
-    }
-
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Thoát?'),
-        content: Text(
-          'Bạn đã thêm ${controller.createdFields.length} sân. Bạn có muốn thoát không?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () {
-              Get.back();
-              Get.until((route) => route.settings.name == AppPages.ownerHome || route.isFirst);
-              _refreshOwnerHome();
-            },
-            child: const Text('Thoát'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _refreshOwnerHome() {
-    if (Get.isRegistered<OwnerHomeController>()) {
-      Get.find<OwnerHomeController>().refreshAll();
-    }
-  }
-
-  void _showFinishDialog(AddFieldController controller) {
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Hoàn Thành'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Bạn đã tạo thành công:'),
-            const SizedBox(height: 12),
-            ...controller.createdFields.map((field) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.check, color: AppColors.primary, size: 16),
-                      const SizedBox(width: 8),
-                      Text(field.fieldName ?? 'Sân'),
-                    ],
-                  ),
-                )),
-          ],
-        ),
-        actions: [
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () {
-              Get.back();
-              Get.until((route) => route.settings.name == AppPages.ownerHome || route.isFirst);
-              _refreshOwnerHome();
-            },
-            child: const Text('Về Trang Quản Lý'),
-          ),
-        ],
-      ),
-    );
   }
 }

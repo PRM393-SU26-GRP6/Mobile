@@ -1,4 +1,5 @@
 import 'package:exe101/data/remote/api_service.dart';
+import 'package:exe101/domain/models/review_model.dart';
 import 'package:exe101/domain/models/time_slot_model.dart';
 import 'package:exe101/domain/models/venue_model.dart';
 import 'package:get/get.dart';
@@ -20,6 +21,18 @@ class VenueDetailController extends GetxController {
 
   final error = ''.obs;
 
+  // --- Reviews state ---
+  static const int reviewsPageSize = 5;
+  final reviews = <ReviewModel>[].obs;
+  final isLoadingReviews = false.obs;
+  final isLoadingMoreReviews = false.obs;
+  final reviewPage = 1.obs;
+  final reviewTotalCount = 0.obs;
+  final reviewAverageRating = 0.0.obs;
+  final hasMoreReviews = false.obs;
+  final reviewsError = ''.obs;
+  bool _reviewsLoaded = false;
+
   VenueDetailController({required this.apiService});
 
   @override
@@ -29,6 +42,7 @@ class VenueDetailController extends GetxController {
     if (arg is VenueModel) {
       venue.value = arg;
       loadFields(arg.id);
+      loadReviews(arg.id);
     } else if (arg is String && arg.isNotEmpty) {
       loadVenue(arg);
     }
@@ -42,6 +56,7 @@ class VenueDetailController extends GetxController {
       venue.value = result;
       if (result != null) {
         loadFields(result.id);
+        loadReviews(result.id);
       }
     } catch (e) {
       error.value = 'Không thể tải thông tin sân: $e';
@@ -137,4 +152,55 @@ class VenueDetailController extends GetxController {
     final selectedSlots = timeSlots.where((s) => selectedSlotIds.contains(s.slotId));
     return selectedSlots.fold(0.0, (sum, s) => sum + s.price);
   }
+
+  // --- Reviews logic ---
+
+  Future<void> loadReviews(String venueId) async {
+    if (isLoadingReviews.value) return;
+    try {
+      isLoadingReviews.value = true;
+      reviewsError.value = '';
+      reviewPage.value = 1;
+      final response = await (apiService as ApiServiceImpl).getReviewsByVenue(
+        venueId: venueId,
+        page: reviewPage.value,
+        pageSize: reviewsPageSize,
+      );
+      reviews.assignAll(response.reviews);
+      reviewTotalCount.value = response.totalCount;
+      reviewAverageRating.value = response.averageRating;
+      hasMoreReviews.value = response.hasMore;
+      _reviewsLoaded = true;
+    } catch (e) {
+      reviewsError.value = 'Không thể tải đánh giá: $e';
+    } finally {
+      isLoadingReviews.value = false;
+    }
+  }
+
+  Future<void> loadMoreReviews() async {
+    final currentVenue = venue.value;
+    if (currentVenue == null) return;
+    if (isLoadingMoreReviews.value || !hasMoreReviews.value) return;
+    try {
+      isLoadingMoreReviews.value = true;
+      final nextPage = reviewPage.value + 1;
+      final response = await (apiService as ApiServiceImpl).getReviewsByVenue(
+        venueId: currentVenue.id,
+        page: nextPage,
+        pageSize: reviewsPageSize,
+      );
+      reviews.addAll(response.reviews);
+      reviewPage.value = nextPage;
+      reviewTotalCount.value = response.totalCount;
+      reviewAverageRating.value = response.averageRating;
+      hasMoreReviews.value = response.hasMore;
+    } catch (e) {
+      reviewsError.value = 'Không thể tải thêm đánh giá: $e';
+    } finally {
+      isLoadingMoreReviews.value = false;
+    }
+  }
+
+  bool get hasReviewsLoaded => _reviewsLoaded;
 }

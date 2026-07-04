@@ -1,6 +1,8 @@
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/domain/models/field_model.dart';
 import 'package:exe101/presentation/features/owner/controller/field_detail_controller.dart';
+import 'package:exe101/presentation/features/owner/view/field/widgets/edit_price_dialog.dart';
+import 'package:exe101/presentation/features/owner/view/shared/owner_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -19,10 +21,7 @@ class FieldDetailPage extends StatelessWidget {
         elevation: 0,
         title: const Text(
           'Chi Tiết Sân',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
@@ -41,7 +40,8 @@ class FieldDetailPage extends StatelessWidget {
               : IconButton(
                   icon: const Icon(Icons.refresh),
                   onPressed: () {
-                    if (Get.arguments != null && Get.arguments['fieldId'] != null) {
+                    if (Get.arguments != null &&
+                        Get.arguments['fieldId'] != null) {
                       controller.loadFieldDetail(Get.arguments['fieldId']);
                     }
                   },
@@ -54,53 +54,13 @@ class FieldDetailPage extends StatelessWidget {
             child: CircularProgressIndicator(color: AppColors.primary),
           );
         }
-
         if (controller.errorMessage.value.isNotEmpty) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: Colors.red,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    controller.errorMessage.value,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (Get.arguments != null && Get.arguments['fieldId'] != null) {
-                        controller.loadFieldDetail(Get.arguments['fieldId']);
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                    ),
-                    child: const Text('Thử lại'),
-                  ),
-                ],
-              ),
-            ),
-          );
+          return _buildErrorState(controller);
         }
-
         final field = controller.field.value;
         if (field == null) {
-          return const Center(
-            child: Text('Không có thông tin sân'),
-          );
+          return const Center(child: Text('Không có thông tin sân'));
         }
-
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -128,8 +88,48 @@ class FieldDetailPage extends StatelessWidget {
     );
   }
 
+  Widget _buildErrorState(FieldDetailController controller) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Colors.red,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              controller.errorMessage.value,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 16,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                if (Get.arguments != null &&
+                    Get.arguments['fieldId'] != null) {
+                  controller.loadFieldDetail(Get.arguments['fieldId']);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+              ),
+              child: const Text('Thử lại'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildFieldHeader(FieldModel field) {
-    final fieldTypeLabel = FieldModel.fieldTypeLabels[field.fieldType] ?? field.fieldType ?? 'Sân';
+    final label = fieldTypeLabel(field.fieldType);
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -151,7 +151,10 @@ class FieldDetailPage extends StatelessWidget {
             height: 70,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [AppColors.buttonGradientStart, AppColors.buttonGradientEnd],
+                colors: [
+                  AppColors.buttonGradientStart,
+                  AppColors.buttonGradientEnd
+                ],
               ),
               borderRadius: BorderRadius.circular(14),
             ),
@@ -176,13 +179,14 @@ class FieldDetailPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    fieldTypeLabel,
+                    label,
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -246,7 +250,8 @@ class FieldDetailPage extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: isActive ? Colors.green.shade700 : Colors.red.shade700,
+                    color:
+                        isActive ? Colors.green.shade700 : Colors.red.shade700,
                   ),
                 ),
               ],
@@ -257,7 +262,7 @@ class FieldDetailPage extends StatelessWidget {
                 onChanged: controller.isToggling.value
                     ? null
                     : (value) => controller.toggleFieldStatus(),
-                activeThumbColor: AppColors.primary,
+                activeColor: AppColors.primary,
               )),
           Obx(() {
             if (controller.isToggling.value) {
@@ -308,7 +313,8 @@ class FieldDetailPage extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.attach_money, color: AppColors.primary, size: 20),
+              const Icon(Icons.attach_money,
+                  color: AppColors.primary, size: 20),
               const SizedBox(width: 8),
               const Expanded(
                 child: Text(
@@ -328,11 +334,14 @@ class FieldDetailPage extends StatelessWidget {
             _buildPriceRow('Giá theo giờ', field.pricePerHour!)
           else ...[
             if (field.priceMorning != null && field.priceMorning! > 0)
-              _buildPriceRow('Giá buổi sáng (06:00-12:00)', field.priceMorning!),
+              _buildPriceRow(
+                  'Giá buổi sáng (06:00-12:00)', field.priceMorning!),
             if (field.priceAfternoon != null && field.priceAfternoon! > 0)
-              _buildPriceRow('Giá buổi chiều (12:00-18:00)', field.priceAfternoon!),
+              _buildPriceRow(
+                  'Giá buổi chiều (12:00-18:00)', field.priceAfternoon!),
             if (field.priceEvening != null && field.priceEvening! > 0)
-              _buildPriceRow('Giá buổi tối (18:00-22:00)', field.priceEvening!),
+              _buildPriceRow(
+                  'Giá buổi tối (18:00-22:00)', field.priceEvening!),
           ],
           if (!hasPrice || price <= 0)
             Container(
@@ -343,7 +352,8 @@ class FieldDetailPage extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.warning_amber, color: Colors.orange.shade700, size: 20),
+                  Icon(Icons.warning_amber,
+                      color: Colors.orange.shade700, size: 20),
                   const SizedBox(width: 8),
                   const Expanded(
                     child: Text(
@@ -364,7 +374,7 @@ class FieldDetailPage extends StatelessWidget {
 
   Widget _buildEditPriceButton(FieldModel field) {
     return GestureDetector(
-      onTap: () => _showEditPriceDialog(field),
+      onTap: () => showEditPriceDialog(field),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
@@ -386,98 +396,6 @@ class FieldDetailPage extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showEditPriceDialog(FieldModel field) {
-    final morningController = TextEditingController(
-      text: field.priceMorning?.toStringAsFixed(0) ?? '',
-    );
-    final afternoonController = TextEditingController(
-      text: field.priceAfternoon?.toStringAsFixed(0) ?? '',
-    );
-    final eveningController = TextEditingController(
-      text: field.priceEvening?.toStringAsFixed(0) ?? '',
-    );
-
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Cập nhật giá sân'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: morningController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Giá buổi sáng (06:00-12:00)',
-                  prefixText: '',
-                  suffixText: 'đ',
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: afternoonController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Giá buổi chiều (12:00-18:00)',
-                  prefixText: '',
-                  suffixText: 'đ',
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: eveningController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Giá buổi tối (18:00-22:00)',
-                  prefixText: '',
-                  suffixText: 'đ',
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final controller = Get.find<FieldDetailController>();
-              final priceMorning = double.tryParse(morningController.text);
-              final priceAfternoon = double.tryParse(afternoonController.text);
-              final priceEvening = double.tryParse(eveningController.text);
-
-              Get.back();
-
-              try {
-                await controller.apiService.updateField(
-                  fieldId: field.id!,
-                  priceMorning: priceMorning,
-                  priceAfternoon: priceAfternoon,
-                  priceEvening: priceEvening,
-                );
-
-                Get.snackbar('Thành công', 'Đã cập nhật giá sân',
-                    snackPosition: SnackPosition.TOP);
-
-                // Reload field detail
-                controller.loadFieldDetail(field.id!);
-              } catch (e) {
-                Get.snackbar('Lỗi', 'Không thể cập nhật giá sân',
-                    snackPosition: SnackPosition.TOP);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-            ),
-            child: const Text('Lưu'),
-          ),
-        ],
       ),
     );
   }
@@ -589,17 +507,15 @@ class FieldDetailPage extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: field.amenities!.map((amenity) {
-              final amenityLabel = FieldModel.availableAmenities.contains(amenity)
-                  ? amenity
-                  : amenity;
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: AppColors.secondary,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  amenityLabel,
+                  amenity,
                   style: const TextStyle(
                     fontSize: 12,
                     color: AppColors.textPrimary,
@@ -622,7 +538,10 @@ class FieldDetailPage extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [AppColors.buttonGradientStart, AppColors.buttonGradientEnd],
+            colors: [
+              AppColors.buttonGradientStart,
+              AppColors.buttonGradientEnd
+            ],
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
           ),

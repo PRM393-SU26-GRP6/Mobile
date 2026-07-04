@@ -1,5 +1,6 @@
 import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/domain/models/booking_model.dart';
+import 'package:exe101/domain/models/review_model.dart';
 import 'package:get/get.dart';
 
 class BookingController extends GetxController {
@@ -10,6 +11,12 @@ class BookingController extends GetxController {
   final isLoadingMore = false.obs;
   final hasMore = true.obs;
   final error = ''.obs;
+
+  // Reviews của user hiện tại — map theo bookingId (mỗi booking tối đa 1 review).
+  // Dùng RxMap để reactive với Obx.
+  final myReviews = RxMap<String, ReviewModel>();
+  final isLoadingReviews = false.obs;
+  final reviewsError = ''.obs;
 
   int _currentPage = 1;
   static const int _pageSize = 20;
@@ -65,6 +72,81 @@ class BookingController extends GetxController {
   }
 
   Future<void> refreshBookings() => loadBookings(refresh: true);
+
+  /// Load danh sách review của user hiện tại để map với bookingId
+  Future<void> loadMyReviews() async {
+    if (isLoadingReviews.value) return;
+    try {
+      isLoadingReviews.value = true;
+      reviewsError.value = '';
+      final list = await (apiService as ApiServiceImpl).getMyReviews();
+      myReviews.clear();
+      for (final r in list) {
+        final bid = r.bookingId;
+        if (bid != null && bid.isNotEmpty) {
+          myReviews[bid] = r;
+        }
+      }
+    } catch (e) {
+      reviewsError.value = 'Không thể tải đánh giá của bạn';
+    } finally {
+      isLoadingReviews.value = false;
+    }
+  }
+
+  ReviewModel? reviewForBooking(String bookingId) => myReviews[bookingId];
+
+  bool hasReviewFor(String bookingId) => myReviews.containsKey(bookingId);
+
+  /// Cập nhật cache local sau khi user tạo/sửa review (không cần gọi lại API list)
+  void upsertReview(ReviewModel review) {
+    final bid = review.bookingId;
+    if (bid != null && bid.isNotEmpty) {
+      myReviews[bid] = review;
+    }
+  }
+
+  void removeReviewForBooking(String bookingId) {
+    myReviews.remove(bookingId);
+  }
+
+  Future<void> deleteReview(String reviewId) async {
+    await (apiService as ApiServiceImpl).deleteReview(reviewId);
+  }
+
+  Future<ReviewModel> createReview({
+    required String venueId,
+    required String bookingId,
+    required int rating,
+    required String comment,
+  }) async {
+    final result = await (apiService as ApiServiceImpl).createReview(
+      venueId: venueId,
+      bookingId: bookingId,
+      rating: rating,
+      comment: comment,
+    );
+    if (result.bookingId != null && result.bookingId!.isNotEmpty) {
+      myReviews[result.bookingId!] = result;
+    }
+    return result;
+  }
+
+  Future<ReviewModel> updateReview({
+    required String reviewId,
+    required int rating,
+    required String comment,
+  }) async {
+    final result = await (apiService as ApiServiceImpl).updateReview(
+      reviewId: reviewId,
+      rating: rating,
+      comment: comment,
+    );
+    if (result.bookingId != null && result.bookingId!.isNotEmpty) {
+      myReviews[result.bookingId!] = result;
+    }
+    return result;
+  }
 
   Future<BookingDto?> createBooking({
     required List<String> slotIds,

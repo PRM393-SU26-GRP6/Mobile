@@ -2,6 +2,9 @@ import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/domain/models/payment_model.dart';
+import 'package:exe101/presentation/features/customer/view/orders/widgets/cash_payment_confirm_dialog.dart';
+import 'package:exe101/presentation/features/customer/view/orders/widgets/payment_method_card.dart';
+import 'package:exe101/presentation/features/customer/view/orders/widgets/payment_method_option.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -9,7 +12,8 @@ class SelectPaymentMethodPage extends StatefulWidget {
   const SelectPaymentMethodPage({super.key});
 
   @override
-  State<SelectPaymentMethodPage> createState() => _SelectPaymentMethodPageState();
+  State<SelectPaymentMethodPage> createState() =>
+      _SelectPaymentMethodPageState();
 }
 
 class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
@@ -20,33 +24,32 @@ class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
   final String paymentType = Get.arguments['paymentType'] ?? 'deposit';
 
   bool get isDeposit => paymentType == 'deposit';
-  bool get isFinal => paymentType == 'final';
 
   PaymentMethod _selectedMethod = PaymentMethod.sePay;
 
-  final List<_PaymentMethodOption> _methods = [
-    _PaymentMethodOption(
+  final List<PaymentMethodOption> _methods = [
+    PaymentMethodOption(
       method: PaymentMethod.sePay,
       name: 'SePay QR',
       description: 'Quét mã QR để thanh toán',
       icon: Icons.qr_code_2,
       color: const Color(0xFF6C63FF),
     ),
-    _PaymentMethodOption(
+    PaymentMethodOption(
       method: PaymentMethod.moMo,
       name: 'MoMo',
       description: 'Thanh toán qua ví MoMo',
       icon: Icons.account_balance_wallet,
       color: const Color(0xFFA50064),
     ),
-    _PaymentMethodOption(
+    PaymentMethodOption(
       method: PaymentMethod.vnPay,
       name: 'VNPay',
       description: 'Thanh toán qua VNPay',
       icon: Icons.payment,
       color: const Color(0xFF0066B3),
     ),
-    _PaymentMethodOption(
+    PaymentMethodOption(
       method: PaymentMethod.cash,
       name: 'Tiền mặt',
       description: 'Thanh toán trực tiếp tại sân',
@@ -93,13 +96,19 @@ class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
                   const Text(
                     'Phương thức thanh toán',
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 12),
-                  ..._methods.map((option) => _buildMethodCard(option)),
+                  ..._methods.map(
+                    (option) => PaymentMethodCard(
+                      option: option,
+                      isSelected: _selectedMethod == option.method,
+                      onTap: () => setState(() => _selectedMethod = option.method),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -205,88 +214,6 @@ class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
     );
   }
 
-  Widget _buildMethodCard(_PaymentMethodOption option) {
-    final isSelected = _selectedMethod == option.method;
-
-    return GestureDetector(
-      onTap: () => setState(() => _selectedMethod = option.method),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? option.color.withValues(alpha: 0.1)
-              : AppColors.secondary,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? option.color : AppColors.inputBorder,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: option.color.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                option.icon,
-                color: option.color,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    option.name,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: isSelected ? option.color : AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    option.description,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isSelected ? option.color : Colors.transparent,
-                border: Border.all(
-                  color: isSelected ? option.color : AppColors.textSecondary,
-                  width: 2,
-                ),
-              ),
-              child: isSelected
-                  ? const Icon(
-                      Icons.check,
-                      size: 16,
-                      color: Colors.white,
-                    )
-                  : null,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildBottomBar() {
     return Container(
       padding: EdgeInsets.fromLTRB(
@@ -340,38 +267,12 @@ class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
     );
   }
 
-  void _onContinue() {
+  void _onContinue() async {
     if (_selectedMethod == PaymentMethod.cash) {
-      Get.dialog(
-        AlertDialog(
-          title: const Row(
-            children: [
-              Icon(Icons.info_outline, color: AppColors.primary),
-              SizedBox(width: 8),
-              Text('Thanh toán tiền mặt'),
-            ],
-          ),
-          content: const Text(
-            'Bạn sẽ thanh toán tiền mặt trực tiếp tại sân. Vui lòng đến đúng giờ và mang theo số tiền đúng với số tiền cọc.\n\nBạn có xác nhận đặt sân không?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Get.back(),
-              child: const Text('Hủy'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                Get.back();
-                await _processCashPayment();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-              ),
-              child: const Text('Xác nhận'),
-            ),
-          ],
-        ),
-      );
+      final confirmed = await showCashPaymentConfirmDialog();
+      if (confirmed) {
+        await _processCashPayment();
+      }
     } else {
       Get.toNamed(
         AppPages.paymentQR,
@@ -431,20 +332,4 @@ class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
       );
     }
   }
-}
-
-class _PaymentMethodOption {
-  final PaymentMethod method;
-  final String name;
-  final String description;
-  final IconData icon;
-  final Color color;
-
-  _PaymentMethodOption({
-    required this.method,
-    required this.name,
-    required this.description,
-    required this.icon,
-    required this.color,
-  });
 }

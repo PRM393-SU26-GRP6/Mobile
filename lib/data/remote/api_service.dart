@@ -6,6 +6,7 @@ import 'package:exe101/domain/models/field_model.dart';
 import 'package:exe101/domain/models/login_response_model.dart';
 import 'package:exe101/domain/models/notification_model.dart';
 import 'package:exe101/domain/models/payment_model.dart';
+import 'package:exe101/domain/models/review_model.dart';
 import 'package:exe101/domain/models/time_slot_model.dart';
 import 'package:exe101/domain/models/field_schedule_model.dart';
 import 'package:exe101/domain/models/venue_model.dart';
@@ -912,11 +913,16 @@ class ApiServiceImpl extends ApiService {
       headers: headers,
     );
 
+    print('[DEBUG] getSePayQRInfo response: ${response.data}');
+
     if (response.data == null) return null;
 
     final data = response.data!;
     final payload = data['data'] ?? data;
     if (payload is! Map<String, dynamic>) return null;
+
+    print('[DEBUG] getSePayQRInfo payload: $payload');
+    print('[DEBUG] qrUrl value: ${payload['qrUrl']}');
 
     return SePayQRInfoModel.fromJson(payload);
   }
@@ -951,6 +957,41 @@ class ApiServiceImpl extends ApiService {
     if (payload is! Map<String, dynamic>) return null;
 
     return SePayCheckoutFormModel.fromJson(payload);
+  }
+
+  Future<Map<String, dynamic>?> handleSePayWebhook({
+    required String transferType,
+    required String transferAmount,
+    required String transferDate,
+    required String bankAccount,
+    String? reference,
+  }) async {
+    final response = await post<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/payments/webhook/sepay',
+      data: {
+        'transferType': transferType,
+        'transferAmount': transferAmount,
+        'transferDate': transferDate,
+        'bankAccount': bankAccount,
+        if (reference != null) 'reference': reference,
+      },
+    );
+
+    if (response.data == null) return null;
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>?> handlePaymentCallback({
+    required String gateway,
+    required Map<String, dynamic> callbackData,
+  }) async {
+    final response = await post<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/payments/callback/$gateway',
+      data: callbackData,
+    );
+
+    if (response.data == null) return null;
+    return response.data;
   }
 
   // ==================== SLOT MANAGEMENT ====================
@@ -1146,6 +1187,117 @@ class ApiServiceImpl extends ApiService {
     } catch (_) {
       return false;
     }
+  }
+
+  // --- Review APIs ---
+
+  Future<ReviewListResponse> getReviewsByVenue({
+    required String venueId,
+    int page = 1,
+    int pageSize = 5,
+  }) async {
+    final headers = await _authHeaders();
+    final response = await get<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/reviews/venue/$venueId',
+      params: {
+        'id': venueId,
+        'page': page,
+        'pageSize': pageSize,
+      },
+      headers: headers,
+    );
+
+    if (response.data == null) {
+      return ReviewListResponse(
+        reviews: const [],
+        totalCount: 0,
+        averageRating: 0,
+        page: page,
+        pageSize: pageSize,
+      );
+    }
+
+    final payload = response.data!['data'] ?? response.data;
+    if (payload is! Map<String, dynamic>) {
+      return ReviewListResponse(
+        reviews: const [],
+        totalCount: 0,
+        averageRating: 0,
+        page: page,
+        pageSize: pageSize,
+      );
+    }
+
+    return ReviewListResponse.fromJson(payload);
+  }
+
+  Future<ReviewModel> createReview({
+    required String venueId,
+    required String bookingId,
+    required int rating,
+    required String comment,
+  }) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+
+    final response = await post<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/reviews',
+      data: {
+        'venueId': venueId,
+        'bookingId': bookingId,
+        'rating': rating,
+        'comment': comment,
+      },
+      headers: headers,
+    );
+
+    final data = response.data?['data'] ?? response.data ?? {};
+    return ReviewModel.fromJson(data is Map<String, dynamic> ? data : {});
+  }
+
+  Future<List<ReviewModel>> getMyReviews() async {
+    final headers = await _authHeaders();
+    final response = await get<dynamic>(
+      '${Env.baseUrl}/api/v1/reviews/my-reviews',
+      headers: headers,
+    );
+
+    if (response.data == null) return [];
+
+    final list = _extractList(response.data);
+
+    return list
+        .map((json) => ReviewModel.fromJson(Map<String, dynamic>.from(json as Map)))
+        .toList();
+  }
+
+  Future<ReviewModel> updateReview({
+    required String reviewId,
+    required int rating,
+    required String comment,
+  }) async {
+    final headers = await _authHeaders();
+    headers['Content-Type'] = 'application/json';
+
+    final response = await put<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/reviews/$reviewId',
+      data: {
+        'rating': rating,
+        'comment': comment,
+      },
+      headers: headers,
+    );
+
+    final data = response.data?['data'] ?? response.data ?? {};
+    return ReviewModel.fromJson(data is Map<String, dynamic> ? data : {});
+  }
+
+  Future<void> deleteReview(String reviewId) async {
+    final headers = await _authHeaders();
+    await delete<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/reviews/$reviewId',
+      headers: headers,
+    );
   }
 
   // --- Notification APIs ---

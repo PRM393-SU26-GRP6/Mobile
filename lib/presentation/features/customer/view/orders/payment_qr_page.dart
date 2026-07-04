@@ -5,8 +5,13 @@ import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/domain/models/payment_model.dart';
 import 'package:exe101/presentation/features/customer/controller/booking_controller.dart';
+import 'package:exe101/presentation/features/customer/shared/customer_constants.dart';
+import 'package:exe101/presentation/features/customer/view/orders/widgets/payment_info_card.dart';
+import 'package:exe101/presentation/features/customer/view/orders/widgets/payment_method_banner.dart';
+import 'package:exe101/presentation/features/customer/view/orders/widgets/payment_redirect_card.dart';
+import 'package:exe101/presentation/features/customer/view/orders/widgets/payment_success_dialog.dart';
+import 'package:exe101/presentation/features/customer/view/orders/widgets/sepay_qr_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 class PaymentQRPage extends StatefulWidget {
@@ -17,15 +22,23 @@ class PaymentQRPage extends StatefulWidget {
 }
 
 class _PaymentQRPageState extends State<PaymentQRPage> {
-  final String bookingId = Get.arguments['bookingId'];
+  final String bookingId = Get.arguments['bookingId'] ?? '';
   final String venueName = Get.arguments['venueName'] ?? 'Sân bóng';
-  final double amount = Get.arguments['amount'] ?? 0;
+  final double totalPrice = Get.arguments['totalPrice'] ?? 0.0;
+  final double paymentAmount = Get.arguments['paymentAmount'] ?? 0.0;
+  final String paymentType = Get.arguments['paymentType'] ?? 'deposit';
+  final PaymentMethod paymentMethod =
+      Get.arguments['paymentMethod'] ?? PaymentMethod.sePay;
+
+  bool get isDeposit => paymentType == 'deposit';
+
+  bool get isSePay => paymentMethod == PaymentMethod.sePay;
 
   bool _isLoading = true;
   bool _isError = false;
   String _errorMessage = '';
   PaymentModel? _payment;
-  SePayQRInfoModel? _paymentInfo;
+  SePayQRInfoModel? _sePayQRInfo;
   Timer? _pollingTimer;
 
   @override
@@ -34,12 +47,25 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
     _createPayment();
   }
 
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
+  }
+
   Future<void> _createPayment() async {
     try {
       final apiService = Get.find<ApiServiceImpl>();
 
-      // Create deposit payment
-      final payment = await apiService.createDepositPayment(bookingId);
+      final payment = isDeposit
+          ? await apiService.createDepositPayment(
+              bookingId,
+              paymentMethod: paymentMethod.value,
+            )
+          : await apiService.createFinalPayment(
+              bookingId,
+              paymentMethod: paymentMethod.value,
+            );
 
       if (payment.id.isEmpty) {
         setState(() {
@@ -59,26 +85,31 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
         return;
       }
 
-      // Get QR info
-      final qrInfo = await apiService.getSePayQRInfo(payment.id);
+      _payment = payment;
+
+      if (isSePay) {
+        final qrInfo = await apiService.getSePayQRInfo(payment.id);
+        setState(() {
+          _sePayQRInfo = qrInfo;
+        });
+      }
 
       setState(() {
-        _payment = payment;
-        _paymentInfo = qrInfo;
         _isLoading = false;
       });
 
-      // Start polling for payment status
-      _startPaymentStatusPolling();
+      if (isSePay) {
+        _startPaymentStatusPolling();
+      }
     } on DioException catch (e) {
       String errorMsg = 'Đã xảy ra lỗi';
 
       if (e.response?.data != null && e.response?.data is Map) {
         final data = e.response?.data as Map;
-        errorMsg = data['message']?.toString() ?? 
-                   data['title']?.toString() ?? 
-                   data['errors']?.toString() ??
-                   'Lỗi từ server (${e.response?.statusCode})';
+        errorMsg = data['message']?.toString() ??
+            data['title']?.toString() ??
+            data['errors']?.toString() ??
+            'Lỗi từ server (${e.response?.statusCode})';
       } else if (e.message != null) {
         errorMsg = e.message!;
       }
@@ -111,46 +142,10 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
 
         if (updatedPayment != null && updatedPayment.isSuccess && mounted) {
           timer.cancel();
-          _showPaymentSuccessDialog();
+          await showPaymentSuccessDialog();
         }
-      } catch (_) {
-        // Silent fail for polling
-      }
+      } catch (_) {}
     });
-  }
-
-  void _showPaymentSuccessDialog() {
-    Get.dialog(
-      AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.green, size: 28),
-            SizedBox(width: 8),
-            Text('Thanh toán thành công'),
-          ],
-        ),
-        content: const Text('Thanh toán của bạn đã được xác nhận. Cảm ơn bạn!'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-              Get.back(result: true);
-              if (Get.isRegistered<BookingController>()) {
-                Get.find<BookingController>().refreshBookings();
-              }
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-      barrierDismissible: false,
-    );
-  }
-
-  @override
-  void dispose() {
-    _pollingTimer?.cancel();
-    super.dispose();
   }
 
   @override
@@ -161,9 +156,11 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          'Thanh toán cọc',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          isDeposit
+              ? 'Thanh toán cọc ${getPaymentMethodText(paymentMethod)}'
+              : 'Thanh toán ${getPaymentMethodText(paymentMethod)}',
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -208,13 +205,29 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
                   color: AppColors.textSecondary,
                 ),
               ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () => Get.back(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                ),
-                child: const Text('Quay lại'),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  OutlinedButton(
+                    onPressed: () => Get.back(),
+                    child: const Text('Quay lại'),
+                  ),
+                  const SizedBox(width: 12),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _isLoading = true;
+                        _isError = false;
+                      });
+                      _createPayment();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                    ),
+                    child: const Text('Thử lại'),
+                  ),
+                ],
               ),
             ],
           ),
@@ -226,290 +239,31 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          _buildInfoCard(),
+          PaymentMethodBanner(
+            paymentMethod: paymentMethod,
+            isDeposit: isDeposit,
+          ),
           const SizedBox(height: 16),
-          _buildQRCard(),
+          PaymentInfoCard(
+            venueName: venueName,
+            paymentAmount: paymentAmount,
+            isDeposit: isDeposit,
+            payment: _payment,
+          ),
           const SizedBox(height: 16),
-          _buildInstructions(),
+          if (isSePay) SePayQrCard(qrInfo: _sePayQRInfo),
+          if (!isSePay)
+            PaymentRedirectCard(
+              payment: _payment,
+              paymentMethodText: getPaymentMethodText(paymentMethod),
+              description: getPaymentMethodDescription(paymentMethod),
+            ),
+          const SizedBox(height: 16),
+          if (isSePay) _buildInstructions(),
           const SizedBox(height: 24),
           _buildConfirmButton(),
         ],
       ),
-    );
-  }
-
-  Widget _buildInfoCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Sân',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              Text(
-                venueName,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Số tiền cọc',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              Text(
-                '${amount.toStringAsFixed(0)}đ',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
-                ),
-              ),
-            ],
-          ),
-          if (_payment != null) ...[
-            const Divider(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Mã thanh toán',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    Clipboard.setData(ClipboardData(text: _payment!.id));
-                    Get.snackbar(
-                      'Đã sao chép',
-                      'Mã thanh toán đã được sao chép',
-                      snackPosition: SnackPosition.TOP,
-                      duration: const Duration(seconds: 2),
-                    );
-                  },
-                  child: Row(
-                    children: [
-                      Text(
-                        _payment!.id.substring(0, 8).toUpperCase(),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.copy, size: 14, color: AppColors.primary),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Phương thức',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                Text(
-                  _getPaymentMethodText(_payment!.paymentMethod),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  String _getPaymentMethodText(PaymentMethod method) {
-    switch (method) {
-      case PaymentMethod.cash:
-        return 'Tiền mặt';
-      case PaymentMethod.moMo:
-        return 'MoMo';
-      case PaymentMethod.vnPay:
-        return 'VNPay';
-      case PaymentMethod.sePay:
-        return 'SePay QR';
-    }
-  }
-
-  Widget _buildQRCard() {
-    if (_paymentInfo == null) {
-      return Container(
-        padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Center(
-          child: Text('Không có thông tin QR'),
-        ),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          const Text(
-            'Quét mã QR để thanh toán',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 16),
-          if (_paymentInfo!.qrUrl.isNotEmpty)
-            Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.inputBorder),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  _paymentInfo!.qrUrl,
-                  width: 200,
-                  height: 200,
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Center(
-                    child: Icon(Icons.qr_code, size: 100, color: AppColors.primary),
-                  ),
-                ),
-              ),
-            )
-          else
-            Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Center(
-                child: Icon(Icons.qr_code, size: 100, color: AppColors.primary),
-              ),
-            ),
-          const SizedBox(height: 16),
-          Text(
-            '${_paymentInfo!.amount.toStringAsFixed(0)}đ',
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primary,
-            ),
-          ),
-          if (_paymentInfo!.bankInfo != null) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.secondary,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                children: [
-                  _buildBankRow('Ngân hàng', _paymentInfo!.bankInfo!.bankId),
-                  const SizedBox(height: 4),
-                  _buildBankRow('Số tài khoản', _paymentInfo!.bankInfo!.accountNo),
-                  const SizedBox(height: 4),
-                  _buildBankRow('Tên TK', _paymentInfo!.bankInfo!.accountName),
-                ],
-              ),
-            ),
-          ],
-          if (_paymentInfo!.description.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Text(
-              'Nội dung: ${_paymentInfo!.description}',
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBankRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecondary,
-          ),
-        ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-        ),
-      ],
     );
   }
 

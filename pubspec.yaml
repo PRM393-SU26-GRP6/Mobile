@@ -34,6 +34,11 @@ dependencies:
   # UI 
   fluttertoast: ^8.2.12
 
+  # utils
+  url_launcher: ^6.2.1
+  qr_flutter: ^4.1.0
+  webview_flutter: ^4.4.2
+
   path: ^1.8.3
   intl: ^0.18.1
   flutter_local_notifications: ^19.4.2

@@ -9,14 +9,14 @@ import 'package:exe101/presentation/features/customer/view/customer_home_page.da
 import 'package:exe101/presentation/features/customer/view/home/venue_detail_page.dart';
 import 'package:exe101/presentation/features/customer/view/notifications/notifications_page.dart';
 import 'package:exe101/presentation/features/customer/view/orders/payment_qr_page.dart';
+import 'package:exe101/presentation/features/customer/view/orders/select_payment_method_page.dart';
 import 'package:exe101/presentation/features/customer/view/profile/user_profile_page.dart';
 import 'package:exe101/presentation/features/owner/binding/owner_binding.dart';
-import 'package:exe101/presentation/features/owner/view/add_field_page.dart';
-import 'package:exe101/presentation/features/owner/view/booking_management_page.dart';
-import 'package:exe101/presentation/features/owner/view/create_field_page.dart';
-import 'package:exe101/presentation/features/owner/view/field_detail_page.dart';
-import 'package:exe101/presentation/features/owner/view/owner_home_page.dart';
-import 'package:exe101/presentation/features/owner/view/slot_management_page.dart';
+import 'package:exe101/presentation/features/owner/view/booking/booking_management_page.dart';
+import 'package:exe101/presentation/features/owner/view/field/add_field_page.dart';
+import 'package:exe101/presentation/features/owner/view/field/field_detail_page.dart';
+import 'package:exe101/presentation/features/owner/view/home/owner_home_page.dart';
+import 'package:exe101/presentation/features/owner/view/slot_management/slot_management_page.dart';
 import 'package:exe101/presentation/features/owner/view/venue_creation_page.dart';
 import 'package:exe101/presentation/features/splash/binding/splash_binding.dart';
 import 'package:exe101/presentation/features/splash/view/splash_view.dart';
@@ -32,13 +32,13 @@ class AppPages {
   static const String customerHome = '/customer-home';
   static const String ownerHome = '/owner-home';
   static const String venueDetail = '/venue-detail';
-  static const String createField = '/owner/create-field';
   static const String venueCreation = '/owner/venue-creation';
   static const String addField = '/owner/add-field';
   static const String bookingManagement = '/owner/bookings';
   static const String fieldDetail = '/owner/field-detail';
   static const String slotManagement = '/owner/slot-management';
   static const String paymentQR = '/payment-qr';
+  static const String selectPaymentMethod = '/select-payment-method';
   static const String userProfile = '/user-profile';
   static const String notifications = '/notifications';
 
@@ -84,11 +84,6 @@ class AppPages {
       binding: OwnerBinding(),
     ),
     GetPage(
-      name: createField,
-      page: () => const CreateFieldPage(),
-      binding: OwnerBinding(),
-    ),
-    GetPage(
       name: venueCreation,
       page: () => const VenueCreationPage(),
       binding: OwnerBinding(),
@@ -116,6 +111,10 @@ class AppPages {
     GetPage(
       name: paymentQR,
       page: () => const PaymentQRPage(),
+    ),
+    GetPage(
+      name: selectPaymentMethod,
+      page: () => const SelectPaymentMethodPage(),
     ),
     GetPage(
       name: userProfile,

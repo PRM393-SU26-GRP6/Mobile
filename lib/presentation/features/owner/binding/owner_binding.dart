@@ -1,7 +1,6 @@
 import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/presentation/features/owner/controller/add_field_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/booking_management_controller.dart';
-import 'package:exe101/presentation/features/owner/controller/create_field_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/field_detail_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/owner_home_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/slot_management_controller.dart';
@@ -19,9 +18,6 @@ class OwnerBinding extends Bindings {
     );
     Get.lazyPut<AddFieldController>(
       () => AddFieldController(apiService: Get.find<ApiServiceImpl>()),
-    );
-    Get.lazyPut<CreateFieldController>(
-      () => CreateFieldController(apiService: Get.find<ApiServiceImpl>()),
     );
     Get.lazyPut<BookingManagementController>(
       () => BookingManagementController(apiService: Get.find<ApiServiceImpl>()),

@@ -144,7 +144,7 @@ class SePayQRInfoModel {
       amount: (json["amount"] as num?)?.toDouble() ?? 0.0,
       description: json["description"] ?? '',
       status: json["status"] ?? '',
-      qrUrl: json["qrUrl"] ?? '',
+      qrUrl: json["vietQrUrl"] ?? json["qrUrl"] ?? '',
       bankInfo: json["bankInfo"] != null
           ? BankInfoModel.fromJson(json["bankInfo"])
           : null,

@@ -1,0 +1,26 @@
+﻿
+File                                                                           Lines
+----                                                                           -----
+lib\presentation\features\customer\view\home\venue_detail_page.dart             1318
+lib\presentation\features\customer\view\orders\payment_qr_page.dart              929
+lib\presentation\features\customer\view\orders\orders_page.dart                  696
+lib\presentation\features\customer\view\notifications\notifications_page.dart    582
+lib\presentation\features\customer\view\booking\booking_confirm_dialog.dart      484
+lib\presentation\features\customer\view\messages\chat_detail_page.dart           472
+lib\presentation\features\customer\view\orders\select_payment_method_page.dart   450
+lib\presentation\features\customer\view\home\home_page.dart                      444
+lib\presentation\features\customer\view\booking\create_review_dialog.dart        387
+lib\presentation\features\customer\view\profile\user_profile_page.dart           382
+lib\presentation\features\customer\view\messages\messages_page.dart              242
+lib\presentation\features\customer\controller\venue_detail_controller.dart       206
+lib\presentation\features\customer\controller\booking_controller.dart            167
+lib\presentation\features\customer\view\customer_home_page.dart                  156
+lib\presentation\features\customer\controller\notification_controller.dart       136
+lib\presentation\features\customer\controller\user_profile_controller.dart       104
+lib\presentation\features\customer\controller\venue_controller.dart               81
+lib\presentation\features\customer\view\cart\cart_page.dart                       65
+lib\presentation\features\customer\view\map\map_page.dart                         65
+lib\presentation\features\customer\binding\customer_binding.dart                  21
+lib\presentation\features\customer\binding\notification_binding.dart              18
+
+

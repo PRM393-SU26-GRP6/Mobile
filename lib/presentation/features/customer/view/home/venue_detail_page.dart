@@ -1,13 +1,15 @@
 import 'package:exe101/core/theme/app_theme.dart';
-import 'package:exe101/data/remote/api_service.dart';
-import 'package:exe101/domain/models/chat_model.dart';
-import 'package:exe101/domain/models/time_slot_model.dart';
-import 'package:exe101/domain/models/venue_model.dart';
 import 'package:exe101/presentation/features/customer/controller/venue_detail_controller.dart';
+import 'package:exe101/presentation/features/customer/shared/customer_helpers.dart';
 import 'package:exe101/presentation/features/customer/view/booking/booking_confirm_dialog.dart';
-import 'package:exe101/presentation/features/customer/view/messages/chat_detail_page.dart';
+import 'package:exe101/presentation/features/customer/view/booking/widgets/booking_labeled_info_row.dart';
+import 'package:exe101/presentation/features/customer/view/home/widgets/venue_chat_launcher.dart';
+import 'package:exe101/presentation/features/customer/view/home/widgets/venue_date_chip.dart';
+import 'package:exe101/presentation/features/customer/view/home/widgets/venue_field_card.dart';
+import 'package:exe101/presentation/features/customer/view/home/widgets/venue_review_card.dart';
+import 'package:exe101/presentation/features/customer/view/home/widgets/venue_slot_grid.dart';
+import 'package:exe101/presentation/features/customer/view/home/widgets/venue_top_nav.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 
 class VenueDetailPage extends StatelessWidget {
@@ -59,6 +61,7 @@ class VenueDetailPage extends StatelessWidget {
                   _buildFieldSelection(controller),
                   if (controller.selectedField.value != null)
                     _buildTimeSlots(controller),
+                  _buildReviewsSection(controller),
                   const SizedBox(height: 100),
                 ],
               ),
@@ -67,7 +70,7 @@ class VenueDetailPage extends StatelessWidget {
               top: MediaQuery.of(Get.context!).padding.top + 8,
               left: 12,
               right: 12,
-              child: _TopNav(controller: controller),
+              child: VenueTopNav(controller: controller),
             ),
             Positioned(
               left: 0,
@@ -126,8 +129,7 @@ class VenueDetailPage extends StatelessWidget {
     return Container(
       color: AppColors.secondary,
       child: const Center(
-        child:
-            Icon(Icons.sports_soccer, size: 64, color: AppColors.textSecondary),
+        child: Icon(Icons.sports_soccer, size: 64, color: AppColors.textSecondary),
       ),
     );
   }
@@ -176,14 +178,16 @@ class VenueDetailPage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          _buildInfoRow(
-              Icons.location_on_outlined, venue.address ?? 'Không có địa chỉ'),
+          LabeledInfoRow(
+              icon: Icons.location_on_outlined,
+              text: venue.address ?? 'Không có địa chỉ'),
           if (venue.phoneContact != null)
-            _buildInfoRow(Icons.phone_outlined, venue.phoneContact!),
+            LabeledInfoRow(icon: Icons.phone_outlined, text: venue.phoneContact!),
           if (venue.openingHours != null)
-            _buildInfoRow(Icons.access_time, venue.openingHours!),
+            LabeledInfoRow(icon: Icons.access_time, text: venue.openingHours!),
           if (venue.ownerName != null)
-            _buildInfoRow(Icons.person_outline, 'Chủ sân: ${venue.ownerName}'),
+            LabeledInfoRow(
+                icon: Icons.person_outline, text: 'Chủ sân: ${venue.ownerName}'),
           const SizedBox(height: 16),
           const Divider(color: AppColors.inputBorder, height: 1),
           const SizedBox(height: 16),
@@ -197,9 +201,11 @@ class VenueDetailPage extends StatelessWidget {
     final venue = controller.venue.value;
     if (venue == null) return const SizedBox.shrink();
 
-    // Hiển thị nút chat nếu có venue (ownerId có thể null, sẽ xử lý sau)
     return GestureDetector(
-      onTap: () => _startChat(controller),
+      onTap: () => startChatWithVenueOwner(
+        venue,
+        onVenueUpdated: (updated) => controller.venue.value = updated,
+      ),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
         decoration: BoxDecoration(
@@ -232,135 +238,6 @@ class VenueDetailPage extends StatelessWidget {
     );
   }
 
-  Future<void> _startChat(VenueDetailController controller) async {
-    final venue = controller.venue.value;
-    if (venue == null) return;
-
-    // Nếu chưa có ownerId, thử load lại venue để lấy
-    if (venue.ownerId == null || venue.ownerId!.isEmpty) {
-      try {
-        Get.dialog(
-          const Center(
-            child: CircularProgressIndicator(color: AppColors.primary),
-          ),
-          barrierDismissible: false,
-        );
-
-        final apiService = Get.find<ApiServiceImpl>();
-        final updatedVenue = await apiService.getVenueById(venue.id);
-        Get.back();
-
-        if (updatedVenue == null || updatedVenue.ownerId == null) {
-          Get.snackbar(
-            'Thông báo',
-            'Hiện tại không thể nhắn tin với chủ sân',
-            snackPosition: SnackPosition.TOP,
-          );
-          return;
-        }
-
-        // Update venue với ownerId mới
-        controller.venue.value = updatedVenue;
-
-        await _doStartChat(updatedVenue);
-      } catch (e) {
-        Get.back();
-        Get.snackbar(
-          'Lỗi',
-          'Không thể tải thông tin chủ sân',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-      }
-      return;
-    }
-
-    await _doStartChat(venue);
-  }
-
-  Future<void> _doStartChat(VenueModel venue) async {
-    if (venue.ownerId == null || venue.ownerId!.isEmpty) return;
-
-    try {
-      Get.dialog(
-        const Center(
-          child: CircularProgressIndicator(color: AppColors.primary),
-        ),
-        barrierDismissible: false,
-      );
-
-      final apiService = Get.find<ApiServiceImpl>();
-      final userData = await _getCurrentUser();
-
-      if (userData == null) {
-        Get.back();
-        Get.snackbar('Lỗi', 'Vui lòng đăng nhập để nhắn tin');
-        return;
-      }
-
-      final chatRoom = await apiService.createChatRoom(
-        CreateChatRoomRequest(
-          customerId: userData['id']!,
-          ownerId: venue.ownerId!,
-          venueId: venue.id,
-        ),
-      );
-
-      Get.back();
-      Get.to(
-        () => ChatDetailPage(chatRoom: chatRoom),
-        transition: Transition.rightToLeft,
-      );
-    } catch (e) {
-      Get.back();
-      Get.snackbar(
-        'Lỗi',
-        'Không thể bắt đầu cuộc trò chuyện',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-    }
-  }
-
-  Future<Map<String, String>?> _getCurrentUser() async {
-    try {
-      final apiService = Get.find<ApiServiceImpl>();
-      final token = await apiService.getAccessToken();
-      if (token == null) return null;
-
-      final userId = await _storage.read(key: 'user_id');
-      if (userId != null) {
-        return {'id': userId};
-      }
-    } catch (_) {}
-    return null;
-  }
-
-  final _storage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
-  );
-
-  Widget _buildInfoRow(IconData icon, String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: AppColors.textSecondary),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              text,
-              style:
-                  const TextStyle(fontSize: 14, color: AppColors.textSecondary),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildAmenities(VenueDetailController controller) {
     final amenities = controller.venue.value?.amenities ?? [];
     if (amenities.isEmpty) return const SizedBox.shrink();
@@ -384,8 +261,7 @@ class VenueDetailPage extends StatelessWidget {
             runSpacing: 8,
             children: amenities.map((a) {
               return Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: AppColors.accent.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
@@ -475,7 +351,7 @@ class VenueDetailPage extends StatelessWidget {
             }
             return Column(
               children: controller.fields.map((field) {
-                return Obx(() => _FieldCard(
+                return Obx(() => VenueFieldCard(
                       field: field,
                       isSelected:
                           controller.selectedField.value?.id == field.id,
@@ -543,8 +419,8 @@ class VenueDetailPage extends StatelessWidget {
                   final date = dates[index];
                   return Obx(() {
                     final isSelected = controller.selectedDate.value != null &&
-                        _isSameDay(date, controller.selectedDate.value!);
-                    return _DateChip(
+                        isSameDay(date, controller.selectedDate.value!);
+                    return VenueDateChip(
                       date: date,
                       isSelected: isSelected,
                       onTap: () => controller.selectDate(date),
@@ -612,15 +488,148 @@ class VenueDetailPage extends StatelessWidget {
                 ),
               );
             }
-            return _TimeSlotGrid(controller: controller);
+            return VenueSlotGrid(controller: controller);
           }),
         ],
       ),
     );
   }
 
-  bool _isSameDay(DateTime a, DateTime b) =>
-      a.year == b.year && a.month == b.month && a.day == b.day;
+  Widget _buildReviewsSection(VenueDetailController controller) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Đánh giá',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              Obx(() {
+                if (controller.reviews.isEmpty) return const SizedBox.shrink();
+                return Row(
+                  children: [
+                    const Icon(Icons.star, color: Colors.amber, size: 18),
+                    const SizedBox(width: 4),
+                    Text(
+                      controller.reviewAverageRating.value.toStringAsFixed(1),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      '(${controller.reviewTotalCount.value})',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                );
+              }),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildReviewsList(controller),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewsList(VenueDetailController controller) {
+    return Obx(() {
+      if (controller.isLoadingReviews.value) {
+        return const Padding(
+          padding: EdgeInsets.symmetric(vertical: 24),
+          child: Center(
+            child: CircularProgressIndicator(color: AppColors.accent),
+          ),
+        );
+      }
+
+      if (controller.reviews.isEmpty) {
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+          decoration: BoxDecoration(
+            color: AppColors.secondary.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.rate_review_outlined,
+                  size: 20, color: Colors.grey.shade500),
+              const SizedBox(width: 8),
+              Text(
+                'Chưa có bài đánh giá nào',
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
+      return Column(
+        children: [
+          ...controller.reviews.map((r) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: VenueReviewCard(review: r),
+              )),
+          if (controller.hasMoreReviews.value)
+            Obx(() => Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: GestureDetector(
+                    onTap: controller.isLoadingMoreReviews.value
+                        ? null
+                        : controller.loadMoreReviews,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.inputBorder),
+                      ),
+                      child: Center(
+                        child: controller.isLoadingMoreReviews.value
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.accent,
+                                ),
+                              )
+                            : const Text(
+                                'Xem thêm đánh giá',
+                                style: TextStyle(
+                                  color: AppColors.accent,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+                )),
+        ],
+      );
+    });
+  }
 
   Widget _buildBottomBar(VenueDetailController controller) {
     return Obx(() {
@@ -721,365 +730,5 @@ class VenueDetailPage extends StatelessWidget {
         ),
       );
     });
-  }
-}
-
-class _TopNav extends StatelessWidget {
-  final dynamic controller;
-  const _TopNav({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    final venueName = controller.venue.value?.venueName ?? '';
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Get.back(),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 6,
-                  ),
-                ],
-              ),
-              child: const Icon(Icons.arrow_back, color: AppColors.primary),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              venueName,
-              style: const TextStyle(
-                color: AppColors.primary,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FieldCard extends StatelessWidget {
-  final FootballFieldDto field;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _FieldCard({
-    required this.field,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.accent.withValues(alpha: 0.15)
-              : AppColors.secondary,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: isSelected ? AppColors.accent : AppColors.inputBorder,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? AppColors.accent.withValues(alpha: 0.2)
-                    : AppColors.inputBorder,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                Icons.sports_soccer,
-                color: isSelected ? AppColors.accent : AppColors.textSecondary,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    field.fieldName ?? 'Sân',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color:
-                          isSelected ? AppColors.accent : AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.accent.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      field.fieldTypeLabel,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: AppColors.accent,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '${field.pricePerHour?.toStringAsFixed(0) ?? '0'}đ',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color:
-                        isSelected ? AppColors.accent : AppColors.textPrimary,
-                  ),
-                ),
-                const Text(
-                  '/giờ',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _TimeSlotGrid extends StatelessWidget {
-  final VenueDetailController controller;
-
-  const _TimeSlotGrid({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      final slots = controller.slotsForSelectedDate;
-      if (slots.isEmpty) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Text(
-            'Ngày này chưa có khung giờ',
-            style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
-          ),
-        );
-      }
-
-      return Wrap(
-        spacing: 10,
-        runSpacing: 10,
-        children: slots.map((slot) {
-          return Obx(() => _SlotChip(
-                slot: slot,
-                isSelected: controller.selectedSlotIds.contains(slot.slotId),
-                onTap: () {
-                  if (slot.isAvailable) {
-                    controller.toggleSlot(slot.slotId);
-                  }
-                },
-              ));
-        }).toList(),
-      );
-    });
-  }
-}
-
-class _SlotChip extends StatelessWidget {
-  final TimeSlotDto slot;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _SlotChip({
-    required this.slot,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final available = slot.isAvailable;
-
-    return GestureDetector(
-      onTap: available ? onTap : null,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.accent
-              : available
-                  ? AppColors.secondary
-                  : Colors.grey.shade800.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected
-                ? AppColors.accent
-                : available
-                    ? AppColors.inputBorder
-                    : Colors.grey.shade700,
-          ),
-        ),
-        child: Column(
-          children: [
-            Text(
-              slot.timeRange,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: isSelected
-                    ? Colors.white
-                    : available
-                        ? AppColors.textPrimary
-                        : Colors.grey.shade600,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              '${slot.price.toStringAsFixed(0)}đ',
-              style: TextStyle(
-                fontSize: 11,
-                color: isSelected
-                    ? Colors.white.withValues(alpha: 0.8)
-                    : available
-                        ? AppColors.textSecondary
-                        : Colors.grey.shade700,
-              ),
-            ),
-            if (!available)
-              Text(
-                'Đã đặt',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Colors.grey.shade600,
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DateChip extends StatelessWidget {
-  final DateTime date;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _DateChip({
-    required this.date,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    const dayNames = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-    final isToday = _isToday(date);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        width: 64,
-        height: 80,
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.accent : AppColors.secondary,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: isSelected
-                ? AppColors.accent
-                : isToday
-                    ? AppColors.accent
-                    : AppColors.inputBorder,
-            width: isSelected || isToday ? 2 : 1,
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              dayNames[date.weekday - 1],
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                color: isSelected ? Colors.white : AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              date.day.toString(),
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.white : AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              'T${date.month}',
-              style: TextStyle(
-                fontSize: 11,
-                color: isSelected
-                    ? Colors.white.withValues(alpha: 0.9)
-                    : AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  bool _isToday(DateTime date) {
-    final now = DateTime.now();
-    return date.year == now.year &&
-        date.month == now.month &&
-        date.day == now.day;
   }
 }

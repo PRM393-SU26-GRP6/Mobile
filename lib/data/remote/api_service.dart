@@ -912,11 +912,16 @@ class ApiServiceImpl extends ApiService {
       headers: headers,
     );
 
+    print('[DEBUG] getSePayQRInfo response: ${response.data}');
+
     if (response.data == null) return null;
 
     final data = response.data!;
     final payload = data['data'] ?? data;
     if (payload is! Map<String, dynamic>) return null;
+
+    print('[DEBUG] getSePayQRInfo payload: $payload');
+    print('[DEBUG] qrUrl value: ${payload['qrUrl']}');
 
     return SePayQRInfoModel.fromJson(payload);
   }
@@ -951,6 +956,41 @@ class ApiServiceImpl extends ApiService {
     if (payload is! Map<String, dynamic>) return null;
 
     return SePayCheckoutFormModel.fromJson(payload);
+  }
+
+  Future<Map<String, dynamic>?> handleSePayWebhook({
+    required String transferType,
+    required String transferAmount,
+    required String transferDate,
+    required String bankAccount,
+    String? reference,
+  }) async {
+    final response = await post<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/payments/webhook/sepay',
+      data: {
+        'transferType': transferType,
+        'transferAmount': transferAmount,
+        'transferDate': transferDate,
+        'bankAccount': bankAccount,
+        if (reference != null) 'reference': reference,
+      },
+    );
+
+    if (response.data == null) return null;
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>?> handlePaymentCallback({
+    required String gateway,
+    required Map<String, dynamic> callbackData,
+  }) async {
+    final response = await post<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/payments/callback/$gateway',
+      data: callbackData,
+    );
+
+    if (response.data == null) return null;
+    return response.data;
   }
 
   // ==================== SLOT MANAGEMENT ====================

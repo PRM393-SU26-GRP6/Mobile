@@ -267,27 +267,50 @@ class _BookingCard extends StatelessWidget {
               ),
               Row(
                 children: [
-                  if (_showDepositButton)
+                  if (_showPaymentButtons) ...[
                     GestureDetector(
                       onTap: _onDepositTap,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                            horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
                           color: const Color(0xFF0D6EFD),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Text(
-                          'Thanh toán cọc',
+                          'Cọc',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 11,
                             fontWeight: FontWeight.w700,
                             color: Colors.white,
                           ),
                         ),
                       ),
                     ),
-                  if (_showDepositButton) const SizedBox(width: 8),
+                    const SizedBox(width: 6),
+                    GestureDetector(
+                      onTap: _onFullPaymentTap,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [AppColors.buttonGradientStart, AppColors.buttonGradientEnd],
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'Full',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                  if (_showPaymentButtons) const SizedBox(width: 8),
                   Text(
                     _timeAgo,
                     style: const TextStyle(
@@ -340,19 +363,37 @@ class _BookingCard extends StatelessWidget {
     return '${booking.totalPrice.toStringAsFixed(0)}đ';
   }
 
-  bool get _showDepositButton =>
+  bool get _showPaymentButtons =>
       booking.bookingStatus?.toLowerCase() == 'accepted';
 
   void _onDepositTap() {
     Get.toNamed(
-      AppPages.paymentQR,
+      AppPages.selectPaymentMethod,
       arguments: {
         'bookingId': booking.id,
         'venueName': _venueName,
-        'amount': booking.totalPrice,
+        'totalPrice': booking.totalPrice,
+        'paymentAmount': booking.depositAmount > 0 ? booking.depositAmount : booking.totalPrice * 0.3,
+        'paymentType': 'deposit',
       },
     )?.then((_) {
-      // Refresh booking list when returning from payment page
+      if (Get.isRegistered<BookingController>()) {
+        Get.find<BookingController>().refreshBookings();
+      }
+    });
+  }
+
+  void _onFullPaymentTap() {
+    Get.toNamed(
+      AppPages.selectPaymentMethod,
+      arguments: {
+        'bookingId': booking.id,
+        'venueName': _venueName,
+        'totalPrice': booking.totalPrice,
+        'paymentAmount': booking.totalPrice - booking.depositAmount,
+        'paymentType': 'final',
+      },
+    )?.then((_) {
       if (Get.isRegistered<BookingController>()) {
         Get.find<BookingController>().refreshBookings();
       }

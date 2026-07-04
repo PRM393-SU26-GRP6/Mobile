@@ -9,6 +9,7 @@ import 'package:exe101/presentation/features/customer/view/customer_home_page.da
 import 'package:exe101/presentation/features/customer/view/home/venue_detail_page.dart';
 import 'package:exe101/presentation/features/customer/view/notifications/notifications_page.dart';
 import 'package:exe101/presentation/features/customer/view/orders/payment_qr_page.dart';
+import 'package:exe101/presentation/features/customer/view/orders/select_payment_method_page.dart';
 import 'package:exe101/presentation/features/customer/view/profile/user_profile_page.dart';
 import 'package:exe101/presentation/features/owner/binding/owner_binding.dart';
 import 'package:exe101/presentation/features/owner/view/add_field_page.dart';
@@ -39,6 +40,7 @@ class AppPages {
   static const String fieldDetail = '/owner/field-detail';
   static const String slotManagement = '/owner/slot-management';
   static const String paymentQR = '/payment-qr';
+  static const String selectPaymentMethod = '/select-payment-method';
   static const String userProfile = '/user-profile';
   static const String notifications = '/notifications';
 
@@ -116,6 +118,10 @@ class AppPages {
     GetPage(
       name: paymentQR,
       page: () => const PaymentQRPage(),
+    ),
+    GetPage(
+      name: selectPaymentMethod,
+      page: () => const SelectPaymentMethodPage(),
     ),
     GetPage(
       name: userProfile,

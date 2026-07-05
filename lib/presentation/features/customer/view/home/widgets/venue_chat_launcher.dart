@@ -41,7 +41,7 @@ Future<void> _doStartChat(VenueModel venue) async {
 
     if (userData == null) {
       Get.back();
-      Get.snackbar('L뿯ẽi', 'Vui l뿯½ng đăng nh뿯ẽp đ뿯ẽ nh뿯ẽn tin');
+      Get.snackbar('Lỗi', 'Vui lòng đăng nhập để nhắn tin');
       return;
     }
 
@@ -61,8 +61,8 @@ Future<void> _doStartChat(VenueModel venue) async {
   } catch (e) {
     Get.back();
     Get.snackbar(
-      'L뿯ẽi',
-      'Kh뿯½ng th뿯ẽ b뿯ẽt đ뿯ẽu cu뿯ẽc tr뿯½ chuy뿯ẽn',
+      'Lỗi',
+      'Không thể bắt đầu cuộc trò chuyện',
       snackPosition: SnackPosition.TOP,
       backgroundColor: Colors.red,
       colorText: Colors.white,
@@ -91,8 +91,8 @@ Future<void> startChatWithVenueOwner(
 
       if (updatedVenue == null || updatedVenue.ownerId == null) {
         Get.snackbar(
-          'Th뿯½ng b뿯½o',
-          'Hi뿯ẽn t뿯ẽi kh뿯½ng th뿯ẽ nh뿯ẽn tin v뿯ẽi ch뿯ẽ s뿯½n',
+          'Thông báo',
+          'Hiện tại không thể nhắn tin với chủ sân',
           snackPosition: SnackPosition.TOP,
         );
         return;
@@ -103,8 +103,8 @@ Future<void> startChatWithVenueOwner(
     } catch (e) {
       Get.back();
       Get.snackbar(
-        'L뿯ẽi',
-        'Kh뿯½ng th뿯ẽ t뿯ẽi th뿯½ng tin ch뿯ẽ s뿯½n',
+        'Lỗi',
+        'Không thể tải thông tin chủ sân',
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,

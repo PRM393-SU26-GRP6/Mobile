@@ -37,13 +37,31 @@ class SlotManagementController extends GetxController {
       if (Get.arguments['field'] != null) {
         field.value = Get.arguments['field'] as FieldModel;
         _fieldId = field.value!.id;
+        _ensureDefaultScheduleRows();
         // Load schedule and slots after setting field
         _loadData();
       } else if (Get.arguments['fieldId'] != null) {
         _fieldId = Get.arguments['fieldId'] as String;
+        _ensureDefaultScheduleRows();
         loadFieldDetail(_fieldId!);
       }
     }
+  }
+
+  void _ensureDefaultScheduleRows() {
+    if (editingSchedules.isNotEmpty) return;
+    editingSchedules.assignAll(
+      List.generate(
+        7,
+        (index) => FieldScheduleRowDto(
+          dayOfWeek: index + 1,
+          openTime: '06:00',
+          closeTime: '22:00',
+          slotDurationMinutes: 60,
+          isActive: true,
+        ),
+      ),
+    );
   }
 
   Future<void> _loadData() async {

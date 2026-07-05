@@ -16,88 +16,90 @@ class ScheduleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dayName = FieldScheduleDto.dayNames[index];
-    final schedule = controller.editingSchedules.length > index
-        ? controller.editingSchedules[index]
-        : null;
-    final isActive = schedule?.isActive ?? true;
+    return Obx(() {
+      final dayName = FieldScheduleDto.dayNames[index];
+      final schedule = controller.editingSchedules.length > index
+          ? controller.editingSchedules[index]
+          : null;
+      final isActive = schedule?.isActive ?? true;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: index < 6
-            ? const Border(
-                bottom: BorderSide(color: AppColors.inputBorder, width: 1),
-              )
-            : null,
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: Row(
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: isActive
-                            ? AppColors.primary.withValues(alpha: 0.1)
-                            : AppColors.secondary,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Center(
-                        child: Text(
-                          '${index + 1}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: isActive
-                                ? AppColors.primary
-                                : AppColors.textSecondary,
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: index < 6
+              ? const Border(
+                  bottom: BorderSide(color: AppColors.inputBorder, width: 1),
+                )
+              : null,
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: isActive
+                              ? AppColors.primary.withValues(alpha: 0.1)
+                              : AppColors.secondary,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: Text(
+                            '${index + 1}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: isActive
+                                  ? AppColors.primary
+                                  : AppColors.textSecondary,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      dayName,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: isActive
-                            ? AppColors.textPrimary
-                            : AppColors.textSecondary,
+                      const SizedBox(width: 12),
+                      Text(
+                        dayName,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: isActive
+                              ? AppColors.textPrimary
+                              : AppColors.textSecondary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Switch(
-                value: isActive,
-                onChanged: (value) {
-                  controller.updateEditingSchedule(
-                    index,
-                    isActive: value,
-                    openTime: value ? '06:00' : null,
-                    closeTime: value ? '22:00' : null,
-                  );
-                },
-                activeThumbColor: AppColors.primary,
-              ),
+                Switch(
+                  value: isActive,
+                  onChanged: (value) {
+                    controller.updateEditingSchedule(
+                      index,
+                      isActive: value,
+                      openTime: value ? '06:00' : null,
+                      closeTime: value ? '22:00' : null,
+                    );
+                  },
+                  activeColor: AppColors.primary,
+                ),
+              ],
+            ),
+            if (isActive) ...[
+              const SizedBox(height: 12),
+              _buildTimeRow(context, schedule),
+              const SizedBox(height: 8),
+              _buildDurationRow(schedule),
             ],
-          ),
-          if (isActive) ...[
-            const SizedBox(height: 12),
-            _buildTimeRow(context, schedule),
-            const SizedBox(height: 8),
-            _buildDurationRow(schedule),
           ],
-        ],
-      ),
-    );
+        ),
+      );
+    });
   }
 
   Widget _buildTimeRow(

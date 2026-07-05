@@ -44,7 +44,7 @@ class VenueReviewCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      review.userName ?? 'Ng뿯ƽ뿯ẽi d뿯½ng 뿯ẽn danh',
+                      review.userName ?? 'Người dùng ẩn danh',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,

@@ -65,7 +65,7 @@ class VenueSlotChip extends StatelessWidget {
             ),
             if (!available)
               Text(
-                'Đ뿯½ đ뿯ẽt',
+                'Đã đặt',
                 style: TextStyle(
                   fontSize: 10,
                   color: Colors.grey.shade600,

@@ -262,7 +262,7 @@ class FieldDetailPage extends StatelessWidget {
                 onChanged: controller.isToggling.value
                     ? null
                     : (value) => controller.toggleFieldStatus(),
-                activeThumbColor: AppColors.primary,
+                activeColor: AppColors.primary,
               )),
           Obx(() {
             if (controller.isToggling.value) {

@@ -14,10 +14,10 @@ String formatTimeHM(DateTime dt) {
 
 String timeAgoVN(DateTime dt) {
   final diff = DateTime.now().difference(dt);
-  if (diff.inDays > 0) return '${diff.inDays} ng뿯½y tr뿯ƽ뿯ẽc';
-  if (diff.inHours > 0) return '${diff.inHours} gi뿯ẽ tr뿯ƽ뿯ẽc';
-  if (diff.inMinutes > 0) return '${diff.inMinutes} ph뿯½t tr뿯ƽ뿯ẽc';
-  return 'V뿯ẽa xong';
+  if (diff.inDays > 0) return '${diff.inDays} ngày trước';
+  if (diff.inHours > 0) return '${diff.inHours} giờ trước';
+  if (diff.inMinutes > 0) return '${diff.inMinutes} phút trước';
+  return 'Vừa xong';
 }
 
 bool isSameDay(DateTime a, DateTime b) {

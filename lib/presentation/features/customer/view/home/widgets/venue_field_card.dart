@@ -54,7 +54,7 @@ class VenueFieldCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    field.fieldName ?? 'S뿯½n',
+                    field.fieldName ?? 'Sân',
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,

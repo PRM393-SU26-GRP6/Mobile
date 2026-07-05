@@ -1,4 +1,3 @@
-import 'package:exe101/domain/models/field_schedule_model.dart';
 import 'package:exe101/presentation/features/owner/controller/slot_management_controller.dart';
 import 'package:exe101/presentation/features/owner/view/slot_management/widgets/schedule_row.dart';
 import 'package:exe101/presentation/features/owner/view/slot_management/widgets/slot_info_card.dart';
@@ -30,21 +29,6 @@ class ScheduleTab extends StatelessWidget {
   }
 
   Widget _buildScheduleGrid() {
-    if (controller.editingSchedules.isEmpty) {
-      controller.editingSchedules.addAll(
-        List.generate(
-          7,
-          (index) => FieldScheduleRowDto(
-            dayOfWeek: index + 1,
-            openTime: '06:00',
-            closeTime: '22:00',
-            slotDurationMinutes: 60,
-            isActive: true,
-          ),
-        ),
-      );
-    }
-
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -58,12 +42,13 @@ class ScheduleTab extends StatelessWidget {
         ],
       ),
       child: Column(
-        children: List.generate(7, (index) {
-          return Obx(() => ScheduleRow(
-                index: index,
-                controller: controller,
-              ));
-        }),
+        children: List.generate(
+          7,
+          (index) => ScheduleRow(
+            index: index,
+            controller: controller,
+          ),
+        ),
       ),
     );
   }

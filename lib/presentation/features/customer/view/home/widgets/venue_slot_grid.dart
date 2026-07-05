@@ -15,7 +15,7 @@ class VenueSlotGrid extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 16),
           child: Text(
-            'Ng뿯½y n뿯½y ch뿯ƽa c뿯½ khung gi뿯ẽ',
+            'Ngày này chưa có khung giờ',
             style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
           ),
         );

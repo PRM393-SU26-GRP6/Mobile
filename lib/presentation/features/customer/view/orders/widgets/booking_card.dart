@@ -5,6 +5,7 @@ import 'package:exe101/presentation/features/customer/controller/booking_control
 import 'package:exe101/presentation/features/customer/shared/customer_helpers.dart';
 import 'package:exe101/presentation/features/customer/view/booking/create_review_dialog.dart';
 import 'package:exe101/presentation/features/customer/view/orders/widgets/booking_payment_buttons.dart';
+import 'package:exe101/presentation/features/customer/view/orders/widgets/customer_booking_details_sheet.dart';
 import 'package:exe101/presentation/features/customer/view/orders/widgets/booking_review_actions.dart';
 import 'package:exe101/presentation/features/customer/view/orders/widgets/delete_review_dialog.dart';
 import 'package:exe101/presentation/features/customer/view/orders/widgets/status_badge.dart';
@@ -19,100 +20,108 @@ class BookingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<BookingController>();
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.inputBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  _venueName,
+    return GestureDetector(
+      onTap: () => showCustomerBookingDetailsSheet(booking.id),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.inputBorder),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    _venueName,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                StatusBadge(status: booking.bookingStatus ?? ''),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _slotSummary,
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              _dateRange,
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  _priceText,
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              StatusBadge(status: booking.bookingStatus ?? ''),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _slotSummary,
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppColors.textPrimary,
+                Text(
+                  timeAgoVN(booking.createdAt),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.accent,
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            _dateRange,
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                _priceText,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              Text(
-                timeAgoVN(booking.createdAt),
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.accent,
-                ),
+            if (_showPaymentButtons) ...[
+              const SizedBox(height: 10),
+              BookingPaymentButtons(
+                showDeposit: booking.canPayDeposit,
+                showFullUpfront: booking.canPayFullUpfront,
+                showRemaining: booking.canPayRemaining,
+                onDepositTap: () => _onDepositTap(),
+                onFullUpfrontTap: () => _onFullUpfrontTap(),
+                onRemainingTap: () => _onRemainingTap(),
               ),
             ],
-          ),
-          if (_showPaymentButtons) ...[
-            const SizedBox(height: 10),
-            BookingPaymentButtons(
-              onDepositTap: () => _onDepositTap(),
-              onFullPaymentTap: () => _onFullPaymentTap(),
-            ),
-          ],
-          if (_isCompleted())
-            Obx(() {
-              final hasReview = controller.myReviews.containsKey(booking.id);
-              if (!hasReview) {
+            if (_isCompleted())
+              Obx(() {
+                final hasReview = controller.myReviews.containsKey(booking.id);
+                if (!hasReview) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: _buildCreateReviewButton(context, controller),
+                    ),
+                  );
+                }
                 return Padding(
                   padding: const EdgeInsets.only(top: 10),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: _buildCreateReviewButton(context, controller),
+                  child: BookingReviewActions(
+                    onEditTap: () => _onEditReview(context, controller),
+                    onDeleteTap: () => _onDeleteReview(context, controller),
                   ),
                 );
-              }
-              return Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: BookingReviewActions(
-                  onEditTap: () => _onEditReview(context, controller),
-                  onDeleteTap: () => _onDeleteReview(context, controller),
-                ),
-              );
-            }),
-        ],
+              }),
+          ],
+        ),
       ),
     );
   }
@@ -228,7 +237,9 @@ class BookingCard extends StatelessWidget {
   }
 
   bool get _showPaymentButtons =>
-      booking.bookingStatus?.toLowerCase() == 'accepted';
+      booking.canPayDeposit ||
+      booking.canPayFullUpfront ||
+      booking.canPayRemaining;
 
   void _onDepositTap() {
     Get.toNamed(
@@ -249,14 +260,31 @@ class BookingCard extends StatelessWidget {
     });
   }
 
-  void _onFullPaymentTap() {
+  void _onFullUpfrontTap() {
     Get.toNamed(
       AppPages.selectPaymentMethod,
       arguments: {
         'bookingId': booking.id,
         'venueName': _venueName,
         'totalPrice': booking.totalPrice,
-        'paymentAmount': booking.totalPrice - booking.depositAmount,
+        'paymentAmount': booking.totalPrice,
+        'paymentType': 'full',
+      },
+    )?.then((_) {
+      if (Get.isRegistered<BookingController>()) {
+        Get.find<BookingController>().refreshBookings();
+      }
+    });
+  }
+
+  void _onRemainingTap() {
+    Get.toNamed(
+      AppPages.selectPaymentMethod,
+      arguments: {
+        'bookingId': booking.id,
+        'venueName': _venueName,
+        'totalPrice': booking.totalPrice,
+        'paymentAmount': booking.totalPrice - booking.paidDepositAmount,
         'paymentType': 'final',
       },
     )?.then((_) {

@@ -2,7 +2,9 @@ import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/domain/models/payment_model.dart';
+import 'package:exe101/presentation/features/customer/controller/booking_controller.dart';
 import 'package:exe101/presentation/features/customer/view/orders/widgets/cash_payment_confirm_dialog.dart';
+import 'package:exe101/presentation/features/customer/view/orders/widgets/payment_continue_bar.dart';
 import 'package:exe101/presentation/features/customer/view/orders/widgets/payment_method_card.dart';
 import 'package:exe101/presentation/features/customer/view/orders/widgets/payment_method_option.dart';
 import 'package:flutter/material.dart';
@@ -18,43 +20,50 @@ class SelectPaymentMethodPage extends StatefulWidget {
 
 class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
   final String bookingId = Get.arguments['bookingId'] ?? '';
-  final String venueName = Get.arguments['venueName'] ?? 'Sân bóng';
+  final String venueName = Get.arguments['venueName'] ?? 'San bong';
   final double totalPrice = Get.arguments['totalPrice'] ?? 0;
   final double paymentAmount = Get.arguments['paymentAmount'] ?? 0.0;
   final String paymentType = Get.arguments['paymentType'] ?? 'deposit';
 
   bool get isDeposit => paymentType == 'deposit';
+  bool get isFullUpfront => paymentType == 'full';
+
+  String get paymentAmountLabel {
+    if (isDeposit) return 'So tien coc';
+    if (isFullUpfront) return 'Thanh toan het';
+    return 'Thanh toan con lai';
+  }
 
   PaymentMethod _selectedMethod = PaymentMethod.sePay;
 
-  final List<PaymentMethodOption> _methods = [
+  final List<PaymentMethodOption> _methods = const [
     PaymentMethodOption(
       method: PaymentMethod.sePay,
       name: 'SePay QR',
-      description: 'Quét mã QR để thanh toán',
+      description: 'Quet ma QR de thanh toan',
       icon: Icons.qr_code_2,
-      color: const Color(0xFF6C63FF),
+      color: Color(0xFF6C63FF),
     ),
     PaymentMethodOption(
       method: PaymentMethod.moMo,
       name: 'MoMo',
-      description: 'Thanh toán qua ví MoMo',
+      description: 'Chua ho tro tren BE',
       icon: Icons.account_balance_wallet,
-      color: const Color(0xFFA50064),
+      color: Color(0xFFA50064),
     ),
     PaymentMethodOption(
       method: PaymentMethod.vnPay,
       name: 'VNPay',
-      description: 'Thanh toán qua VNPay',
+      description: 'Chua ho tro tren BE',
       icon: Icons.payment,
-      color: const Color(0xFF0066B3),
+      color: Color(0xFF0066B3),
     ),
     PaymentMethodOption(
       method: PaymentMethod.cash,
-      name: 'Tiền mặt',
-      description: 'Thanh toán trực tiếp tại sân',
+      name: 'Tien mat',
+      description: 'Thanh toan truc tiep tai san',
       icon: Icons.payments,
-      color: const Color(0xFF16A34A),
+      color: Color(0xFF16A34A),
     ),
   ];
 
@@ -67,7 +76,7 @@ class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
         foregroundColor: Colors.white,
         elevation: 0,
         title: const Text(
-          'Chọn phương thức thanh toán',
+          'Chon phuong thuc thanh toan',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -76,44 +85,8 @@ class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
         children: [
           _buildPriceInfo(),
           const SizedBox(height: 16),
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  const Text(
-                    'Phương thức thanh toán',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  ..._methods.map(
-                    (option) => PaymentMethodCard(
-                      option: option,
-                      isSelected: _selectedMethod == option.method,
-                      onTap: () => setState(() => _selectedMethod = option.method),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          _buildBottomBar(),
+          Expanded(child: _buildMethods()),
+          PaymentContinueBar(onPressed: _onContinue),
         ],
       ),
     );
@@ -143,156 +116,118 @@ class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
       ),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Sân',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white70,
-                ),
-              ),
-              Expanded(
-                child: Text(
-                  venueName,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                  textAlign: TextAlign.right,
-                ),
-              ),
-            ],
-          ),
+          _priceRow('San', venueName),
           const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Tổng tiền',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white70,
-                ),
-              ),
-              Text(
-                '${totalPrice.toStringAsFixed(0)}đ',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.white70,
-                  decoration: TextDecoration.lineThrough,
-                ),
-              ),
-            ],
-          ),
+          _priceRow('Tong tien', '${totalPrice.toStringAsFixed(0)}d',
+              strikeValue: true),
           const SizedBox(height: 4),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                isDeposit ? 'Số tiền cọc (30%)' : 'Thanh toán còn lại',
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                '${paymentAmount.toStringAsFixed(0)}đ',
-                style: const TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+          _priceRow(
+            paymentAmountLabel,
+            '${paymentAmount.toStringAsFixed(0)}d',
+            highlightValue: true,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBottomBar() {
+  Widget _priceRow(
+    String label,
+    String value, {
+    bool strikeValue = false,
+    bool highlightValue = false,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: highlightValue ? 16 : 14,
+            color: highlightValue ? Colors.white : Colors.white70,
+            fontWeight: highlightValue ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: highlightValue ? 20 : 14,
+              color: highlightValue ? Colors.white : Colors.white70,
+              fontWeight: highlightValue ? FontWeight.bold : FontWeight.w600,
+              decoration: strikeValue ? TextDecoration.lineThrough : null,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMethods() {
     return Container(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        16,
-        16,
-        16 + MediaQuery.of(context).padding.bottom,
-      ),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
-            offset: const Offset(0, -2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: GestureDetector(
-        onTap: _onContinue,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.buttonGradientStart, AppColors.buttonGradientEnd],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: const Center(
-            child: Text(
-              'Tiếp tục',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          const Text(
+            'Phuong thuc thanh toan',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
             ),
           ),
-        ),
+          const SizedBox(height: 12),
+          ..._methods.map(
+            (option) => PaymentMethodCard(
+              option: option,
+              isSelected: _selectedMethod == option.method,
+              onTap: () => setState(() => _selectedMethod = option.method),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  void _onContinue() async {
+  Future<void> _onContinue() async {
     if (_selectedMethod == PaymentMethod.cash) {
       final confirmed = await showCashPaymentConfirmDialog();
-      if (confirmed) {
-        await _processCashPayment();
-      }
-    } else {
-      Get.toNamed(
-        AppPages.paymentQR,
-        arguments: {
-          'bookingId': bookingId,
-          'venueName': venueName,
-          'totalPrice': totalPrice,
-          'paymentAmount': paymentAmount,
-          'paymentType': paymentType,
-          'paymentMethod': _selectedMethod,
-        },
-      );
+      if (confirmed) await _processCashPayment();
+      return;
     }
+
+    Get.toNamed(
+      AppPages.paymentQR,
+      arguments: {
+        'bookingId': bookingId,
+        'venueName': venueName,
+        'totalPrice': totalPrice,
+        'paymentAmount': paymentAmount,
+        'paymentType': paymentType,
+        'paymentMethod': _selectedMethod,
+      },
+    );
   }
 
   Future<void> _processCashPayment() async {
     Get.dialog(
-      const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
-      ),
+      const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       barrierDismissible: false,
     );
 
@@ -300,6 +235,11 @@ class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
       final apiService = Get.find<ApiServiceImpl>();
       if (isDeposit) {
         await apiService.createDepositPayment(
+          bookingId,
+          paymentMethod: _selectedMethod.value,
+        );
+      } else if (isFullUpfront) {
+        await apiService.createFullPayment(
           bookingId,
           paymentMethod: _selectedMethod.value,
         );
@@ -311,25 +251,30 @@ class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
       }
 
       Get.back();
-      Get.back();
+      _returnToOrders();
       Get.snackbar(
-        'Thành công',
-        isDeposit
-            ? 'Đặt cọc tiền mặt thành công. Vui lòng thanh toán tại sân.'
-            : 'Thanh toán tiền mặt thành công.',
+        'Thanh cong',
+        'Da tao thanh toan thanh cong.',
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
-    } catch (e) {
+    } catch (_) {
       Get.back();
       Get.snackbar(
-        'Lỗi',
-        'Không thể xử lý thanh toán. Vui lòng thử lại.',
+        'Loi',
+        'Khong the xu ly thanh toan. Vui long thu lai.',
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
     }
+  }
+
+  void _returnToOrders() {
+    if (Get.isRegistered<BookingController>()) {
+      Get.find<BookingController>().refreshBookings();
+    }
+    Get.until((route) => route.settings.name == AppPages.customerHome);
   }
 }

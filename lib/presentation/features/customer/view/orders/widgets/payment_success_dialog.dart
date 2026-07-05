@@ -1,3 +1,4 @@
+import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/presentation/features/customer/controller/booking_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -17,10 +18,10 @@ Future<void> showPaymentSuccessDialog() async {
         TextButton(
           onPressed: () {
             Get.back();
-            Get.back(result: true);
             if (Get.isRegistered<BookingController>()) {
               Get.find<BookingController>().refreshBookings();
             }
+            Get.until((route) => route.settings.name == AppPages.customerHome);
           },
           child: const Text('OK'),
         ),

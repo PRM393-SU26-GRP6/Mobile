@@ -166,4 +166,28 @@ class BookingDto {
         return bookingStatus ?? 'Không rõ';
     }
   }
+
+  double get paidDepositAmount {
+    return payments
+            ?.where((payment) =>
+                payment.paymentType?.toLowerCase() == 'deposit' &&
+                (payment.paymentStatus?.toLowerCase() == 'success' ||
+                    payment.paymentStatus?.toLowerCase() == 'completed'))
+            .fold<double>(
+              0,
+              (total, payment) => total + (payment.amount ?? 0),
+            ) ??
+        0;
+  }
+
+  bool get hasSuccessfulDepositPayment => paidDepositAmount > 0;
+
+  String get depositRequirementLabel =>
+      hasSuccessfulDepositPayment ? 'Đã đặt cọc' : 'Cọc cần thu';
+
+  bool get canPayDeposit => bookingStatus?.toLowerCase() == 'accepted';
+
+  bool get canPayFullUpfront => bookingStatus?.toLowerCase() == 'accepted';
+
+  bool get canPayRemaining => bookingStatus?.toLowerCase() == 'deposited';
 }

@@ -862,6 +862,13 @@ class ApiServiceImpl extends ApiService {
 
     final data = response.data!;
 
+    if (data is List) {
+      return data
+          .map((json) =>
+              PaymentModel.fromJson(Map<String, dynamic>.from(json as Map)))
+          .toList();
+    }
+
     if (data is! Map<String, dynamic>) return [];
 
     final listData = data['data'];
@@ -918,6 +925,11 @@ class ApiServiceImpl extends ApiService {
     // API returns payment directly without 'data' wrapper
     final data = response.data?['data'] ?? response.data ?? {};
     return PaymentModel.fromJson(data is Map<String, dynamic> ? data : {});
+  }
+
+  Future<PaymentModel> createFullPayment(String bookingId,
+      {String paymentMethod = 'SePay'}) async {
+    return createFinalPayment(bookingId, paymentMethod: paymentMethod);
   }
 
   Future<SePayQRInfoModel?> getSePayQRInfo(String paymentId) async {

@@ -50,8 +50,9 @@ Future<void> showBookingDetailsSheet(BookingDto booking) {
             ),
             if (booking.depositAmount > 0)
               _DetailRow(
-                label: 'Đã đặt cọc',
-                value: '${booking.depositAmount.toStringAsFixed(0)} VNĐ',
+                label: booking.depositRequirementLabel,
+                value:
+                    '${(booking.hasSuccessfulDepositPayment ? booking.paidDepositAmount : booking.depositAmount).toStringAsFixed(0)} VNĐ',
               ),
             if (booking.discountAmount > 0)
               _DetailRow(

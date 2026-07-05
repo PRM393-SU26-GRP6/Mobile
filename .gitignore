@@ -17,6 +17,7 @@ migrate_working_dir/
 android/app/google-services.json
 android/.gradle/
 android/local.properties
+.superpowers/
 
 # IntelliJ related
 *.iml

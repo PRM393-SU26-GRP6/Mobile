@@ -11,6 +11,8 @@ class BookingController extends GetxController {
   final isLoadingMore = false.obs;
   final hasMore = true.obs;
   final error = ''.obs;
+  final searchQuery = ''.obs;
+  final statusFilter = ''.obs;
 
   // Reviews của user hiện tại — map theo bookingId (mỗi booking tối đa 1 review).
   // Dùng RxMap để reactive với Obx.
@@ -26,8 +28,31 @@ class BookingController extends GetxController {
 
   BookingController({required this.apiService});
 
-  Future<void> loadBookings(
-      {bool refresh = false, String? status, String? from, String? to}) async {
+  List<BookingDto> get filteredBookings {
+    final query = searchQuery.value.trim().toLowerCase();
+    if (query.isEmpty) return bookings;
+
+    return bookings.where((booking) {
+      final text = [
+        booking.id,
+        booking.bookingStatus ?? '',
+        booking.statusLabel,
+        for (final item in booking.items ?? const <BookingItemDto>[]) ...[
+          item.venueName ?? '',
+          item.fieldName ?? '',
+        ],
+      ].join(' ').toLowerCase();
+      return text.contains(query);
+    }).toList();
+  }
+
+  Future<void> loadBookings({
+    bool refresh = false,
+    String? status,
+    bool clearStatus = false,
+    String? from,
+    String? to,
+  }) async {
     if (refresh) {
       _currentPage = 1;
       hasMore.value = true;
@@ -35,7 +60,11 @@ class BookingController extends GetxController {
     }
 
     // update filters only when provided (null means keep existing)
-    if (status != null) _status = status;
+    if (clearStatus) {
+      _status = null;
+    } else if (status != null) {
+      _status = status.isEmpty ? null : status;
+    }
     if (from != null) _from = from;
     if (to != null) _to = to;
 
@@ -72,6 +101,19 @@ class BookingController extends GetxController {
   }
 
   Future<void> refreshBookings() => loadBookings(refresh: true);
+
+  Future<void> applyStatusFilter(String status) {
+    statusFilter.value = status;
+    return loadBookings(
+      refresh: true,
+      status: status,
+      clearStatus: status.isEmpty,
+    );
+  }
+
+  void updateSearchQuery(String value) {
+    searchQuery.value = value;
+  }
 
   /// Load danh sách review của user hiện tại để map với bookingId
   Future<void> loadMyReviews() async {

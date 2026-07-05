@@ -166,7 +166,7 @@ class BookingListItem extends StatelessWidget {
                           ),
                           if (booking.depositAmount > 0)
                             Text(
-                              'Đặt cọc: ${booking.depositAmount.toStringAsFixed(0)}K',
+                              '${booking.depositRequirementLabel}: ${(booking.hasSuccessfulDepositPayment ? booking.paidDepositAmount : booking.depositAmount).toStringAsFixed(0)}K',
                               style: TextStyle(
                                 fontSize: 10,
                                 color: AppColors.textSecondary,
@@ -271,7 +271,8 @@ class BookingListItem extends StatelessWidget {
                         ),
                         child: const Text(
                           'Từ chối',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                              fontSize: 13, fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),
@@ -289,7 +290,8 @@ class BookingListItem extends StatelessWidget {
                         ),
                         child: const Text(
                           'Chấp nhận',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                              fontSize: 13, fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),
@@ -308,7 +310,8 @@ class BookingListItem extends StatelessWidget {
                         ),
                         child: const Text(
                           'Hoàn thành',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                              fontSize: 13, fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),

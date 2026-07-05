@@ -2,68 +2,123 @@ import 'package:exe101/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class BookingPaymentButtons extends StatelessWidget {
+  final bool showDeposit;
+  final bool showFullUpfront;
+  final bool showRemaining;
   final VoidCallback onDepositTap;
-  final VoidCallback onFullPaymentTap;
+  final VoidCallback onFullUpfrontTap;
+  final VoidCallback onRemainingTap;
 
   const BookingPaymentButtons({
     super.key,
+    required this.showDeposit,
+    required this.showFullUpfront,
+    required this.showRemaining,
     required this.onDepositTap,
-    required this.onFullPaymentTap,
+    required this.onFullUpfrontTap,
+    required this.onRemainingTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
+    final buttons = <Widget>[];
+
+    if (showDeposit) {
+      buttons.add(
         Expanded(
-          child: GestureDetector(
+          child: _PaymentActionButton(
+            label: 'Thanh toan coc',
+            icon: Icons.qr_code_2,
             onTap: onDepositTap,
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-              decoration: BoxDecoration(
-                color: const Color(0xFF0D6EFD),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              alignment: Alignment.center,
-              child: const Text(
-                'Thanh toán cọc',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
-            ),
+            backgroundColor: const Color(0xFF0D6EFD),
           ),
         ),
-        const SizedBox(width: 8),
+      );
+    }
+
+    if (showFullUpfront) {
+      _addGap(buttons);
+      buttons.add(
         Expanded(
-          child: GestureDetector(
-            onTap: onFullPaymentTap,
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    AppColors.buttonGradientStart,
-                    AppColors.buttonGradientEnd,
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              alignment: Alignment.center,
-              child: const Text(
-                'Thanh toán hết',
-                style: TextStyle(
+          child: _PaymentActionButton(
+            label: 'Thanh toan het',
+            icon: Icons.payments_outlined,
+            onTap: onFullUpfrontTap,
+            backgroundColor: AppColors.primary,
+          ),
+        ),
+      );
+    }
+
+    if (showRemaining) {
+      _addGap(buttons);
+      buttons.add(
+        Expanded(
+          child: _PaymentActionButton(
+            label: 'Thanh toan con lai',
+            icon: Icons.payments_outlined,
+            onTap: onRemainingTap,
+            backgroundColor: AppColors.primary,
+          ),
+        ),
+      );
+    }
+
+    if (buttons.isEmpty) return const SizedBox.shrink();
+
+    return Row(children: buttons);
+  }
+
+  void _addGap(List<Widget> buttons) {
+    if (buttons.isNotEmpty) {
+      buttons.add(const SizedBox(width: 8));
+    }
+  }
+}
+
+class _PaymentActionButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+  final Color backgroundColor;
+
+  const _PaymentActionButton({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+    required this.backgroundColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 15, color: Colors.white),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
                 ),
               ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

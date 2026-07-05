@@ -17,7 +17,7 @@ IconData getPaymentMethodIcon(PaymentMethod method) {
 String getPaymentMethodText(PaymentMethod method) {
   switch (method) {
     case PaymentMethod.cash:
-      return 'Ti뿯ẽn m뿯ẽt';
+      return 'Tiền mặt';
     case PaymentMethod.moMo:
       return 'MoMo';
     case PaymentMethod.vnPay:
@@ -30,20 +30,20 @@ String getPaymentMethodText(PaymentMethod method) {
 String getPaymentMethodDescription(PaymentMethod method) {
   switch (method) {
     case PaymentMethod.sePay:
-      return 'Qu뿯½t m뿯½ QR đ뿯ẽ thanh to뿯½n';
+      return 'Quét mã QR để thanh toán';
     case PaymentMethod.moMo:
-      return 'Thanh to뿯½n qua v뿯½ MoMo';
+      return 'Thanh toán qua ví MoMo';
     case PaymentMethod.vnPay:
-      return 'Thanh to뿯½n qua VNPay';
+      return 'Thanh toán qua VNPay';
     case PaymentMethod.cash:
-      return 'Thanh to뿯½n tr뿯ẽc ti뿯ẽp t뿯ẽi s뿯½n';
+      return 'Thanh toán trực tiếp tại sân';
   }
 }
 
 Color getPaymentMethodColor(PaymentMethod method) {
   switch (method) {
     case PaymentMethod.sePay:
-      return const Color(0xFF6C63FF);
+      return const Color(0xFF0FA24A);
     case PaymentMethod.moMo:
       return const Color(0xFFA50064);
     case PaymentMethod.vnPay:
@@ -86,15 +86,15 @@ Color getNotificationColor(String? type) {
 String getNotificationLabel(String? type) {
   switch (type?.toLowerCase()) {
     case 'booking':
-      return 'Đ뿯ẽt s뿯½n';
+      return 'Đặt sân';
     case 'payment':
-      return 'Thanh to뿯½n';
+      return 'Thanh toán';
     case 'promotion':
-      return 'Khuy뿯ẽn m뿯½i';
+      return 'Khuyến mãi';
     case 'system':
-      return 'H뿯ẽ th뿯ẽng';
+      return 'Hệ thống';
     default:
-      return 'Th뿯½ng b뿯½o';
+      return 'Thông báo';
   }
 }
 
@@ -116,26 +116,26 @@ BookingStatusStyle getBookingStatusStyle(String status) {
       return const BookingStatusStyle(
         color: Color(0xFFD97706),
         bgColor: Color(0xFFFFF3CD),
-        label: 'Ch뿯ẽ duy뿯ẽt',
+        label: 'Chờ duyệt',
       );
     case 'accepted':
     case 'confirmed':
       return const BookingStatusStyle(
         color: Color(0xFF16A34A),
         bgColor: Color(0xFFDCFCE7),
-        label: 'Đ뿯½ x뿯½c nh뿯ẽn',
+        label: 'Đã xác nhận',
       );
     case 'deposited':
       return const BookingStatusStyle(
         color: Color(0xFF0D6EFD),
         bgColor: Color(0xFFCCE5FF),
-        label: 'Đ뿯½ đ뿯ẽt c뿯ẽc',
+        label: 'Đã đặt cọc',
       );
     case 'completed':
       return const BookingStatusStyle(
         color: Color(0xFF2563EB),
         bgColor: Color(0xFFDBEAFE),
-        label: 'Ho뿯½n th뿯½nh',
+        label: 'Hoàn thành',
       );
     case 'cancelled':
     case 'rejected':
@@ -149,7 +149,7 @@ BookingStatusStyle getBookingStatusStyle(String status) {
       return BookingStatusStyle(
         color: Colors.grey,
         bgColor: Colors.grey.shade200,
-        label: status.isEmpty ? 'Kh뿯½ng r뿯½' : status,
+        label: status.isEmpty ? 'Không rõ' : status,
       );
   }
 }

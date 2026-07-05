@@ -118,8 +118,7 @@ class _OrdersPageState extends State<OrdersPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.receipt_long,
-                    size: 64, color: Colors.grey.shade300),
+                Icon(Icons.receipt_long, size: 64, color: Colors.grey.shade300),
                 const SizedBox(height: 16),
                 Text(
                   'Bạn chưa có đơn đặt sân nào',
@@ -132,12 +131,95 @@ class _OrdersPageState extends State<OrdersPage> {
       );
     }
 
+    final bookings = _controller.filteredBookings;
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: _controller.bookings.length,
+      itemCount: bookings.length + 1,
       itemBuilder: (context, index) {
-        return BookingCard(booking: _controller.bookings[index]);
+        if (index == 0) {
+          return _buildSearchAndFilters(bookings.isEmpty);
+        }
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: BookingCard(booking: bookings[index - 1]),
+        );
       },
+    );
+  }
+
+  Widget _buildSearchAndFilters(bool isFilteredEmpty) {
+    return Column(
+      children: [
+        TextField(
+          onChanged: _controller.updateSearchQuery,
+          decoration: InputDecoration(
+            hintText: 'Tim theo san, mat san, ma don...',
+            prefixIcon: const Icon(Icons.search),
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.inputBorder),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.inputBorder),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: const [
+              _FilterChip(label: 'Tat ca', value: ''),
+              _FilterChip(label: 'Cho duyet', value: 'Pending'),
+              _FilterChip(label: 'Da xac nhan', value: 'Accepted'),
+              _FilterChip(label: 'Da coc', value: 'Deposited'),
+              _FilterChip(label: 'Hoan thanh', value: 'Completed'),
+            ],
+          ),
+        ),
+        if (isFilteredEmpty) ...[
+          const SizedBox(height: 72),
+          Icon(Icons.search_off, size: 52, color: Colors.grey.shade300),
+          const SizedBox(height: 12),
+          Text(
+            'Khong tim thay don phu hop',
+            style: TextStyle(fontSize: 15, color: Colors.grey.shade500),
+          ),
+        ],
+        const SizedBox(height: 10),
+      ],
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _FilterChip({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.find<BookingController>();
+    final selected = controller.statusFilter.value == value;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: ChoiceChip(
+        label: Text(label),
+        selected: selected,
+        onSelected: (_) => controller.applyStatusFilter(value),
+        selectedColor: AppColors.primary,
+        backgroundColor: Colors.white,
+        labelStyle: TextStyle(
+          color: selected ? Colors.white : AppColors.textPrimary,
+          fontWeight: FontWeight.w700,
+        ),
+        side: const BorderSide(color: AppColors.inputBorder),
+      ),
     );
   }
 }

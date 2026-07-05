@@ -14,6 +14,7 @@ class OtpVerificationPage extends StatelessWidget {
       Get.put(OtpController(userRepository: Get.find<UserRepository>()));
     }
     final controller = Get.find<OtpController>();
+    controller.applyRouteArguments(Get.arguments);
 
     return Scaffold(
       body: Container(
@@ -67,10 +68,17 @@ class OtpVerificationPage extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.accent.withValues(alpha: 0.15),
             shape: BoxShape.circle,
-            border: Border.all(color: AppColors.accent.withValues(alpha: 0.3), width: 2),
+            border: Border.all(
+              color: AppColors.accent.withValues(alpha: 0.3),
+              width: 2,
+            ),
           ),
           child: const Center(
-            child: Icon(Icons.mark_email_unread_outlined, size: 48, color: AppColors.accent),
+            child: Icon(
+              Icons.mark_email_unread_outlined,
+              size: 48,
+              color: AppColors.accent,
+            ),
           ),
         ),
         const SizedBox(height: 24),
@@ -83,10 +91,10 @@ class OtpVerificationPage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Text(
+        const Text(
           'Nhập mã OTP đã được gửi đến email của bạn',
           textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
       ],
     );
@@ -104,8 +112,9 @@ class _OtpInput extends StatefulWidget {
 
 class _OtpInputState extends State<_OtpInput> {
   final List<TextEditingController> _controllers =
-      List.generate(4, (_) => TextEditingController());
-  final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
+      List.generate(OtpController.otpLength, (_) => TextEditingController());
+  final List<FocusNode> _focusNodes =
+      List.generate(OtpController.otpLength, (_) => FocusNode());
 
   @override
   void dispose() {
@@ -119,7 +128,7 @@ class _OtpInputState extends State<_OtpInput> {
   }
 
   void _onChanged(String value, int index) {
-    if (value.isNotEmpty && index < 3) {
+    if (value.isNotEmpty && index < OtpController.otpLength - 1) {
       _focusNodes[index + 1].requestFocus();
     }
 
@@ -143,11 +152,11 @@ class _OtpInputState extends State<_OtpInput> {
 
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(4, (index) {
+        children: List.generate(OtpController.otpLength, (index) {
           return Container(
-            width: 60,
-            height: 70,
-            margin: const EdgeInsets.symmetric(horizontal: 6),
+            width: 46,
+            height: 60,
+            margin: const EdgeInsets.symmetric(horizontal: 4),
             child: TextField(
               controller: _controllers[index],
               focusNode: _focusNodes[index],
@@ -155,7 +164,7 @@ class _OtpInputState extends State<_OtpInput> {
               keyboardType: TextInputType.number,
               maxLength: 1,
               style: const TextStyle(
-                fontSize: 28,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
               ),
@@ -173,7 +182,8 @@ class _OtpInputState extends State<_OtpInput> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: AppColors.accent, width: 2),
+                  borderSide:
+                      const BorderSide(color: AppColors.accent, width: 2),
                 ),
               ),
               onChanged: (value) => _onChanged(value, index),
@@ -200,7 +210,8 @@ class _ResendSection extends StatelessWidget {
         children: [
           Text(
             'Gửi lại mã sau ${controller.countdown.value}s',
-            style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+            style:
+                const TextStyle(fontSize: 14, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 12),
           TextButton(

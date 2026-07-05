@@ -36,15 +36,22 @@ Future<void> startChatWithCustomer(BookingDto booking) async {
     }
 
     final chatRoom = await apiService.createChatRoom(
-      CreateChatRoomRequest(customerId: customerId, ownerId: ownerId),
+      CreateChatRoomRequest(
+        customerId: customerId,
+        ownerId: ownerId,
+        bookingId: booking.id.isNotEmpty ? booking.id : null,
+      ),
     );
 
     Get.back();
     Get.to(
-      () => ChatDetailPage(chatRoom: chatRoom),
+      () => ChatDetailPage(
+        chatRoom: chatRoom,
+        bookingContext: booking,
+      ),
       transition: Transition.rightToLeft,
     );
-  } catch (e) {
+  } catch (_) {
     Get.back();
     Get.snackbar(
       'Lỗi',

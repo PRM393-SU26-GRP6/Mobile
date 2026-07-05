@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/data/remote/api_service.dart';
+import 'package:exe101/domain/models/booking_model.dart';
 import 'package:exe101/domain/models/chat_model.dart';
+import 'package:exe101/presentation/features/customer/view/messages/widgets/booking_context_card.dart';
 import 'package:exe101/presentation/features/customer/view/messages/widgets/chat_date_separator.dart';
 import 'package:exe101/presentation/features/customer/view/messages/widgets/chat_message_bubble.dart';
 import 'package:flutter/material.dart';
@@ -10,8 +12,13 @@ import 'package:get/get.dart';
 
 class ChatDetailPage extends StatefulWidget {
   final ChatRoomModel chatRoom;
+  final BookingDto? bookingContext;
 
-  const ChatDetailPage({super.key, required this.chatRoom});
+  const ChatDetailPage({
+    super.key,
+    required this.chatRoom,
+    this.bookingContext,
+  });
 
   @override
   State<ChatDetailPage> createState() => _ChatDetailPageState();
@@ -64,7 +71,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
           _isLoading = false;
         });
       }
-    } catch (e) {
+    } catch (_) {
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -97,7 +104,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
 
       _messageController.clear();
       await _loadMessages();
-    } catch (e) {
+    } catch (_) {
       Get.snackbar(
         'Lỗi',
         'Không thể gửi tin nhắn. Vui lòng thử lại.',
@@ -130,6 +137,53 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
         currentDate.year != previousDate.year;
   }
 
+  void _showBookingDetails() {
+    final booking = widget.bookingContext;
+    if (booking == null) return;
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 44,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.inputBorder,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                const Text(
+                  'Chi tiết đơn đặt sân',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                BookingContextCard(booking: booking),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -146,6 +200,11 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
             )
           : Column(
               children: [
+                if (widget.bookingContext != null)
+                  BookingContextCard(
+                    booking: widget.bookingContext!,
+                    onViewDetails: _showBookingDetails,
+                  ),
                 Expanded(child: _buildMessageList()),
                 _buildInputArea(),
               ],
@@ -163,8 +222,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
         final isMe = message.senderId == _currentUserId;
         return Column(
           children: [
-            if (_shouldShowDate(index))
-              ChatDateSeparator(date: message.sentAt),
+            if (_shouldShowDate(index)) ChatDateSeparator(date: message.sentAt),
             ChatMessageBubble(message: message, isMe: isMe),
           ],
         );

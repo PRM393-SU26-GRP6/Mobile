@@ -2,6 +2,7 @@ import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/domain/repositories/user_repository.dart';
 import 'package:exe101/main.dart';
+import 'package:exe101/presentation/features/auth/controller/auth_flow_resolver.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -36,13 +37,35 @@ class AuthController extends GetxController {
           Get.offAllNamed(AppPages.customerHome);
         }
       } else {
+        if (AuthFlowResolver.shouldOpenOtpAfterLogin(loginResponse)) {
+          _openOtpVerification();
+          return;
+        }
         Get.snackbar('Lỗi', loginResponse.message ?? 'Đăng nhập thất bại');
       }
     } catch (e) {
+      if (AuthFlowResolver.shouldOpenOtpAfterLogin(e)) {
+        Get.snackbar(
+          'Thông báo',
+          'Tài khoản chưa xác thực email. Vui lòng nhập OTP để tiếp tục.',
+        );
+        _openOtpVerification();
+        return;
+      }
       Get.snackbar('Lỗi', ApiErrorHandler.getMessage(e));
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void _openOtpVerification() {
+    final email = emailController.text.trim();
+    if (email.isEmpty) return;
+
+    Get.toNamed(
+      AppPages.otpVerification,
+      arguments: {'email': email, 'isRegister': false},
+    );
   }
 
   void logout() async {

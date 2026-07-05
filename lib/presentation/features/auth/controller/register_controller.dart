@@ -2,6 +2,7 @@ import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/domain/models/login_response_model.dart';
 import 'package:exe101/domain/repositories/user_repository.dart';
 import 'package:exe101/main.dart';
+import 'package:exe101/presentation/features/auth/controller/auth_flow_resolver.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -80,7 +81,10 @@ class RegisterController extends GetxController {
     if (!validatePassword(passwordController.text)) {
       return;
     }
-    validateConfirmPassword(confirmPasswordController.text, passwordController.text);
+    validateConfirmPassword(
+      confirmPasswordController.text,
+      passwordController.text,
+    );
     if (confirmPasswordError.value.isNotEmpty) {
       return;
     }
@@ -109,19 +113,44 @@ class RegisterController extends GetxController {
       }
 
       if (response.success) {
-        _pendingEmail = emailController.text;
-        Get.toNamed(
-          AppPages.otpVerification,
-          arguments: {'email': _pendingEmail, 'isRegister': true},
-        );
+        _pendingEmail = emailController.text.trim();
+        _openOtpVerification();
       } else {
+        if (AuthFlowResolver.shouldOpenOtpAfterRegister(response)) {
+          _pendingEmail = emailController.text.trim();
+          Get.snackbar(
+            'Thông báo',
+            response.message ??
+                'Yêu cầu đăng ký phản hồi chậm. Vui lòng kiểm tra email để nhập OTP.',
+          );
+          _openOtpVerification();
+          return;
+        }
         Get.snackbar('Lỗi', response.message ?? 'Đăng ký thất bại');
       }
     } catch (e) {
+      if (AuthFlowResolver.shouldOpenOtpAfterRegister(e)) {
+        _pendingEmail = emailController.text.trim();
+        Get.snackbar(
+          'Thông báo',
+          'Yêu cầu đăng ký phản hồi chậm. Nếu bạn đã nhận được OTP qua email, hãy nhập mã để tiếp tục.',
+        );
+        _openOtpVerification();
+        return;
+      }
       Get.snackbar('Lỗi', ApiErrorHandler.getMessage(e));
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void _openOtpVerification() {
+    if ((_pendingEmail ?? '').isEmpty) return;
+
+    Get.toNamed(
+      AppPages.otpVerification,
+      arguments: {'email': _pendingEmail, 'isRegister': true},
+    );
   }
 
   @override

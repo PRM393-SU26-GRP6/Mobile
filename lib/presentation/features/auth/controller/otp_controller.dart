@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 class OtpController extends GetxController {
+  static const int otpLength = 6;
+
   final UserRepository userRepository;
 
   final otpController = TextEditingController();
@@ -24,15 +26,24 @@ class OtpController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    final args = Get.arguments as Map<String, dynamic>?;
-    if (args != null) {
-      email = args['email'] ?? '';
-      isRegister = args['isRegister'] ?? false;
-    }
+    applyRouteArguments(Get.arguments);
     _startCountdown();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       focusNode.requestFocus();
     });
+  }
+
+  void applyRouteArguments(dynamic args) {
+    if (args is! Map<String, dynamic>) return;
+
+    final nextEmail = (args['email'] as String?)?.trim() ?? '';
+    final nextIsRegister = args['isRegister'] == true;
+
+    if (nextEmail.isNotEmpty && nextEmail != email) {
+      email = nextEmail;
+      otpController.clear();
+    }
+    isRegister = nextIsRegister;
   }
 
   void _startCountdown() {
@@ -51,15 +62,21 @@ class OtpController extends GetxController {
   }
 
   Future<void> verifyOtp() async {
-    if (otpController.text.length < 4) {
+    if (otpController.text.length < otpLength) {
       Get.snackbar('Lỗi', 'Vui lòng nhập đầy đủ mã OTP');
+      return;
+    }
+
+    if (email.isEmpty) {
+      Get.snackbar('Lỗi', 'Không tìm thấy email để xác thực OTP');
       return;
     }
 
     try {
       isLoading.value = true;
 
-      final response = await userRepository.verifyOtp(email, otpController.text);
+      final response =
+          await userRepository.verifyOtp(email, otpController.text);
 
       if (response.success) {
         Get.snackbar('Thành công', 'Xác thực thành công!');
@@ -86,7 +103,7 @@ class OtpController extends GetxController {
   }
 
   void onOtpChanged(String value) {
-    if (value.length == 4) {
+    if (value.length == otpLength) {
       HapticFeedback.lightImpact();
       verifyOtp();
     }

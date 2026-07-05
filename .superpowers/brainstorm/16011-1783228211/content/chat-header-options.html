@@ -1,0 +1,120 @@
+<h2>Chọn kiểu đầu chat cho owner nhắn từ đơn hàng</h2>
+<p class="subtitle">Mục tiêu: giống cảm giác Zalo/Messenger hơn, nhưng vẫn giúp chủ sân biết đang nói về đơn nào.</p>
+
+<div class="cards">
+  <div class="card" data-choice="a-profile" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="width:320px;height:620px;margin:auto;background:#f4fff4;border-radius:28px;overflow:hidden;border:1px solid #d7eadc;font-family:Arial,sans-serif;">
+        <div style="height:72px;background:#00a84f;color:white;display:flex;align-items:center;gap:12px;padding:0 16px;">
+          <span style="font-size:26px;">‹</span>
+          <div style="width:42px;height:42px;border-radius:50%;background:white;color:#008f43;display:flex;align-items:center;justify-content:center;font-weight:700;">PH</div>
+          <div style="flex:1;">
+            <div style="font-size:17px;font-weight:700;">pham bao phi</div>
+            <div style="font-size:12px;opacity:.85;">Khách hàng • đang hoạt động</div>
+          </div>
+          <span style="font-size:20px;">☎</span>
+          <span style="font-size:20px;">⋮</span>
+        </div>
+        <div style="padding:14px 16px;">
+          <div style="text-align:center;margin:18px 0 16px;">
+            <div style="width:76px;height:76px;border-radius:50%;background:#dff7e8;color:#008f43;display:inline-flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;">PH</div>
+            <div style="font-weight:800;font-size:18px;margin-top:10px;">pham bao phi</div>
+            <div style="font-size:12px;color:#6b7d6e;">Khách đặt sân</div>
+          </div>
+          <div style="background:white;border-radius:16px;padding:12px;box-shadow:0 4px 16px rgba(0,0,0,.06);display:flex;gap:10px;align-items:center;">
+            <div style="width:36px;height:36px;border-radius:12px;background:#e8f7ef;color:#00a84f;display:flex;align-items:center;justify-content:center;">📅</div>
+            <div>
+              <div style="font-weight:700;font-size:13px;">Đơn gần nhất</div>
+              <div style="font-size:12px;color:#5e7165;">Sân A • 07:00 - 08:00 • Đã xác nhận</div>
+            </div>
+          </div>
+        </div>
+        <div style="height:310px;background:#f5fff6;border-top:1px solid #e5f1e8;"></div>
+        <div style="height:62px;background:white;display:flex;align-items:center;gap:8px;padding:10px 12px;">
+          <div style="flex:1;background:#f0faf2;border-radius:22px;padding:13px 16px;color:#667;">Nhập tin nhắn...</div>
+          <div style="width:44px;height:44px;border-radius:50%;background:#00a84f;color:white;display:flex;align-items:center;justify-content:center;">➤</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. Header giống Messenger/Zalo</h3>
+      <p>Tập trung vào người chat: avatar, trạng thái, gọi nhanh, menu. Có một thẻ “đơn gần nhất” nhỏ bên dưới để không mất context.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b-booking" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="width:320px;height:620px;margin:auto;background:#f4fff4;border-radius:28px;overflow:hidden;border:1px solid #d7eadc;font-family:Arial,sans-serif;">
+        <div style="height:68px;background:#00a84f;color:white;display:flex;align-items:center;gap:12px;padding:0 16px;">
+          <span style="font-size:26px;">‹</span>
+          <div style="flex:1;text-align:center;">
+            <div style="font-size:17px;font-weight:700;">pham bao phi</div>
+            <div style="font-size:12px;opacity:.85;">Chat về đơn đặt sân</div>
+          </div>
+          <span style="font-size:20px;">⋮</span>
+        </div>
+        <div style="padding:14px;">
+          <div style="background:white;border-radius:18px;padding:14px;box-shadow:0 6px 22px rgba(0,0,0,.08);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+              <div style="font-size:12px;background:#e8f7ef;color:#008f43;border-radius:999px;padding:5px 9px;font-weight:700;">Đã xác nhận</div>
+              <div style="font-size:12px;color:#7b8a7f;">Hôm nay</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <div style="width:44px;height:44px;border-radius:14px;background:#e8f7ef;color:#00a84f;display:flex;align-items:center;justify-content:center;font-size:20px;">⚽</div>
+              <div style="flex:1;">
+                <div style="font-weight:800;">Sân A</div>
+                <div style="font-size:12px;color:#67776c;">07:00 - 08:00 • Cọc 75.000K</div>
+              </div>
+              <div style="font-weight:800;color:#00a84f;">150.000K</div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:14px;">
+              <button style="flex:1;border:1px solid #00a84f;background:white;color:#00a84f;border-radius:10px;padding:9px;font-weight:700;">Xem đơn</button>
+              <button style="flex:1;border:0;background:#00a84f;color:white;border-radius:10px;padding:9px;font-weight:700;">Hoàn thành</button>
+            </div>
+          </div>
+        </div>
+        <div style="height:354px;background:#f5fff6;border-top:1px solid #e5f1e8;"></div>
+        <div style="height:62px;background:white;display:flex;align-items:center;gap:8px;padding:10px 12px;">
+          <div style="flex:1;background:#f0faf2;border-radius:22px;padding:13px 16px;color:#667;">Nhập tin nhắn...</div>
+          <div style="width:44px;height:44px;border-radius:50%;background:#00a84f;color:white;display:flex;align-items:center;justify-content:center;">➤</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. Header là thẻ đơn đặt sân</h3>
+      <p>Rất hợp owner bấm từ booking: nhìn ngay sân, giờ, tiền, trạng thái và CTA. Ít giống social chat hơn nhưng tiện vận hành nhất.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c-hybrid" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="width:320px;height:620px;margin:auto;background:#f4fff4;border-radius:28px;overflow:hidden;border:1px solid #d7eadc;font-family:Arial,sans-serif;">
+        <div style="height:72px;background:#00a84f;color:white;display:flex;align-items:center;gap:12px;padding:0 16px;">
+          <span style="font-size:26px;">‹</span>
+          <div style="width:42px;height:42px;border-radius:50%;background:white;color:#008f43;display:flex;align-items:center;justify-content:center;font-weight:700;">PH</div>
+          <div style="flex:1;">
+            <div style="font-size:17px;font-weight:700;">pham bao phi</div>
+            <div style="font-size:12px;opacity:.85;">Sân A • 07:00 hôm nay</div>
+          </div>
+          <span style="font-size:20px;">☎</span>
+        </div>
+        <div style="padding:10px 14px 0;">
+          <div style="background:white;border-radius:14px;padding:11px 12px;box-shadow:0 4px 14px rgba(0,0,0,.06);display:flex;align-items:center;gap:10px;">
+            <div style="font-size:12px;background:#e8f7ef;color:#008f43;border-radius:999px;padding:5px 8px;font-weight:700;">Đã xác nhận</div>
+            <div style="flex:1;font-size:13px;font-weight:700;">Sân A • 07:00 - 08:00</div>
+            <div style="font-size:13px;color:#00a84f;font-weight:800;">150K</div>
+          </div>
+        </div>
+        <div style="height:400px;background:#f5fff6;border-top:1px solid #e5f1e8;margin-top:10px;"></div>
+        <div style="height:62px;background:white;display:flex;align-items:center;gap:8px;padding:10px 12px;">
+          <div style="flex:1;background:#f0faf2;border-radius:22px;padding:13px 16px;color:#667;">Nhập tin nhắn...</div>
+          <div style="width:44px;height:44px;border-radius:50%;background:#00a84f;color:white;display:flex;align-items:center;justify-content:center;">➤</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C. Hybrid compact</h3>
+      <p>Vừa có cảm giác social chat, vừa có booking context ở chip/thẻ nhỏ. Đây là hướng mình recommend vì ít chiếm diện tích mà owner vẫn hiểu ngữ cảnh.</p>
+    </div>
+  </div>
+</div>

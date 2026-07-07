@@ -76,3 +76,58 @@ class ReviewListResponse {
     return reviews.length + (page - 1) * pageSize < totalCount;
   }
 }
+
+/// Minimal DTO returned by `GET /bookings/{id}/review`.
+///
+/// The booking-review endpoint returns only the review fields attached to
+/// the booking (no user/venue metadata). It is intentionally lighter than
+/// [ReviewModel] so callers can hydrate additional context separately.
+class BookingReviewDto {
+  final String reviewId;
+  final int rating;
+  final String? comment;
+  final DateTime? createdAt;
+
+  BookingReviewDto({
+    required this.reviewId,
+    required this.rating,
+    this.comment,
+    this.createdAt,
+  });
+
+  factory BookingReviewDto.fromJson(Map<String, dynamic> json) {
+    return BookingReviewDto(
+      reviewId: json['reviewId']?.toString() ?? '',
+      rating: (json['rating'] is num) ? (json['rating'] as num).toInt() : 0,
+      comment: json['comment'] as String?,
+      createdAt: json['createdAt'] == null
+          ? null
+          : DateTime.tryParse(json['createdAt'].toString()),
+    );
+  }
+}
+
+/// Returned by `GET /reviews/field/{fieldId}/average-rating`.
+class FieldRatingDto {
+  final String fieldId;
+  final double averageRating;
+  final int totalReviews;
+
+  FieldRatingDto({
+    required this.fieldId,
+    required this.averageRating,
+    required this.totalReviews,
+  });
+
+  factory FieldRatingDto.fromJson(Map<String, dynamic> json) {
+    return FieldRatingDto(
+      fieldId: json['fieldId']?.toString() ?? '',
+      averageRating: (json['averageRating'] is num)
+          ? (json['averageRating'] as num).toDouble()
+          : 0.0,
+      totalReviews: (json['totalReviews'] is num)
+          ? (json['totalReviews'] as num).toInt()
+          : 0,
+    );
+  }
+}

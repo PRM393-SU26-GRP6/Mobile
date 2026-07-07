@@ -1,4 +1,6 @@
 import 'package:exe101/core/theme/app_theme.dart';
+import 'package:exe101/domain/repositories/review_repository.dart';
+import 'package:exe101/domain/repositories/slot_repository.dart';
 import 'package:exe101/presentation/features/customer/controller/venue_detail_controller.dart';
 import 'package:exe101/presentation/features/customer/shared/customer_helpers.dart';
 import 'package:exe101/presentation/features/customer/view/booking/booking_confirm_dialog.dart';
@@ -19,7 +21,11 @@ class VenueDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.isRegistered<VenueDetailController>()
         ? Get.find<VenueDetailController>()
-        : Get.put(VenueDetailController(apiService: Get.find()));
+        : Get.put(VenueDetailController(
+            apiService: Get.find(),
+            slotRepository: Get.find<SlotRepository>(),
+            reviewRepository: Get.find<ReviewRepository>(),
+          ));
 
     return Scaffold(
       backgroundColor: AppColors.secondary,
@@ -137,8 +143,8 @@ class VenueDetailPage extends StatelessWidget {
             bottom: 12,
             right: 12,
             child: Obx(() => Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(12),
@@ -161,8 +167,7 @@ class VenueDetailPage extends StatelessWidget {
               child: Obx(() => Row(
                     mainAxisSize: MainAxisSize.min,
                     children: List.generate(images.length, (i) {
-                      final active =
-                          i == controller.currentImageIndex.value;
+                      final active = i == controller.currentImageIndex.value;
                       return AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
                         margin: const EdgeInsets.symmetric(horizontal: 3),
@@ -417,6 +422,9 @@ class VenueDetailPage extends StatelessWidget {
                       field: field,
                       isSelected:
                           controller.selectedField.value?.id == field.id,
+                      rating: controller.ratingFor(field.id),
+                      onLoadRating: () =>
+                          controller.loadFieldAverageRating(field.id),
                       onTap: () => controller.selectField(field),
                     ));
               }).toList(),

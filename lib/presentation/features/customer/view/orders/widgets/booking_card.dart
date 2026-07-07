@@ -1,6 +1,7 @@
 import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/domain/models/booking_model.dart';
+import 'package:exe101/domain/models/review_model.dart';
 import 'package:exe101/presentation/features/customer/controller/booking_controller.dart';
 import 'package:exe101/presentation/features/customer/shared/customer_helpers.dart';
 import 'package:exe101/presentation/features/customer/view/booking/create_review_dialog.dart';
@@ -166,8 +167,22 @@ class BookingCard extends StatelessWidget {
 
   Future<void> _onEditReview(
       BuildContext context, BookingController controller) async {
-    final existing = controller.reviewForBooking(booking.id);
-    if (existing == null) return;
+    ReviewModel? existing = controller.reviewForBooking(booking.id);
+    if (existing == null) {
+      // Cache miss — fall back to a single-booking lookup before showing
+      // the edit form. Avoids forcing `loadMyReviews()` (which fetches all).
+      await controller.loadBookingReview(booking.id);
+      existing = controller.reviewForBooking(booking.id);
+      if (existing == null) {
+        Get.snackbar(
+          'Thông báo',
+          'Không tìm thấy đánh giá cho booking này',
+          snackPosition: SnackPosition.TOP,
+          margin: const EdgeInsets.all(12),
+        );
+        return;
+      }
+    }
     final success = await ReviewFormDialog.showEdit(booking, existing);
     if (!success) return;
     await controller.loadMyReviews();

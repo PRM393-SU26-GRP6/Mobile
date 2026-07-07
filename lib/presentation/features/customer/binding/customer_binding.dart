@@ -1,4 +1,6 @@
 import 'package:exe101/data/remote/api_service.dart';
+import 'package:exe101/domain/repositories/review_repository.dart';
+import 'package:exe101/domain/repositories/slot_repository.dart';
 import 'package:exe101/domain/repositories/user_repository.dart';
 import 'package:exe101/presentation/features/customer/controller/booking_controller.dart';
 import 'package:exe101/presentation/features/customer/controller/venue_controller.dart';
@@ -15,9 +17,14 @@ class CustomerBinding extends Bindings {
     }
 
     Get.lazyPut<VenueController>(() => VenueController(apiService: apiService));
-    Get.lazyPut<VenueDetailController>(
-        () => VenueDetailController(apiService: apiService));
-    Get.lazyPut<BookingController>(
-        () => BookingController(apiService: apiService));
+    Get.lazyPut<VenueDetailController>(() => VenueDetailController(
+          apiService: apiService,
+          slotRepository: Get.find<SlotRepository>(),
+          reviewRepository: Get.find<ReviewRepository>(),
+        ));
+    Get.lazyPut<BookingController>(() => BookingController(
+          apiService: apiService,
+          reviewRepository: Get.find<ReviewRepository>(),
+        ));
   }
 }

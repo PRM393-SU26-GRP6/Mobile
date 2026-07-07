@@ -112,6 +112,32 @@ class NotificationItem extends StatelessWidget {
                           color: AppColors.textSecondary,
                         ),
                       ),
+                      const Spacer(),
+                      if (!notification.isRead)
+                        GestureDetector(
+                          onTap: onMarkRead,
+                          behavior: HitTestBehavior.opaque,
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 4, vertical: 2),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.done_all,
+                                    size: 14, color: AppColors.primary),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Đã đọc',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ],

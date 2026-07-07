@@ -4,8 +4,12 @@ import 'package:exe101/core/config/env.dart';
 import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/data/remote/owner_resource_api_service.dart';
 import 'package:exe101/data/remote/owner_stats_api_service.dart';
+import 'package:exe101/data/remote/review_api_service.dart';
+import 'package:exe101/data/remote/slot_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:exe101/domain/repositories/review_repository.dart';
+import 'package:exe101/domain/repositories/slot_repository.dart';
 import 'package:exe101/domain/repositories/user_repository.dart';
 import 'package:exe101/domain/repositories/owner_management_repository.dart';
 import 'package:exe101/presentation/features/auth/controller/auth_controller.dart';
@@ -93,6 +97,14 @@ void main() {
     ),
   );
 
+  // Customer slot service for unlock-slot cleanup flow.
+  Get.put<SlotApiService>(SlotApiService(dio));
+  Get.put<SlotRepository>(SlotRepository(slotApiService: Get.find()));
+
+  // Customer review service for lazy booking/field rating lookups.
+  Get.put<ReviewApiService>(ReviewApiService(dio));
+  Get.put<ReviewRepository>(ReviewRepository(reviewApiService: Get.find()));
+
   // Register core controllers used across routes so Get.find works from any page.
   final userRepository = UserRepository(apiService: apiService);
   Get.put<AuthController>(AuthController(userRepository: userRepository));
@@ -100,7 +112,10 @@ void main() {
       RegisterController(userRepository: userRepository));
 
   // BookingController is used inside customer home pages; ensure it's available.
-  Get.put<BookingController>(BookingController(apiService: apiService));
+  Get.put<BookingController>(BookingController(
+    apiService: apiService,
+    reviewRepository: Get.find<ReviewRepository>(),
+  ));
 
   runApp(const App());
 }

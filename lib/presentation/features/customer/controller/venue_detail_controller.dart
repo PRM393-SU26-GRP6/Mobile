@@ -2,12 +2,15 @@ import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/domain/models/review_model.dart';
 import 'package:exe101/domain/models/time_slot_model.dart';
 import 'package:exe101/domain/models/venue_model.dart';
-import 'package:flutter/animation.dart';
+import 'package:exe101/domain/repositories/review_repository.dart';
+import 'package:exe101/domain/repositories/slot_repository.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 class VenueDetailController extends GetxController {
   final ApiService apiService;
+  final SlotRepository slotRepository;
+  final ReviewRepository reviewRepository;
 
   final venue = Rxn<VenueModel>();
   final fields = <FootballFieldDto>[].obs;
@@ -39,7 +42,22 @@ class VenueDetailController extends GetxController {
   final currentImageIndex = 0.obs;
   final PageController imagePageController = PageController();
 
-  VenueDetailController({required this.apiService});
+  /// Per-field average rating cache (keyed by fieldId).
+  /// Lazy-loaded so the venue detail page never blocks on rating fetches.
+  final fieldRatings = <String, FieldRatingDto>{}.obs;
+  final isLoadingFieldRating = <String, bool>{}.obs;
+  final fieldRatingError = <String, String>{}.obs;
+
+  /// Tracks whether a slot-unlock has already been attempted for the
+  /// currently held selection — prevents duplicate unlock calls when
+  /// `onClose` and a manual "clear selection" both fire.
+  bool _unlockDispatched = false;
+
+  VenueDetailController({
+    required this.apiService,
+    required this.slotRepository,
+    required this.reviewRepository,
+  });
 
   @override
   void onInit() {
@@ -218,6 +236,54 @@ class VenueDetailController extends GetxController {
 
   bool get hasReviewsLoaded => _reviewsLoaded;
 
+  /// Lazy-load `GET /reviews/field/{id}/average-rating` for a single field.
+  /// Uses an in-memory cache so repeated lookups (e.g. switching tabs)
+  /// don't refetch.
+  Future<FieldRatingDto?> loadFieldAverageRating(String fieldId) async {
+    if (fieldRatings.containsKey(fieldId)) return fieldRatings[fieldId];
+    if (isLoadingFieldRating[fieldId] == true) return null;
+
+    isLoadingFieldRating[fieldId] = true;
+    fieldRatingError.remove(fieldId);
+    try {
+      final dto = await reviewRepository.getFieldAverageRating(fieldId);
+      fieldRatings[fieldId] = dto;
+      return dto;
+    } catch (e) {
+      fieldRatingError[fieldId] = 'Không thể tải đánh giá sân';
+      return null;
+    } finally {
+      isLoadingFieldRating[fieldId] = false;
+    }
+  }
+
+  FieldRatingDto? ratingFor(String fieldId) => fieldRatings[fieldId];
+
+  /// Best-effort unlock for every slot the user is currently holding on this
+  /// detail screen. Called when the page is disposed, when the user deselects
+  /// all slots, or when navigating away from the booking flow.
+  ///
+  /// Server-side, slot locking happens via `POST /bookings`. If the booking is
+  /// never created, this gives the user/server a chance to free the lock.
+  void unlockSelectedSlots() {
+    if (_unlockDispatched) return;
+    final ids = selectedSlotIds.toList(growable: false);
+    if (ids.isEmpty) return;
+    _unlockDispatched = true;
+    // Fire-and-forget; the slot repository swallows network errors so a
+    // failure here cannot affect navigation back to the previous screen.
+    for (final slotId in ids) {
+      slotRepository.unlockSlot(slotId);
+    }
+  }
+
+  /// Public hook for the view to clear the local selection after a manual
+  /// "bỏ chọn" action without leaving the page.
+  void clearSelectedSlots() {
+    selectedSlotIds.clear();
+    _unlockDispatched = false;
+  }
+
   void nextImage(int total) {
     if (total <= 1) return;
     final next = (currentImageIndex.value + 1) % total;
@@ -244,6 +310,8 @@ class VenueDetailController extends GetxController {
 
   @override
   void onClose() {
+    // Best-effort unlock before disposing UI controllers.
+    unlockSelectedSlots();
     imagePageController.dispose();
     super.onClose();
   }

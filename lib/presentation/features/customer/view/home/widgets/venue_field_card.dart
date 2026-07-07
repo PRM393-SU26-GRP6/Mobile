@@ -1,4 +1,5 @@
 import 'package:exe101/core/theme/app_theme.dart';
+import 'package:exe101/domain/models/review_model.dart';
 import 'package:exe101/domain/models/venue_model.dart';
 import 'package:flutter/material.dart';
 
@@ -6,16 +7,28 @@ class VenueFieldCard extends StatelessWidget {
   final FootballFieldDto field;
   final bool isSelected;
   final VoidCallback onTap;
+  final FieldRatingDto? rating;
+  final VoidCallback? onLoadRating;
 
   const VenueFieldCard({
     super.key,
     required this.field,
     required this.isSelected,
     required this.onTap,
+    this.rating,
+    this.onLoadRating,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Trigger a one-shot lazy fetch the first time the card is built.
+    // The controller is responsible for caching and dedup.
+    if (rating == null && onLoadRating != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        onLoadRating?.call();
+      });
+    }
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -63,22 +76,47 @@ class VenueFieldCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.accent.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      field.fieldTypeLabel,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: AppColors.accent,
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.accent.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          field.fieldTypeLabel,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.accent,
+                          ),
+                        ),
                       ),
-                    ),
+                      if (rating != null && rating!.totalReviews > 0) ...[
+                        const SizedBox(width: 8),
+                        const Icon(Icons.star, size: 13, color: Colors.amber),
+                        const SizedBox(width: 2),
+                        Text(
+                          rating!.averageRating.toStringAsFixed(1),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        Text(
+                          '(${rating!.totalReviews})',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),
@@ -96,7 +134,7 @@ class VenueFieldCard extends StatelessWidget {
                   ),
                 ),
                 const Text(
-                  '/gi뿯ẽ',
+                  '/giờ',
                   style: TextStyle(
                     fontSize: 11,
                     color: AppColors.textSecondary,

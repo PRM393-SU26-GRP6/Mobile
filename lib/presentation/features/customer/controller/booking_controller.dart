@@ -1,10 +1,12 @@
 import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/domain/models/booking_model.dart';
 import 'package:exe101/domain/models/review_model.dart';
+import 'package:exe101/domain/repositories/review_repository.dart';
 import 'package:get/get.dart';
 
 class BookingController extends GetxController {
   final ApiService apiService;
+  final ReviewRepository reviewRepository;
 
   final bookings = <BookingDto>[].obs;
   final isLoading = false.obs;
@@ -26,7 +28,10 @@ class BookingController extends GetxController {
   String? _from;
   String? _to;
 
-  BookingController({required this.apiService});
+  BookingController({
+    required this.apiService,
+    required this.reviewRepository,
+  });
 
   List<BookingDto> get filteredBookings {
     final query = searchQuery.value.trim().toLowerCase();
@@ -139,6 +144,30 @@ class BookingController extends GetxController {
   ReviewModel? reviewForBooking(String bookingId) => myReviews[bookingId];
 
   bool hasReviewFor(String bookingId) => myReviews.containsKey(bookingId);
+
+  /// Lightweight lookup using `GET /bookings/{id}/review`.
+  /// Populates `myReviews[bookingId]` when the booking has a review so
+  /// downstream UI can read it via `reviewForBooking`. Returns the DTO
+  /// so callers can decide whether to navigate into a review form.
+  Future<BookingReviewDto?> loadBookingReview(String bookingId) async {
+    try {
+      final dto = await reviewRepository.getBookingReview(bookingId);
+      if (dto != null) {
+        myReviews[bookingId] = ReviewModel(
+          reviewId: dto.reviewId,
+          userId: '',
+          venueId: '',
+          bookingId: bookingId,
+          rating: dto.rating,
+          comment: dto.comment,
+          createdAt: dto.createdAt,
+        );
+      }
+      return dto;
+    } catch (_) {
+      return null;
+    }
+  }
 
   /// Cập nhật cache local sau khi user tạo/sửa review (không cần gọi lại API list)
   void upsertReview(ReviewModel review) {

@@ -37,7 +37,8 @@ class MapPage extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.map_outlined, size: 64, color: AppColors.accent),
+                      Icon(Icons.map_outlined,
+                          size: 64, color: AppColors.accent),
                       SizedBox(height: 16),
                       Text(
                         'Bản đồ cụm sân',

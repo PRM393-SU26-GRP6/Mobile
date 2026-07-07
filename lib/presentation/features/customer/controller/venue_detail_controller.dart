@@ -2,6 +2,8 @@ import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/domain/models/review_model.dart';
 import 'package:exe101/domain/models/time_slot_model.dart';
 import 'package:exe101/domain/models/venue_model.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 class VenueDetailController extends GetxController {
@@ -32,6 +34,10 @@ class VenueDetailController extends GetxController {
   final hasMoreReviews = false.obs;
   final reviewsError = ''.obs;
   bool _reviewsLoaded = false;
+
+  /// Current page index for the venue image carousel.
+  final currentImageIndex = 0.obs;
+  final PageController imagePageController = PageController();
 
   VenueDetailController({required this.apiService});
 
@@ -65,10 +71,18 @@ class VenueDetailController extends GetxController {
     }
   }
 
+  /// Refreshes venue data (especially images) after owner uploads new photos.
+  Future<void> refreshVenue() async {
+    final current = venue.value;
+    if (current == null) return;
+    await loadVenue(current.id);
+  }
+
   Future<void> loadFields(String venueId) async {
     try {
       isLoadingFields.value = true;
-      final result = await (apiService as ApiServiceImpl).getFieldsByVenue(venueId);
+      final result =
+          await (apiService as ApiServiceImpl).getFieldsByVenue(venueId);
       fields.value = result;
     } catch (e) {
       fields.clear();
@@ -80,7 +94,8 @@ class VenueDetailController extends GetxController {
   Future<void> loadSlots(String fieldId) async {
     try {
       isLoadingSlots.value = true;
-      final result = await (apiService as ApiServiceImpl).getSlotsByField(fieldId);
+      final result =
+          await (apiService as ApiServiceImpl).getSlotsByField(fieldId);
       timeSlots.value = result;
       selectedSlotIds.clear();
       final dates = availableDates;
@@ -141,15 +156,14 @@ class VenueDetailController extends GetxController {
     if (selectedDate.value == null) return [];
     final ymd =
         '${selectedDate.value!.year.toString().padLeft(4, '0')}-${selectedDate.value!.month.toString().padLeft(2, '0')}-${selectedDate.value!.day.toString().padLeft(2, '0')}';
-    final list = timeSlots
-        .where((s) => s.selectedDate == ymd)
-        .toList()
+    final list = timeSlots.where((s) => s.selectedDate == ymd).toList()
       ..sort((a, b) => a.startTime.compareTo(b.startTime));
     return list;
   }
 
   double get totalPrice {
-    final selectedSlots = timeSlots.where((s) => selectedSlotIds.contains(s.slotId));
+    final selectedSlots =
+        timeSlots.where((s) => selectedSlotIds.contains(s.slotId));
     return selectedSlots.fold(0.0, (sum, s) => sum + s.price);
   }
 
@@ -203,4 +217,34 @@ class VenueDetailController extends GetxController {
   }
 
   bool get hasReviewsLoaded => _reviewsLoaded;
+
+  void nextImage(int total) {
+    if (total <= 1) return;
+    final next = (currentImageIndex.value + 1) % total;
+    imagePageController.animateToPage(
+      next,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void previousImage(int total) {
+    if (total <= 1) return;
+    final prev = (currentImageIndex.value - 1 + total) % total;
+    imagePageController.animateToPage(
+      prev,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void onImagePageChanged(int index) {
+    currentImageIndex.value = index;
+  }
+
+  @override
+  void onClose() {
+    imagePageController.dispose();
+    super.onClose();
+  }
 }

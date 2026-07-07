@@ -107,7 +107,8 @@ class AddFieldPage extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.primary.withValues(alpha: 0.3),
+                                    color: AppColors.primary
+                                        .withValues(alpha: 0.3),
                                     blurRadius: 8,
                                     offset: const Offset(0, 4),
                                   ),
@@ -124,7 +125,8 @@ class AddFieldPage extends StatelessWidget {
                                         ),
                                       )
                                     : const Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           Icon(Icons.add, color: Colors.white),
                                           SizedBox(width: 8),
@@ -229,7 +231,8 @@ class AddFieldPage extends StatelessWidget {
       ),
       child: Obx(() => Row(
             children: controller.fieldTypes.map((type) {
-              final isSelected = controller.selectedFieldType.value == type['value'];
+              final isSelected =
+                  controller.selectedFieldType.value == type['value'];
               return Expanded(
                 child: GestureDetector(
                   onTap: () => controller.setFieldType(type['value']!),
@@ -237,10 +240,13 @@ class AddFieldPage extends StatelessWidget {
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
-                      color: isSelected ? AppColors.primary : AppColors.secondary,
+                      color:
+                          isSelected ? AppColors.primary : AppColors.secondary,
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: isSelected ? AppColors.primary : AppColors.inputBorder,
+                        color: isSelected
+                            ? AppColors.primary
+                            : AppColors.inputBorder,
                         width: isSelected ? 2 : 1,
                       ),
                     ),
@@ -256,7 +262,9 @@ class AddFieldPage extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: isSelected ? Colors.white : AppColors.textPrimary,
+                            color: isSelected
+                                ? Colors.white
+                                : AppColors.textPrimary,
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -435,12 +443,17 @@ class AddFieldPage extends StatelessWidget {
               return GestureDetector(
                 onTap: () => controller.toggleAmenity(amenity['id']!),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : AppColors.secondary,
+                    color: isSelected
+                        ? AppColors.primary.withValues(alpha: 0.1)
+                        : AppColors.secondary,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: isSelected ? AppColors.primary : AppColors.inputBorder,
+                      color: isSelected
+                          ? AppColors.primary
+                          : AppColors.inputBorder,
                     ),
                   ),
                   child: Row(
@@ -452,13 +465,17 @@ class AddFieldPage extends StatelessWidget {
                         amenity['name']!,
                         style: TextStyle(
                           fontSize: 12,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                          color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w500,
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.textPrimary,
                         ),
                       ),
                       if (isSelected) ...[
                         const SizedBox(width: 4),
-                        const Icon(Icons.check_circle, size: 14, color: AppColors.primary),
+                        const Icon(Icons.check_circle,
+                            size: 14, color: AppColors.primary),
                       ],
                     ],
                   ),
@@ -497,7 +514,8 @@ class AddFieldPage extends StatelessWidget {
                     color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.check_circle, color: AppColors.primary, size: 20),
+                  child: const Icon(Icons.check_circle,
+                      color: AppColors.primary, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -513,7 +531,9 @@ class AddFieldPage extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        controller.createdFields.map((f) => f.fieldName ?? 'Sân').join(', '),
+                        controller.createdFields
+                            .map((f) => f.fieldName ?? 'Sân')
+                            .join(', '),
                         style: const TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,

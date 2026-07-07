@@ -1071,7 +1071,7 @@ class ApiServiceImpl extends ApiService {
 
     await put<Map<String, dynamic>>(
       '${Env.baseUrl}/api/v1/owner/slots/$slotId/status',
-      data: {'status': status},
+      data: {'slotStatus': status},
       headers: headers,
     );
   }

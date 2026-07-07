@@ -58,8 +58,7 @@ class UserModel {
         "is_active": isActive,
         "thoi_gian_tao": thoiGianTao?.toIso8601String(),
         "thoi_gian_cap_nhat": thoiGianCapNhat?.toIso8601String(),
-        "fcm_token": fcmToken == null 
-            ? [] 
-            : List<dynamic>.from(fcmToken!.map((x) => x)),
+        "fcm_token":
+            fcmToken == null ? [] : List<dynamic>.from(fcmToken!.map((x) => x)),
       };
 }

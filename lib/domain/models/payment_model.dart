@@ -96,9 +96,15 @@ class PaymentModel {
     );
   }
 
-  bool get isSuccess => paymentStatus.toLowerCase() == 'success' || paymentStatus.toLowerCase() == 'completed';
-  bool get isPending => paymentStatus.toLowerCase() == 'pending' || paymentStatus.toLowerCase() == 'processing';
-  bool get isFailed => paymentStatus.toLowerCase() == 'failed' || paymentStatus.toLowerCase() == 'error';
+  bool get isSuccess =>
+      paymentStatus.toLowerCase() == 'success' ||
+      paymentStatus.toLowerCase() == 'completed';
+  bool get isPending =>
+      paymentStatus.toLowerCase() == 'pending' ||
+      paymentStatus.toLowerCase() == 'processing';
+  bool get isFailed =>
+      paymentStatus.toLowerCase() == 'failed' ||
+      paymentStatus.toLowerCase() == 'error';
 }
 
 class BankInfoModel {

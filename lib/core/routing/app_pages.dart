@@ -16,8 +16,10 @@ import 'package:exe101/presentation/features/owner/view/booking/booking_manageme
 import 'package:exe101/presentation/features/owner/view/field/add_field_page.dart';
 import 'package:exe101/presentation/features/owner/view/field/field_detail_page.dart';
 import 'package:exe101/presentation/features/owner/view/home/owner_home_page.dart';
+import 'package:exe101/presentation/features/owner/view/revenue/revenue_page.dart';
 import 'package:exe101/presentation/features/owner/view/slot_management/slot_management_page.dart';
 import 'package:exe101/presentation/features/owner/view/venue_creation_page.dart';
+import 'package:exe101/presentation/features/owner/view/venue_images/venue_images_page.dart';
 import 'package:exe101/presentation/features/splash/binding/splash_binding.dart';
 import 'package:exe101/presentation/features/splash/view/splash_view.dart';
 import 'package:get/get.dart';
@@ -41,6 +43,8 @@ class AppPages {
   static const String selectPaymentMethod = '/select-payment-method';
   static const String userProfile = '/user-profile';
   static const String notifications = '/notifications';
+  static const String revenue = '/owner/revenue';
+  static const String venueImages = '/owner/venue-images';
 
   // GetX pages configuration
   static final List<GetPage> pages = [
@@ -125,6 +129,16 @@ class AppPages {
       name: notifications,
       page: () => const NotificationsPage(),
       binding: NotificationBinding(),
+    ),
+    GetPage(
+      name: revenue,
+      page: () => const RevenuePage(),
+      binding: OwnerBinding(),
+    ),
+    GetPage(
+      name: venueImages,
+      page: () => const VenueImagesPage(),
+      binding: OwnerBinding(),
     ),
   ];
 

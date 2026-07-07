@@ -66,7 +66,8 @@ class RegisterForm extends StatelessWidget {
           prefixIcon: Icons.lock_outline,
           obscureText: true,
           textInputAction: TextInputAction.done,
-          onSubmitted: (_) => onSubmit(emailController.text, passwordController.text),
+          onSubmitted: (_) =>
+              onSubmit(emailController.text, passwordController.text),
         ),
         const SizedBox(height: 24),
         SizedBox(
@@ -150,7 +151,8 @@ class RegisterForm extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: Colors.blue.shade600, width: 2),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
         ),
       ],

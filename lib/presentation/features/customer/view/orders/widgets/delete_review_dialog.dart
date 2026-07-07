@@ -30,8 +30,7 @@ Future<bool> showDeleteReviewDialog() async {
             onPressed: () => Get.back<bool>(result: true),
             style: TextButton.styleFrom(
               foregroundColor: Colors.white,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             ),
             child: const Text(
               'Xóa',

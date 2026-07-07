@@ -50,7 +50,10 @@ class BookingSuccessView extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 14),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [AppColors.buttonGradientStart, AppColors.buttonGradientEnd],
+                colors: [
+                  AppColors.buttonGradientStart,
+                  AppColors.buttonGradientEnd
+                ],
               ),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [

@@ -120,6 +120,7 @@ class OwnerHomePage extends StatelessWidget {
             pendingCount: Get.find<BookingManagementController>().pendingCount,
             onFieldsTap: () {},
             onBookingsTap: () => Get.toNamed(AppPages.bookingManagement),
+            onRevenueTap: () => Get.toNamed(AppPages.revenue),
           )),
     );
   }

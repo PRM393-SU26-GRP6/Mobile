@@ -48,8 +48,9 @@ class VenueCreationController extends GetxController {
     isLoading.value = true;
 
     try {
-      final openingHours = '${openingHourController.text} - ${closingHourController.text}';
-      
+      final openingHours =
+          '${openingHourController.text} - ${closingHourController.text}';
+
       final venue = await apiService.createVenue(
         venueName: nameController.text.trim(),
         address: addressController.text.trim(),

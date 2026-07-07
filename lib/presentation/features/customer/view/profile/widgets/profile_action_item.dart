@@ -30,9 +30,7 @@ class ProfileActionItem extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: isPrimary
-                      ? AppColors.primary
-                      : AppColors.secondary,
+                  color: isPrimary ? AppColors.primary : AppColors.secondary,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
@@ -48,9 +46,8 @@ class ProfileActionItem extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: isPrimary ? FontWeight.w600 : FontWeight.w500,
-                    color: isPrimary
-                        ? AppColors.primary
-                        : AppColors.textPrimary,
+                    color:
+                        isPrimary ? AppColors.primary : AppColors.textPrimary,
                   ),
                 ),
               ),

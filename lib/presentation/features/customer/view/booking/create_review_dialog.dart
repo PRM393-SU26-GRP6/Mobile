@@ -189,7 +189,8 @@ class _ReviewFormDialogState extends State<ReviewFormDialog> {
                     ),
                     IconButton(
                       onPressed: () => Get.back<bool>(result: false),
-                      icon: const Icon(Icons.close, color: AppColors.textSecondary),
+                      icon: const Icon(Icons.close,
+                          color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -234,11 +235,13 @@ class _ReviewFormDialogState extends State<ReviewFormDialog> {
                     fillColor: AppColors.secondary,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.inputBorder),
+                      borderSide:
+                          const BorderSide(color: AppColors.inputBorder),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.inputBorder),
+                      borderSide:
+                          const BorderSide(color: AppColors.inputBorder),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -252,14 +255,17 @@ class _ReviewFormDialogState extends State<ReviewFormDialog> {
                   validator: (value) {
                     final text = (value ?? '').trim();
                     if (text.isEmpty) return 'Vui lòng nhập nhận xét';
-                    if (text.length < 5) return 'Nhận xét quá ngắn (tối thiểu 5 ký tự)';
+                    if (text.length < 5) {
+                      return 'Nhận xét quá ngắn (tối thiểu 5 ký tự)';
+                    }
                     return null;
                   },
                 ),
                 if (_errorMessage != null) ...[
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
                       color: Colors.red.shade50,
                       borderRadius: BorderRadius.circular(8),
@@ -267,7 +273,8 @@ class _ReviewFormDialogState extends State<ReviewFormDialog> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.error_outline, size: 16, color: Colors.red.shade700),
+                        Icon(Icons.error_outline,
+                            size: 16, color: Colors.red.shade700),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(

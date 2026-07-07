@@ -137,7 +137,8 @@ class AddFieldController extends GetxController {
         priceEvening = double.tryParse(eveningPriceController.text.trim());
       }
 
-      debugPrint('Creating field: venueId=$venueId, name=${nameController.text.trim()}, type=${selectedFieldType.value}');
+      debugPrint(
+          'Creating field: venueId=$venueId, name=${nameController.text.trim()}, type=${selectedFieldType.value}');
 
       final field = await apiService.createOwnerField(
         venueId: venueId.value,
@@ -149,7 +150,8 @@ class AddFieldController extends GetxController {
         priceMorning: priceMorning,
         priceAfternoon: priceAfternoon,
         priceEvening: priceEvening,
-        amenities: selectedAmenities.isNotEmpty ? selectedAmenities.toList() : null,
+        amenities:
+            selectedAmenities.isNotEmpty ? selectedAmenities.toList() : null,
       );
 
       debugPrint('Field created successfully: ${field.fieldName}');

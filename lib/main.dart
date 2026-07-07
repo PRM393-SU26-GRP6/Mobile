@@ -2,9 +2,12 @@ import 'package:dio/dio.dart';
 import 'package:exe101/app.dart';
 import 'package:exe101/core/config/env.dart';
 import 'package:exe101/data/remote/api_service.dart';
+import 'package:exe101/data/remote/owner_resource_api_service.dart';
+import 'package:exe101/data/remote/owner_stats_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:exe101/domain/repositories/user_repository.dart';
+import 'package:exe101/domain/repositories/owner_management_repository.dart';
 import 'package:exe101/presentation/features/auth/controller/auth_controller.dart';
 import 'package:exe101/presentation/features/auth/controller/register_controller.dart';
 import 'package:exe101/presentation/features/customer/controller/booking_controller.dart';
@@ -79,6 +82,17 @@ void main() {
   final apiService = ApiServiceImpl(dio);
   Get.put(apiService);
 
+  // Focused owner services. Registered at app-level so feature bindings
+  // can resolve them via Get.find without rebuilding Dio clients.
+  Get.put<OwnerStatsApiService>(OwnerStatsApiService(dio));
+  Get.put<OwnerResourceApiService>(OwnerResourceApiService(dio));
+  Get.put<OwnerManagementRepository>(
+    OwnerManagementRepository(
+      statsService: Get.find<OwnerStatsApiService>(),
+      resourceService: Get.find<OwnerResourceApiService>(),
+    ),
+  );
+
   // Register core controllers used across routes so Get.find works from any page.
   final userRepository = UserRepository(apiService: apiService);
   Get.put<AuthController>(AuthController(userRepository: userRepository));
@@ -86,8 +100,7 @@ void main() {
       RegisterController(userRepository: userRepository));
 
   // BookingController is used inside customer home pages; ensure it's available.
-  Get.put<BookingController>(
-      BookingController(apiService: apiService));
+  Get.put<BookingController>(BookingController(apiService: apiService));
 
   runApp(const App());
 }

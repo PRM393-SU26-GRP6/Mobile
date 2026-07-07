@@ -1,6 +1,8 @@
+import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/domain/models/venue_model.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class VenueStatsCard extends StatelessWidget {
   final VenueModel venue;
@@ -82,6 +84,7 @@ class VenueStatsCard extends StatelessWidget {
                   ],
                 ),
               ),
+              _ImagesActionButton(venue: venue),
             ],
           ),
           const SizedBox(height: 16),
@@ -142,6 +145,41 @@ class VenueStatsCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ImagesActionButton extends StatelessWidget {
+  final VenueModel venue;
+  const _ImagesActionButton({required this.venue});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white.withValues(alpha: 0.2),
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: () => Get.toNamed(AppPages.venueImages, arguments: venue),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.image_outlined, color: Colors.white, size: 16),
+              const SizedBox(width: 4),
+              const Text(
+                'Ảnh',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -88,9 +88,11 @@ class NotificationController extends GetxController {
 
   Future<void> markAsRead(String notificationId) async {
     try {
-      final success = await userRepository.markNotificationAsRead(notificationId);
+      final success =
+          await userRepository.markNotificationAsRead(notificationId);
       if (success) {
-        final index = notifications.indexWhere((n) => n.notificationId == notificationId);
+        final index =
+            notifications.indexWhere((n) => n.notificationId == notificationId);
         if (index != -1) {
           notifications[index] = notifications[index].copyWith(isRead: true);
         }

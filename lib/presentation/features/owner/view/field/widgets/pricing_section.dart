@@ -144,7 +144,8 @@ class PricingSection extends StatelessWidget {
               ),
               filled: true,
               fillColor: AppColors.secondary,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,

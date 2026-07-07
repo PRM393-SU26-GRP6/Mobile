@@ -1,12 +1,17 @@
 import 'package:exe101/data/remote/api_service.dart';
+import 'package:exe101/data/remote/owner_resource_api_service.dart';
 import 'package:exe101/domain/models/booking_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class BookingManagementController extends GetxController {
   final ApiServiceImpl apiService;
+  final OwnerResourceApiService ownerResourceService;
 
-  BookingManagementController({required this.apiService});
+  BookingManagementController({
+    required this.apiService,
+    required this.ownerResourceService,
+  });
 
   final bookings = <BookingDto>[].obs;
   final pendingBookings = <BookingDto>[].obs;
@@ -33,7 +38,8 @@ class BookingManagementController extends GetxController {
   Future<void> loadBookings() async {
     isLoading.value = true;
     try {
-      final status = selectedFilter.value == 'all' ? null : selectedFilter.value;
+      final status =
+          selectedFilter.value == 'all' ? null : selectedFilter.value;
       final result = await apiService.getOwnerBookings(status: status);
       bookings.assignAll(result);
     } catch (e) {
@@ -95,6 +101,18 @@ class BookingManagementController extends GetxController {
 
   Future<void> refreshAll() async {
     await Future.wait([loadBookings(), loadPendingBookings()]);
+  }
+
+  /// Lấy chi tiết booking theo ID từ owner-side API.
+  /// Sử dụng cho booking details sheet khi cần dữ liệu mới nhất.
+  Future<BookingDto?> fetchBookingDetail(String bookingId) async {
+    try {
+      return await ownerResourceService.getOwnerBookingById(bookingId);
+    } catch (e) {
+      Get.snackbar('Lỗi', 'Không thể tải chi tiết đặt sân',
+          snackPosition: SnackPosition.TOP);
+      return null;
+    }
   }
 
   int get pendingCount => pendingBookings.length;

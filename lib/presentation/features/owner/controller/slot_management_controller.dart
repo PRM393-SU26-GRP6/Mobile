@@ -4,6 +4,8 @@ import 'package:exe101/domain/models/field_schedule_model.dart';
 import 'package:exe101/domain/models/time_slot_model.dart';
 import 'package:get/get.dart';
 
+/// Controller chịu trách nhiệm load slots/schedule và bulk create slots.
+/// Các thao tác sửa/xoá slot đơn lẻ tách sang [SlotActionsController].
 class SlotManagementController extends GetxController {
   final ApiServiceImpl apiService;
 
@@ -38,7 +40,6 @@ class SlotManagementController extends GetxController {
         field.value = Get.arguments['field'] as FieldModel;
         _fieldId = field.value!.id;
         _ensureDefaultScheduleRows();
-        // Load schedule and slots after setting field
         _loadData();
       } else if (Get.arguments['fieldId'] != null) {
         _fieldId = Get.arguments['fieldId'] as String;
@@ -92,15 +93,16 @@ class SlotManagementController extends GetxController {
       final result = await apiService.getFieldSchedule(_fieldId!);
       schedules.assignAll(result);
 
-      // Initialize editing schedules
       editingSchedules.assignAll(
-        result.map((s) => FieldScheduleRowDto(
-          dayOfWeek: s.dayOfWeek,
-          openTime: s.openTime,
-          closeTime: s.closeTime,
-          slotDurationMinutes: s.slotDurationMinutes,
-          isActive: s.isActive,
-        )).toList(),
+        result
+            .map((s) => FieldScheduleRowDto(
+                  dayOfWeek: s.dayOfWeek,
+                  openTime: s.openTime,
+                  closeTime: s.closeTime,
+                  slotDurationMinutes: s.slotDurationMinutes,
+                  isActive: s.isActive,
+                ))
+            .toList(),
       );
     } catch (e) {
       errorMessage.value = 'Lỗi khi tải lịch sân';
@@ -151,15 +153,14 @@ class SlotManagementController extends GetxController {
       Get.snackbar('Thành công', 'Đã tạo slots thành công',
           snackPosition: SnackPosition.TOP);
 
-      // Refresh slots list
       await loadSlots();
 
-      // Reset form
       fromDate.value = null;
       toDate.value = null;
     } catch (e) {
       errorMessage.value = 'Lỗi khi tạo slots: ${e.toString()}';
-      Get.snackbar('Lỗi', 'Không thể tạo slots', snackPosition: SnackPosition.TOP);
+      Get.snackbar('Lỗi', 'Không thể tạo slots',
+          snackPosition: SnackPosition.TOP);
     } finally {
       isCreatingSlots.value = false;
     }
@@ -180,17 +181,21 @@ class SlotManagementController extends GetxController {
       Get.snackbar('Thành công', 'Đã lưu lịch sân thành công',
           snackPosition: SnackPosition.TOP);
 
-      // Refresh schedule
       await loadSchedule();
     } catch (e) {
       errorMessage.value = 'Lỗi khi lưu lịch sân';
-      Get.snackbar('Lỗi', 'Không thể lưu lịch sân', snackPosition: SnackPosition.TOP);
+      Get.snackbar('Lỗi', 'Không thể lưu lịch sân',
+          snackPosition: SnackPosition.TOP);
     } finally {
       isSavingSchedule.value = false;
     }
   }
 
-  void updateEditingSchedule(int dayIndex, {String? openTime, String? closeTime, int? slotDuration, bool? isActive}) {
+  void updateEditingSchedule(int dayIndex,
+      {String? openTime,
+      String? closeTime,
+      int? slotDuration,
+      bool? isActive}) {
     if (dayIndex < 0 || dayIndex >= editingSchedules.length) return;
 
     final current = editingSchedules[dayIndex];
@@ -203,34 +208,5 @@ class SlotManagementController extends GetxController {
     );
   }
 
-  Future<void> toggleSlotStatus(String slotId, bool isActive) async {
-    try {
-      final status = isActive ? 'Available' : 'Locked';
-      await apiService.updateSlotStatus(slotId, status);
-      await loadSlots();
-
-      Get.snackbar(
-        'Thành công',
-        isActive ? 'Đã mở slot' : 'Đã khóa slot',
-        snackPosition: SnackPosition.TOP,
-      );
-    } catch (e) {
-      Get.snackbar('Lỗi', 'Không thể cập nhật trạng thái slot',
-          snackPosition: SnackPosition.TOP);
-    }
-  }
-
-  void setDateRange(DateTime start, DateTime end) {
-    fromDate.value = start;
-    toDate.value = end;
-  }
-
   List<int> get availableDurations => [30, 45, 60, 90, 120];
-
-  String formatPrice(double price) {
-    if (price >= 1000000) {
-      return '${(price / 1000000).toStringAsFixed(1)}M';
-    }
-    return '${(price / 1000).toStringAsFixed(0)}K';
-  }
 }

@@ -9,13 +9,15 @@ class CustomerBinding extends Bindings {
   @override
   void dependencies() {
     final apiService = Get.find<ApiServiceImpl>();
-    
+
     if (!Get.isRegistered<UserRepository>()) {
       Get.put<UserRepository>(UserRepository(apiService: apiService));
     }
-    
+
     Get.lazyPut<VenueController>(() => VenueController(apiService: apiService));
-    Get.lazyPut<VenueDetailController>(() => VenueDetailController(apiService: apiService));
-    Get.lazyPut<BookingController>(() => BookingController(apiService: apiService));
+    Get.lazyPut<VenueDetailController>(
+        () => VenueDetailController(apiService: apiService));
+    Get.lazyPut<BookingController>(
+        () => BookingController(apiService: apiService));
   }
 }

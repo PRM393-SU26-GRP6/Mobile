@@ -56,9 +56,9 @@ class BookingManagementPage extends StatelessWidget {
                   onFilterChanged: controller.setFilter,
                   options: controller.filterOptions
                       .map((e) => {
-                          'value': e['value'] as String,
-                          'label': e['label'] as String
-                        })
+                            'value': e['value'] as String,
+                            'label': e['label'] as String
+                          })
                       .toList(),
                 )),
             Expanded(
@@ -116,12 +116,11 @@ class BookingManagementPage extends StatelessWidget {
   String _emptyMessageFor(String filter) {
     if (filter == 'Pending') return 'Không có đơn chờ duyệt';
     if (filter == 'all') return 'Chưa có đơn đặt sân nào';
-    final matched = Get.find<BookingManagementController>()
-        .filterOptions
-        .firstWhere(
-          (e) => e['value'] == filter,
-          orElse: () => {'label': 'này'},
-        );
+    final matched =
+        Get.find<BookingManagementController>().filterOptions.firstWhere(
+              (e) => e['value'] == filter,
+              orElse: () => {'label': 'này'},
+            );
     return 'Không có đơn ${matched['label']}';
   }
 }

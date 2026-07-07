@@ -69,7 +69,8 @@ class VenueCreationPage extends StatelessWidget {
                     _buildTextField(
                       controller: controller.descController,
                       label: 'Mô tả sân bóng',
-                      hint: 'VD: Sân cỏ nhân tạo chất lượng cao, đầy đủ tiện nghi...',
+                      hint:
+                          'VD: Sân cỏ nhân tạo chất lượng cao, đầy đủ tiện nghi...',
                       prefixIcon: Icons.description,
                       maxLines: 4,
                     ),
@@ -130,7 +131,8 @@ class VenueCreationPage extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.primary.withValues(alpha: 0.3),
+                                    color: AppColors.primary
+                                        .withValues(alpha: 0.3),
                                     blurRadius: 8,
                                     offset: const Offset(0, 4),
                                   ),
@@ -265,12 +267,14 @@ class VenueCreationPage extends StatelessWidget {
               ),
               const SizedBox(width: 16),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
                   color: AppColors.secondary,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.arrow_forward, color: AppColors.textSecondary),
+                child: const Icon(Icons.arrow_forward,
+                    color: AppColors.textSecondary),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -312,7 +316,8 @@ class VenueCreationPage extends StatelessWidget {
           },
         );
         if (time != null) {
-          controller.text = '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+          controller.text =
+              '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
         }
       },
       child: Container(

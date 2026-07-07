@@ -27,7 +27,8 @@ class AmenitiesSection extends StatelessWidget {
             border: Border.all(color: AppColors.inputBorder),
           ),
           child: Column(
-            children: FieldModel.availableAmenities.asMap().entries.map((entry) {
+            children:
+                FieldModel.availableAmenities.asMap().entries.map((entry) {
               final index = entry.key;
               final amenity = entry.value;
               final isSelected = selectedAmenities.contains(amenity);

@@ -55,6 +55,10 @@ class VenueController extends GetxController {
         } else {
           hasMore.value = true;
         }
+
+        // BE GET /Venues list không trả `images` trong mỗi item; chỉ GET /Venues/{id} mới có.
+        // Sau khi có list, gọi song song getVenueById cho từng venue để merge ảnh.
+        await _enrichVenuesWithImages(fetched);
       }
     } catch (e) {
       error.value = 'Có lỗi xảy ra: $e';
@@ -72,6 +76,54 @@ class VenueController extends GetxController {
 
   Future<void> refreshVenues() async {
     await loadVenues();
+  }
+
+  /// Gọi song song `GET /Venues/{id}` để lấy `images` cho mỗi venue trong list.
+  /// Vì API list không trả images, cần enrich từ detail endpoint.
+  Future<void> _enrichVenuesWithImages(List<VenueModel> target) async {
+    if (target.isEmpty || apiService is! ApiServiceImpl) return;
+    final svc = apiService as ApiServiceImpl;
+
+    final results = await Future.wait(
+      target.map((v) async {
+        try {
+          return await svc.getVenueById(v.id);
+        } catch (_) {
+          return null;
+        }
+      }),
+    );
+
+    for (var i = 0; i < target.length; i++) {
+      final detailed = results[i];
+      if (detailed == null) continue;
+      if ((target[i].images == null || target[i].images!.isEmpty) &&
+          detailed.images != null &&
+          detailed.images!.isNotEmpty) {
+        final updated = VenueModel(
+          id: target[i].id,
+          venueName: target[i].venueName ?? detailed.venueName,
+          address: target[i].address ?? detailed.address,
+          latitude: target[i].latitude ?? detailed.latitude,
+          longitude: target[i].longitude ?? detailed.longitude,
+          description: target[i].description ?? detailed.description,
+          openingHours: target[i].openingHours ?? detailed.openingHours,
+          phoneContact: target[i].phoneContact ?? detailed.phoneContact,
+          averageRating: target[i].averageRating ?? detailed.averageRating,
+          totalReviews: target[i].totalReviews ?? detailed.totalReviews,
+          minPrice: target[i].minPrice ?? detailed.minPrice,
+          maxPrice: target[i].maxPrice ?? detailed.maxPrice,
+          images: detailed.images,
+          amenities: target[i].amenities ?? detailed.amenities,
+          fields: target[i].fields ?? detailed.fields,
+          isActive: target[i].isActive ?? detailed.isActive,
+          ownerId: target[i].ownerId ?? detailed.ownerId,
+          ownerName: target[i].ownerName ?? detailed.ownerName,
+        );
+        target[i] = updated;
+      }
+    }
+    venues.refresh();
   }
 
   void search(String query) {

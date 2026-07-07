@@ -1,12 +1,35 @@
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/domain/models/booking_model.dart';
+import 'package:exe101/presentation/features/owner/controller/booking_management_controller.dart';
 import 'package:exe101/presentation/features/owner/view/shared/owner_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-Future<void> showBookingDetailsSheet(BookingDto booking) {
+/// Hiển thị chi tiết 1 booking dạng bottom sheet.
+/// Có tuỳ chọn [refreshFromApi] - nếu true sẽ gọi owner booking API để lấy
+/// dữ liệu mới nhất trước khi hiển thị (dùng cho trang detail chuyên biệt).
+Future<void> showBookingDetailsSheet(
+  BookingDto booking, {
+  bool refreshFromApi = false,
+}) async {
+  BookingDto resolved = booking;
+  if (refreshFromApi) {
+    final ctrl = Get.find<BookingManagementController>();
+    final fresh = await ctrl.fetchBookingDetail(booking.id);
+    if (fresh != null) resolved = fresh;
+  }
   return Get.bottomSheet(
-    Container(
+    _BookingDetailsBody(booking: resolved),
+  );
+}
+
+class _BookingDetailsBody extends StatelessWidget {
+  final BookingDto booking;
+  const _BookingDetailsBody({required this.booking});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
       padding: const EdgeInsets.all(20),
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -37,7 +60,12 @@ Future<void> showBookingDetailsSheet(BookingDto booking) {
               ),
             ),
             const SizedBox(height: 20),
-            _DetailRow(label: 'Mã đơn', value: booking.id.substring(0, 8)),
+            _DetailRow(
+              label: 'Mã đơn',
+              value: booking.id.length >= 8
+                  ? booking.id.substring(0, 8)
+                  : booking.id,
+            ),
             _DetailRow(label: 'Sân', value: _fieldName(booking)),
             _DetailRow(
               label: 'Thời gian',
@@ -62,6 +90,9 @@ Future<void> showBookingDetailsSheet(BookingDto booking) {
             _DetailRow(label: 'Trạng thái', value: booking.statusLabel),
             _DetailRow(
                 label: 'Ngày tạo', value: formatDateVN(booking.createdAt)),
+            if (booking.customerName != null &&
+                booking.customerName!.isNotEmpty)
+              _DetailRow(label: 'Khách hàng', value: booking.customerName!),
             if (booking.note != null && booking.note!.isNotEmpty)
               _DetailRow(label: 'Ghi chú', value: booking.note!),
             const SizedBox(height: 20),
@@ -83,8 +114,8 @@ Future<void> showBookingDetailsSheet(BookingDto booking) {
           ],
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _DetailRow extends StatelessWidget {

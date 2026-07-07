@@ -16,7 +16,8 @@ class FieldListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fieldTypeLabel = FieldModel.fieldTypeLabels[field.fieldType] ?? field.fieldType ?? 'Sân';
+    final fieldTypeLabel =
+        FieldModel.fieldTypeLabels[field.fieldType] ?? field.fieldType ?? 'Sân';
 
     return GestureDetector(
       onTap: onTap,
@@ -70,7 +71,8 @@ class FieldListItem extends StatelessWidget {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
                               color: AppColors.secondary,
                               borderRadius: BorderRadius.circular(4),
@@ -94,7 +96,8 @@ class FieldListItem extends StatelessWidget {
                 Column(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: field.isActive == true
                             ? Colors.green.shade50

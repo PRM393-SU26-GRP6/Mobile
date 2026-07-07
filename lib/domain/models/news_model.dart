@@ -59,7 +59,8 @@ class NewsModel {
         danhMucTinTuc: json["danh_muc_tin_tuc"] == null
             ? null
             : Category.fromJson(json["danh_muc_tin_tuc"]),
-        count: json["_count"] == null ? null : NewsCount.fromJson(json["_count"]),
+        count:
+            json["_count"] == null ? null : NewsCount.fromJson(json["_count"]),
       );
 }
 

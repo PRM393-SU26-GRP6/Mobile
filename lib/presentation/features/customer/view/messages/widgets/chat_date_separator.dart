@@ -32,7 +32,8 @@ class ChatDateSeparator extends StatelessWidget {
   String _label(DateTime date) {
     final now = DateTime.now();
     if (isSameDay(date, now)) return 'Hôm nay';
-    if (isSameDay(date, now.subtract(const Duration(days: 1)))) return 'Hôm qua';
+    if (isSameDay(date, now.subtract(const Duration(days: 1))))
+      return 'Hôm qua';
     return '${date.day}/${date.month}/${date.year}';
   }
 }

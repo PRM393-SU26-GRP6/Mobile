@@ -86,7 +86,8 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
         if (statusCode == 409) {
           msg = 'Slot đã được đặt, vui lòng chọn lại';
         } else if (statusCode == 400) {
-          msg = 'Dữ liệu không hợp lệ${serverMsg.isNotEmpty ? ': $serverMsg' : ''}';
+          msg =
+              'Dữ liệu không hợp lệ${serverMsg.isNotEmpty ? ': $serverMsg' : ''}';
         } else if (statusCode == 401) {
           msg = 'Phiên đăng nhập hết hạn';
         } else if (statusCode != null) {
@@ -161,7 +162,8 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
             color: AppColors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Icon(Icons.calendar_month, color: AppColors.primary, size: 24),
+          child: const Icon(Icons.calendar_month,
+              color: AppColors.primary, size: 24),
         ),
         const SizedBox(width: 14),
         const Expanded(
@@ -179,7 +181,8 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
             onTap: () => Get.back(result: false),
             child: Container(
               padding: const EdgeInsets.all(4),
-              child: const Icon(Icons.close, color: AppColors.textSecondary, size: 22),
+              child: const Icon(Icons.close,
+                  color: AppColors.textSecondary, size: 22),
             ),
           ),
       ],
@@ -246,12 +249,16 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
       style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
       decoration: InputDecoration(
         labelText: 'Mã giảm giá',
-        labelStyle: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+        labelStyle: const TextStyle(
+            fontSize: 13,
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500),
         hintText: 'Nhập mã giảm giá (nếu có)',
         hintStyle: TextStyle(fontSize: 13, color: Colors.grey.shade400),
         filled: true,
         fillColor: AppColors.secondary,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: AppColors.inputBorder),
@@ -268,7 +275,8 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: Colors.grey.shade300),
         ),
-        prefixIcon: const Icon(Icons.discount_outlined, size: 18, color: AppColors.primary),
+        prefixIcon: const Icon(Icons.discount_outlined,
+            size: 18, color: AppColors.primary),
       ),
     );
   }
@@ -281,12 +289,16 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
       style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
       decoration: InputDecoration(
         labelText: 'Ghi chú',
-        labelStyle: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+        labelStyle: const TextStyle(
+            fontSize: 13,
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500),
         hintText: 'Nhập ghi chú cho chủ sân (nếu có)',
         hintStyle: TextStyle(fontSize: 13, color: Colors.grey.shade400),
         filled: true,
         fillColor: AppColors.secondary,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: AppColors.inputBorder),
@@ -303,7 +315,8 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: Colors.grey.shade300),
         ),
-        prefixIcon: const Icon(Icons.note_outlined, size: 18, color: AppColors.primary),
+        prefixIcon:
+            const Icon(Icons.note_outlined, size: 18, color: AppColors.primary),
       ),
     );
   }
@@ -313,7 +326,8 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
       children: [
         Expanded(
           child: GestureDetector(
-            onTap: _state == _State.loading ? null : () => Get.back(result: false),
+            onTap:
+                _state == _State.loading ? null : () => Get.back(result: false),
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
@@ -341,7 +355,10 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [AppColors.buttonGradientStart, AppColors.buttonGradientEnd],
+                  colors: [
+                    AppColors.buttonGradientStart,
+                    AppColors.buttonGradientEnd
+                  ],
                 ),
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [

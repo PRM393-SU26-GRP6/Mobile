@@ -105,7 +105,8 @@ class UserRepository {
 
   Future<bool> markNotificationAsRead(String notificationId) async {
     if (apiService is ApiServiceImpl) {
-      return (apiService as ApiServiceImpl).markNotificationAsRead(notificationId);
+      return (apiService as ApiServiceImpl)
+          .markNotificationAsRead(notificationId);
     }
     throw Exception('ApiService must be ApiServiceImpl');
   }

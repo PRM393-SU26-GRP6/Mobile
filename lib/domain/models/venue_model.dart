@@ -75,10 +75,14 @@ class VenueModel {
       maxPrice: (json["maxPrice"] as num?)?.toDouble(),
       images: resolvedImages,
       amenities: json["amenities"] != null
-          ? (json["amenities"] as List).map((e) => AmenityModel.fromJson(e)).toList()
+          ? (json["amenities"] as List)
+              .map((e) => AmenityModel.fromJson(e))
+              .toList()
           : null,
       fields: json["fields"] != null
-          ? (json["fields"] as List).map((e) => FootballFieldDto.fromJson(e)).toList()
+          ? (json["fields"] as List)
+              .map((e) => FootballFieldDto.fromJson(e))
+              .toList()
           : null,
       isActive: json["isActive"] as bool?,
       ownerId: json["ownerId"],
@@ -126,7 +130,8 @@ class FootballFieldDto {
     this.isActive,
   });
 
-  factory FootballFieldDto.fromJson(Map<String, dynamic> json) => FootballFieldDto(
+  factory FootballFieldDto.fromJson(Map<String, dynamic> json) =>
+      FootballFieldDto(
         id: json["id"] ?? '',
         ownerId: json["ownerId"],
         fieldName: json["fieldName"],

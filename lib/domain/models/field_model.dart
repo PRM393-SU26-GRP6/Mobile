@@ -42,9 +42,7 @@ class FieldModel {
           ? List<String>.from(json['amenities'])
           : null,
       isActive: json['isActive'] as bool?,
-      images: json['images'] != null
-          ? List<String>.from(json['images'])
-          : null,
+      images: json['images'] != null ? List<String>.from(json['images']) : null,
     );
   }
 

@@ -71,7 +71,8 @@ class NotificationsPage extends StatelessWidget {
               return GestureDetector(
                 onTap: () => showMarkAllReadDialog(controller),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
@@ -157,13 +158,16 @@ class NotificationsPage extends StatelessWidget {
         },
         child: ListView.builder(
           padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-          itemCount: controller.notifications.length + (controller.hasMore.value ? 1 : 0),
+          itemCount: controller.notifications.length +
+              (controller.hasMore.value ? 1 : 0),
           itemBuilder: (context, index) {
             if (index < controller.notifications.length) {
               return NotificationItem(
                 notification: controller.notifications[index],
-                onTap: () => _handleNotificationTap(controller, controller.notifications[index]),
-                onMarkRead: () => controller.markAsRead(controller.notifications[index].notificationId!),
+                onTap: () => _handleNotificationTap(
+                    controller, controller.notifications[index]),
+                onMarkRead: () => controller.markAsRead(
+                    controller.notifications[index].notificationId!),
                 getTimeAgo: controller.getTimeAgo,
               );
             }
@@ -216,7 +220,8 @@ class NotificationsPage extends StatelessWidget {
             GestureDetector(
               onTap: () => controller.loadNotifications(refresh: true),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 decoration: BoxDecoration(
                   color: AppColors.primary,
                   borderRadius: BorderRadius.circular(8),
@@ -253,14 +258,18 @@ class NotificationsPage extends StatelessWidget {
                 border: Border.all(color: const Color(0xFFEAEAEA)),
               ),
               child: Icon(
-                unreadOnly ? Icons.notifications_off_outlined : Icons.notifications_outlined,
+                unreadOnly
+                    ? Icons.notifications_off_outlined
+                    : Icons.notifications_outlined,
                 size: 40,
                 color: AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: 20),
             Text(
-              unreadOnly ? 'Không có thông báo chưa đọc' : 'Không có thông báo nào',
+              unreadOnly
+                  ? 'Không có thông báo chưa đọc'
+                  : 'Không có thông báo nào',
               style: const TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
@@ -284,7 +293,8 @@ class NotificationsPage extends StatelessWidget {
     );
   }
 
-  void _handleNotificationTap(NotificationController controller, NotificationModel notification) {
+  void _handleNotificationTap(
+      NotificationController controller, NotificationModel notification) {
     if (!notification.isRead) {
       controller.markAsRead(notification.notificationId!);
     }

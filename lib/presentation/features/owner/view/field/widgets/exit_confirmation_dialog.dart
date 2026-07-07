@@ -88,8 +88,7 @@ Future<void> showFinishDialog(AddFieldController controller) async {
 
 void _exitToOwnerHome() {
   Get.until(
-    (route) =>
-        route.settings.name == AppPages.ownerHome || route.isFirst,
+    (route) => route.settings.name == AppPages.ownerHome || route.isFirst,
   );
   if (Get.isRegistered<OwnerHomeController>()) {
     Get.find<OwnerHomeController>().refreshAll();

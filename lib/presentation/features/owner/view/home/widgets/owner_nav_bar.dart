@@ -5,12 +5,14 @@ class OwnerNavBar extends StatelessWidget {
   final int pendingCount;
   final VoidCallback onFieldsTap;
   final VoidCallback onBookingsTap;
+  final VoidCallback onRevenueTap;
 
   const OwnerNavBar({
     super.key,
     required this.pendingCount,
     required this.onFieldsTap,
     required this.onBookingsTap,
+    required this.onRevenueTap,
   });
 
   @override
@@ -28,25 +30,34 @@ class OwnerNavBar extends StatelessWidget {
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Row(
             children: [
               Expanded(
                 child: _NavButton(
                   icon: Icons.stadium,
-                  label: 'Quản lý sân',
+                  label: 'Sân',
                   isSelected: true,
                   onTap: onFieldsTap,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               Expanded(
                 child: _NavButton(
                   icon: Icons.calendar_today,
-                  label: 'Duyệt đặt sân',
+                  label: 'Đặt sân',
                   isSelected: false,
                   badge: pendingCount,
                   onTap: onBookingsTap,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _NavButton(
+                  icon: Icons.bar_chart,
+                  label: 'Doanh thu',
+                  isSelected: false,
+                  onTap: onRevenueTap,
                 ),
               ),
             ],
@@ -115,13 +126,16 @@ class _NavButton extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : AppColors.textSecondary,
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                label,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: isSelected ? Colors.white : AppColors.textSecondary,
+                ),
               ),
             ),
           ],

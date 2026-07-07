@@ -94,7 +94,9 @@ class VenueDetailPage extends StatelessWidget {
           width: double.infinity,
           child: images.isNotEmpty
               ? PageView.builder(
+                  controller: controller.imagePageController,
                   itemCount: images.length,
+                  onPageChanged: controller.onImagePageChanged,
                   itemBuilder: (context, index) {
                     return Image.network(
                       images[index],
@@ -105,22 +107,77 @@ class VenueDetailPage extends StatelessWidget {
                 )
               : _buildImagePlaceholder(),
         ),
-        if (images.length > 1)
+        if (images.length > 1) ...[
+          // Left arrow
           Positioned(
-            bottom: 12,
-            right: 12,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                '${images.length} ảnh',
-                style: const TextStyle(color: Colors.white, fontSize: 12),
+            left: 8,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: _ImageNavButton(
+                icon: Icons.chevron_left,
+                onTap: () => controller.previousImage(images.length),
               ),
             ),
           ),
+          // Right arrow
+          Positioned(
+            right: 8,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: _ImageNavButton(
+                icon: Icons.chevron_right,
+                onTap: () => controller.nextImage(images.length),
+              ),
+            ),
+          ),
+          // Page indicator (e.g. 1/3)
+          Positioned(
+            bottom: 12,
+            right: 12,
+            child: Obx(() => Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${controller.currentImageIndex.value + 1}/${images.length}',
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600),
+                  ),
+                )),
+          ),
+          // Dot indicators
+          Positioned(
+            bottom: 14,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Obx(() => Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(images.length, (i) {
+                      final active =
+                          i == controller.currentImageIndex.value;
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        margin: const EdgeInsets.symmetric(horizontal: 3),
+                        width: active ? 18 : 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: active ? Colors.white : Colors.white70,
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      );
+                    }),
+                  )),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -129,7 +186,8 @@ class VenueDetailPage extends StatelessWidget {
     return Container(
       color: AppColors.secondary,
       child: const Center(
-        child: Icon(Icons.sports_soccer, size: 64, color: AppColors.textSecondary),
+        child:
+            Icon(Icons.sports_soccer, size: 64, color: AppColors.textSecondary),
       ),
     );
   }
@@ -182,12 +240,14 @@ class VenueDetailPage extends StatelessWidget {
               icon: Icons.location_on_outlined,
               text: venue.address ?? 'Không có địa chỉ'),
           if (venue.phoneContact != null)
-            LabeledInfoRow(icon: Icons.phone_outlined, text: venue.phoneContact!),
+            LabeledInfoRow(
+                icon: Icons.phone_outlined, text: venue.phoneContact!),
           if (venue.openingHours != null)
             LabeledInfoRow(icon: Icons.access_time, text: venue.openingHours!),
           if (venue.ownerName != null)
             LabeledInfoRow(
-                icon: Icons.person_outline, text: 'Chủ sân: ${venue.ownerName}'),
+                icon: Icons.person_outline,
+                text: 'Chủ sân: ${venue.ownerName}'),
           const SizedBox(height: 16),
           const Divider(color: AppColors.inputBorder, height: 1),
           const SizedBox(height: 16),
@@ -222,7 +282,8 @@ class VenueDetailPage extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.chat_bubble_outline, color: Colors.white, size: 20),
+            const Icon(Icons.chat_bubble_outline,
+                color: Colors.white, size: 20),
             const SizedBox(width: 8),
             Text(
               venue.ownerId != null ? 'Nhắn tin chủ sân' : 'Liên hệ chủ sân',
@@ -261,7 +322,8 @@ class VenueDetailPage extends StatelessWidget {
             runSpacing: 8,
             children: amenities.map((a) {
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: AppColors.accent.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
@@ -730,5 +792,28 @@ class VenueDetailPage extends StatelessWidget {
         ),
       );
     });
+  }
+}
+
+class _ImageNavButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _ImageNavButton({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.black.withValues(alpha: 0.4),
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Icon(icon, color: Colors.white, size: 28),
+        ),
+      ),
+    );
   }
 }

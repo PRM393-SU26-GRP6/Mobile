@@ -38,7 +38,8 @@ class RoleSelectionPage extends StatelessWidget {
                 const SizedBox(height: 8),
                 const Text(
                   'Chọn vai trò để tiếp tục',
-                  style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                  style:
+                      TextStyle(fontSize: 14, color: AppColors.textSecondary),
                 ),
                 const Spacer(),
                 _buildRoleCard(
@@ -46,7 +47,8 @@ class RoleSelectionPage extends StatelessWidget {
                   title: 'Khách hàng',
                   subtitle: 'Đặt sân thể thao dễ dàng',
                   color: Colors.blue,
-                  onTap: () => Get.toNamed(AppPages.register, arguments: 'Customer'),
+                  onTap: () =>
+                      Get.toNamed(AppPages.register, arguments: 'Customer'),
                 ),
                 const SizedBox(height: 16),
                 _buildRoleCard(
@@ -54,7 +56,8 @@ class RoleSelectionPage extends StatelessWidget {
                   title: 'Chủ sân',
                   subtitle: 'Quản lý sân của bạn',
                   color: Colors.orange,
-                  onTap: () => Get.toNamed(AppPages.register, arguments: 'Owner'),
+                  onTap: () =>
+                      Get.toNamed(AppPages.register, arguments: 'Owner'),
                 ),
                 const Spacer(),
                 Row(
@@ -62,7 +65,8 @@ class RoleSelectionPage extends StatelessWidget {
                   children: [
                     const Text(
                       'Đã có tài khoản? ',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                      style: TextStyle(
+                          color: AppColors.textSecondary, fontSize: 14),
                     ),
                     GestureDetector(
                       onTap: () => Get.back(),

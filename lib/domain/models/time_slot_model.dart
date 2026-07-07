@@ -22,32 +22,47 @@ class TimeSlotDto {
   });
 
   factory TimeSlotDto.fromJson(Map<String, dynamic> json) => TimeSlotDto(
-        slotId: json["slotId"] ?? '',
-        fieldId: json["fieldId"] ?? '',
-        startTime: json["startTime"] ?? '',
-        endTime: json["endTime"] ?? '',
-        selectedDate: json["selectedDate"] ?? '',
-        price: (json["price"] as num).toDouble(),
-        slotStatus: json["slotStatus"],
+        slotId: json["slotId"]?.toString() ?? '',
+        fieldId: json["fieldId"]?.toString() ?? '',
+        startTime: json["startTime"]?.toString() ?? '',
+        endTime: json["endTime"]?.toString() ?? '',
+        selectedDate: json["selectedDate"]?.toString() ?? '',
+        price: ((json["price"] as num?) ?? 0).toDouble(),
+        slotStatus: json["slotStatus"]?.toString(),
         createdAt: json["createdAt"] != null
-            ? DateTime.parse(json["createdAt"])
+            ? DateTime.tryParse(json["createdAt"].toString())
             : null,
         updatedAt: json["updatedAt"] != null
-            ? DateTime.parse(json["updatedAt"])
+            ? DateTime.tryParse(json["updatedAt"].toString())
             : null,
       );
+
+  Map<String, dynamic> toJson() {
+    return {
+      if (slotId.isNotEmpty) 'slotId': slotId,
+      if (fieldId.isNotEmpty) 'fieldId': fieldId,
+      'startTime': startTime,
+      'endTime': endTime,
+      if (selectedDate.isNotEmpty) 'selectedDate': selectedDate,
+      'price': price,
+      if (slotStatus != null) 'slotStatus': slotStatus,
+    };
+  }
 
   String get timeRange => '$startTime - $endTime';
 
   bool get isBooked =>
-      slotStatus != null &&
-      (slotStatus == 'Booked' || slotStatus == 'booked');
+      slotStatus != null && (slotStatus == 'Booked' || slotStatus == 'booked');
 
-  bool get isAvailable => !isBooked;
+  /// Slot thực sự có thể đặt được (không bị khoá, không bị đặt).
+  bool get isAvailable {
+    if (slotStatus == null) return true;
+    final s = slotStatus!;
+    return s == 'Available' || s == 'available';
+  }
 
   bool get isLocked =>
-      slotStatus != null &&
-      (slotStatus == 'Locked' || slotStatus == 'locked');
+      slotStatus != null && (slotStatus == 'Locked' || slotStatus == 'locked');
 
   bool get isPending =>
       slotStatus != null &&

@@ -37,7 +37,8 @@ class CartPage extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.shopping_cart_outlined, size: 64, color: AppColors.accent),
+                      Icon(Icons.shopping_cart_outlined,
+                          size: 64, color: AppColors.accent),
                       SizedBox(height: 16),
                       Text(
                         'Giỏ hàng trống',

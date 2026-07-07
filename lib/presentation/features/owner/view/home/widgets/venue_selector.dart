@@ -102,7 +102,10 @@ class VenueSelector extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [AppColors.buttonGradientStart, AppColors.buttonGradientEnd],
+            colors: [
+              AppColors.buttonGradientStart,
+              AppColors.buttonGradientEnd
+            ],
           ),
           borderRadius: BorderRadius.circular(8),
         ),

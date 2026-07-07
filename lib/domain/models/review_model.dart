@@ -60,14 +60,14 @@ class ReviewListResponse {
       reviews: list
           .map((e) => ReviewModel.fromJson(Map<String, dynamic>.from(e as Map)))
           .toList(),
-      totalCount: (json['totalCount'] is num)
-          ? (json['totalCount'] as num).toInt()
-          : 0,
+      totalCount:
+          (json['totalCount'] is num) ? (json['totalCount'] as num).toInt() : 0,
       averageRating: (json['averageRating'] is num)
           ? (json['averageRating'] as num).toDouble()
           : 0.0,
       page: (json['page'] is num) ? (json['page'] as num).toInt() : 1,
-      pageSize: (json['pageSize'] is num) ? (json['pageSize'] as num).toInt() : 5,
+      pageSize:
+          (json['pageSize'] is num) ? (json['pageSize'] as num).toInt() : 5,
     );
   }
 

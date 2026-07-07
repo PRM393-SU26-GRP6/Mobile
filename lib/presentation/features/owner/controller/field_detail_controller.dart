@@ -69,7 +69,8 @@ class FieldDetailController extends GetxController {
       if (Get.isRegistered<OwnerHomeController>()) {
         final ownerController = Get.find<OwnerHomeController>();
         if (ownerController.selectedVenue.value != null) {
-          await ownerController.loadFields(ownerController.selectedVenue.value!.id);
+          await ownerController
+              .loadFields(ownerController.selectedVenue.value!.id);
         }
       }
 

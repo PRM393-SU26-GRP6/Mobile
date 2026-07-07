@@ -99,9 +99,8 @@ class BookingStatsCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 12),
         margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
-          color: isHighlight
-              ? Colors.white
-              : Colors.white.withValues(alpha: 0.15),
+          color:
+              isHighlight ? Colors.white : Colors.white.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(

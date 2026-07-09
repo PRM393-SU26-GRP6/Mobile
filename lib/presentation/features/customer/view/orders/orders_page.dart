@@ -3,6 +3,7 @@ import 'package:exe101/presentation/features/customer/controller/booking_control
 import 'package:exe101/presentation/features/customer/view/orders/widgets/booking_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:exe101/core/routing/app_pages.dart';
 
 class OrdersPage extends StatefulWidget {
   const OrdersPage({super.key});
@@ -46,18 +47,30 @@ class _OrdersPageState extends State<OrdersPage> {
               ),
             ],
           ),
-          child: const Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 14),
-              child: Text(
-                'Đơn đặt sân của tôi',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 14),
+                child: Text(
+                  'Đơn đặt sân của tôi',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
-            ),
+              Positioned(
+                right: 8,
+                child: IconButton(
+                  icon: const Icon(Icons.history, color: AppColors.primary),
+                  onPressed: () {
+                    Get.toNamed(AppPages.paymentHistory);
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),

@@ -6,9 +6,11 @@ class VenueController extends GetxController {
   final ApiService apiService;
 
   final venues = <VenueModel>[].obs;
+  final allAmenities = <AmenityModel>[].obs;
   final isLoading = false.obs;
   final error = ''.obs;
   final searchQuery = ''.obs;
+  final selectedAmenityIds = <String>[].obs;
   final page = 1.obs;
   final int pageSize = 5;
   final hasMore = true.obs;
@@ -19,6 +21,25 @@ class VenueController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    loadAmenities();
+    loadVenues();
+  }
+
+  Future<void> loadAmenities() async {
+    if (apiService is ApiServiceImpl) {
+      try {
+        final list = await (apiService as ApiServiceImpl).getAllAmenities();
+        allAmenities.value = list;
+      } catch (_) {}
+    }
+  }
+
+  void toggleAmenityFilter(String amenityId) {
+    if (selectedAmenityIds.contains(amenityId)) {
+      selectedAmenityIds.remove(amenityId);
+    } else {
+      selectedAmenityIds.add(amenityId);
+    }
     loadVenues();
   }
 
@@ -38,11 +59,25 @@ class VenueController extends GetxController {
       }
 
       if (apiService is ApiServiceImpl) {
-        final fetched = await (apiService as ApiServiceImpl).getVenues(
-          q: searchQuery.value.isNotEmpty ? searchQuery.value : null,
-          page: page.value,
-          pageSize: pageSize,
-        );
+        final svc = apiService as ApiServiceImpl;
+        final amenitiesParam = selectedAmenityIds.isNotEmpty
+            ? selectedAmenityIds.join(',')
+            : null;
+            
+        List<VenueModel> fetched = [];
+        if (searchQuery.value.isNotEmpty) {
+          fetched = await svc.searchVenues(
+            q: searchQuery.value,
+            page: page.value,
+            pageSize: pageSize,
+          );
+        } else {
+          fetched = await svc.getVenues(
+            amenityIds: amenitiesParam,
+            page: page.value,
+            pageSize: pageSize,
+          );
+        }
 
         if (page.value == 1) {
           venues.value = fetched;

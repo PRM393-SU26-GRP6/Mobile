@@ -34,7 +34,7 @@ class HomePage extends StatelessWidget {
                 child: Column(
                   children: [
                     _buildSearchBar(venueController),
-                    _buildFilterChips(),
+                    _buildFilterChips(venueController),
                     Expanded(child: _buildVenueList(venueController)),
                   ],
                 ),
@@ -165,37 +165,76 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildFilterChips() {
-    final filters = ['Tất cả', 'Bóng đá 5', 'Bóng đá 7', 'Bóng đá 11'];
-    return SizedBox(
-      height: 40,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: filters.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          final isSelected = index == 0;
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: isSelected ? AppColors.accent : Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Center(
-              child: Text(
-                filters[index],
-                style: TextStyle(
-                  fontSize: 13,
-                  color: isSelected ? Colors.white : Colors.grey.shade700,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+  Widget _buildFilterChips(VenueController controller) {
+    return Obx(() {
+      final amenities = controller.allAmenities;
+      if (amenities.isEmpty) return const SizedBox.shrink();
+
+      return SizedBox(
+        height: 40,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: amenities.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 8),
+          itemBuilder: (context, index) {
+            final amenity = amenities[index];
+            final amenityId = amenity.id ?? '';
+            final isSelected = controller.selectedAmenityIds.contains(amenityId);
+
+            return GestureDetector(
+              onTap: () {
+                if (amenityId.isNotEmpty) {
+                  controller.toggleAmenityFilter(amenityId);
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: isSelected ? AppColors.accent : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(20),
+                  border: isSelected
+                      ? null
+                      : Border.all(color: Colors.grey.shade300),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (amenity.icon != null && amenity.icon!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: Image.network(
+                          amenity.icon!,
+                          width: 16,
+                          height: 16,
+                          color:
+                              isSelected ? Colors.white : Colors.grey.shade700,
+                          errorBuilder: (context, error, stackTrace) => Icon(
+                            Icons.check_circle_outline,
+                            size: 16,
+                            color: isSelected
+                                ? Colors.white
+                                : Colors.grey.shade700,
+                          ),
+                        ),
+                      ),
+                    Text(
+                      amenity.amenityName ?? '',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: isSelected ? Colors.white : Colors.grey.shade700,
+                        fontWeight:
+                            isSelected ? FontWeight.w600 : FontWeight.normal,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          );
-        },
-      ),
-    );
+            );
+          },
+        ),
+      );
+    });
   }
 
   Widget _buildVenueList(VenueController controller) {

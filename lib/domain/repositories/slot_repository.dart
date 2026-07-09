@@ -9,4 +9,20 @@ class SlotRepository {
   Future<bool> unlockSlot(String slotId) {
     return slotApiService.unlockSlot(slotId);
   }
+
+  Future<bool> lockSlot({
+    String? slotId,
+    required String fieldId,
+    required String startTime,
+    required String endTime,
+    required String selectedDate,
+  }) {
+    return slotApiService.lockSlot(
+      slotId: slotId,
+      fieldId: fieldId,
+      startTime: startTime,
+      endTime: endTime,
+      selectedDate: selectedDate,
+    );
+  }
 }

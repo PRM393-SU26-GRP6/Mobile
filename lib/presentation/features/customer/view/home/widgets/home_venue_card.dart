@@ -95,28 +95,7 @@ class HomeVenueCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    if (venue.minPrice != null)
-                      RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: '${venue.minPrice!.toStringAsFixed(0)}đ',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.accent,
-                              ),
-                            ),
-                            TextSpan(
-                              text: ' /giờ',
-                              style: TextStyle(
-                                  fontSize: 12, color: Colors.grey.shade500),
-                            ),
-                          ],
-                        ),
-                      )
-                    else
-                      const SizedBox(),
+                    const SizedBox(),
                     GestureDetector(
                       onTap: () {
                         Get.toNamed(AppPages.venueDetail, arguments: venue);

@@ -118,84 +118,86 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ]),
                           const SizedBox(height: 16),
-                          const Text('VAI TRÒ',
-                              style: TextStyle(
-                                  fontSize: 12, color: Colors.black54)),
-                          const SizedBox(height: 8),
-                          Row(children: [
-                            Expanded(
-                                child: Obx(() => GestureDetector(
-                                      onTap: () => registerController
-                                          .setRole('Customer'),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 10),
-                                        decoration: BoxDecoration(
-                                          color: registerController
-                                                      .selectedRole.value ==
-                                                  'Customer'
-                                              ? const Color(0xFFF3FBF4)
-                                              : Colors.transparent,
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          border: Border.all(
-                                              color: registerController
-                                                          .selectedRole.value ==
-                                                      'Customer'
-                                                  ? const Color(0xFF0FA24A)
-                                                  : const Color(0xFFDFF1E0)),
+                          if (!isLogin) ...[
+                            const Text('VAI TRÒ',
+                                style: TextStyle(
+                                    fontSize: 12, color: Colors.black54)),
+                            const SizedBox(height: 8),
+                            Row(children: [
+                              Expanded(
+                                  child: Obx(() => GestureDetector(
+                                        onTap: () => registerController
+                                            .setRole('Customer'),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 10),
+                                          decoration: BoxDecoration(
+                                            color: registerController
+                                                        .selectedRole.value ==
+                                                    'Customer'
+                                                ? const Color(0xFFF3FBF4)
+                                                : Colors.transparent,
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            border: Border.all(
+                                                color: registerController
+                                                            .selectedRole.value ==
+                                                        'Customer'
+                                                    ? const Color(0xFF0FA24A)
+                                                    : const Color(0xFFDFF1E0)),
+                                          ),
+                                          child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: const [
+                                                Icon(Icons.person_outline,
+                                                    color: Color(0xFF0FA24A)),
+                                                SizedBox(width: 8),
+                                                Text('Khách hàng',
+                                                    style: TextStyle(
+                                                        color: Color(0xFF0FA24A)))
+                                              ]),
                                         ),
-                                        child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: const [
-                                              Icon(Icons.person_outline,
-                                                  color: Color(0xFF0FA24A)),
-                                              SizedBox(width: 8),
-                                              Text('Khách hàng',
-                                                  style: TextStyle(
-                                                      color: Color(0xFF0FA24A)))
-                                            ]),
-                                      ),
-                                    ))),
-                            const SizedBox(width: 12),
-                            Expanded(
-                                child: Obx(() => GestureDetector(
-                                      onTap: () =>
-                                          registerController.setRole('Owner'),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 10),
-                                        decoration: BoxDecoration(
-                                          color: registerController
-                                                      .selectedRole.value ==
-                                                  'Owner'
-                                              ? const Color(0xFFF3FBF4)
-                                              : Colors.transparent,
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          border: Border.all(
-                                              color: registerController
-                                                          .selectedRole.value ==
-                                                      'Owner'
-                                                  ? const Color(0xFF0FA24A)
-                                                  : const Color(0xFFDFF1E0)),
+                                      ))),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                  child: Obx(() => GestureDetector(
+                                        onTap: () =>
+                                            registerController.setRole('Owner'),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 10),
+                                          decoration: BoxDecoration(
+                                            color: registerController
+                                                        .selectedRole.value ==
+                                                    'Owner'
+                                                ? const Color(0xFFF3FBF4)
+                                                : Colors.transparent,
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            border: Border.all(
+                                                color: registerController
+                                                            .selectedRole.value ==
+                                                        'Owner'
+                                                    ? const Color(0xFF0FA24A)
+                                                    : const Color(0xFFDFF1E0)),
+                                          ),
+                                          child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: const [
+                                                Icon(Icons.business_outlined,
+                                                    color: Color(0xFF9AA8A0)),
+                                                SizedBox(width: 8),
+                                                Text('Chủ sân',
+                                                    style: TextStyle(
+                                                        color: Color(0xFF9AA8A0)))
+                                              ]),
                                         ),
-                                        child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: const [
-                                              Icon(Icons.business_outlined,
-                                                  color: Color(0xFF9AA8A0)),
-                                              SizedBox(width: 8),
-                                              Text('Chủ sân',
-                                                  style: TextStyle(
-                                                      color: Color(0xFF9AA8A0)))
-                                            ]),
-                                      ),
-                                    ))),
-                          ]),
-                          const SizedBox(height: 20),
+                                      ))),
+                            ]),
+                            const SizedBox(height: 20),
+                          ],
                           isLogin
                               ? _LoginForm(controller: authController)
                               : _RegisterForm(controller: registerController),

@@ -1,5 +1,3 @@
-# exe101
-
 **Yêu Cầu Cấu Hình**
 
 - **Dart SDK**: >=3.1.0 <4.0.0 (theo `environment` trong [pubspec.yaml](pubspec.yaml#L1-L20)).

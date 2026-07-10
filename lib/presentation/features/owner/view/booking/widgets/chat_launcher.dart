@@ -45,10 +45,7 @@ Future<void> startChatWithCustomer(BookingDto booking) async {
 
     Get.back();
     Get.to(
-      () => ChatDetailPage(
-        chatRoom: chatRoom,
-        bookingContext: booking,
-      ),
+      () => ChatDetailPage(chatRoom: chatRoom),
       transition: Transition.rightToLeft,
     );
   } catch (_) {

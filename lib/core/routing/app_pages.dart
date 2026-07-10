@@ -13,6 +13,8 @@ import 'package:exe101/presentation/features/customer/view/orders/payment_qr_pag
 import 'package:exe101/presentation/features/customer/view/orders/select_payment_method_page.dart';
 import 'package:exe101/presentation/features/customer/view/profile/user_profile_page.dart';
 import 'package:exe101/presentation/features/owner/binding/owner_binding.dart';
+import 'package:exe101/presentation/features/owner/view/discount/discount_management_page.dart';
+import 'package:exe101/presentation/features/owner/view/discount/discount_editor_page.dart';
 import 'package:exe101/presentation/features/owner/view/booking/booking_management_page.dart';
 import 'package:exe101/presentation/features/owner/view/field/add_field_page.dart';
 import 'package:exe101/presentation/features/owner/view/field/field_detail_page.dart';
@@ -47,6 +49,8 @@ class AppPages {
   static const String revenue = '/owner/revenue';
   static const String venueImages = '/owner/venue-images';
   static const String paymentHistory = '/payment-history';
+  static const String ownerDiscountManagement = '/owner/discount-management';
+  static const String ownerDiscountEditor = '/owner/discount-editor';
 
   // GetX pages configuration
   static final List<GetPage> pages = [
@@ -146,6 +150,16 @@ class AppPages {
       name: paymentHistory,
       page: () => const PaymentHistoryPage(),
       binding: CustomerBinding(),
+    ),
+    GetPage(
+      name: ownerDiscountManagement,
+      page: () => const DiscountManagementPage(),
+      binding: OwnerBinding(),
+    ),
+    GetPage(
+      name: ownerDiscountEditor,
+      page: () => const DiscountEditorPage(),
+      binding: OwnerBinding(),
     ),
   ];
 

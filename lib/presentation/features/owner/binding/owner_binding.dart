@@ -11,6 +11,7 @@ import 'package:exe101/presentation/features/owner/controller/slot_actions_contr
 import 'package:exe101/presentation/features/owner/controller/slot_management_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/venue_creation_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/venue_images_controller.dart';
+import 'package:exe101/presentation/features/owner/controller/discount_management_controller.dart';
 import 'package:get/get.dart';
 
 class OwnerBinding extends Bindings {
@@ -64,6 +65,9 @@ class OwnerBinding extends Bindings {
     );
     Get.lazyPut<VenueImagesController>(
       () => VenueImagesController(ownerRepository: ownerRepository),
+    );
+    Get.lazyPut<DiscountManagementController>(
+      () => DiscountManagementController(apiService: apiService),
     );
   }
 }

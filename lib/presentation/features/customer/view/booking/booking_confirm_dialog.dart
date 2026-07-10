@@ -52,6 +52,13 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
 
   _State _state = _State.idle;
   String _errorMessage = '';
+  final BookingController _bookingController = Get.find<BookingController>();
+
+  @override
+  void initState() {
+    super.initState();
+    _bookingController.clearDiscount(widget.totalPrice);
+  }
 
   @override
   void dispose() {
@@ -60,8 +67,28 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
     super.dispose();
   }
 
+  Future<void> _onValidateDiscount() async {
+    final code = _discountController.text.trim();
+    if (code.isEmpty) {
+      _bookingController.clearDiscount(widget.totalPrice);
+      return;
+    }
+    setState(() {
+      _state = _State.loading;
+      _errorMessage = '';
+    });
+    // For validateDiscount, we might need fieldId. We'll pass null or fetch it.
+    await _bookingController.validateDiscount(
+      code: code,
+      fieldId:
+          null, // Ideally we have fieldId, but let's pass null or from widget
+      slotIds: widget.slotIds,
+      totalAmount: widget.totalPrice,
+    );
+    setState(() => _state = _State.idle);
+  }
+
   Future<void> _onConfirm() async {
-    final discountCode = _discountController.text.trim();
     final note = _noteController.text.trim();
 
     setState(() {
@@ -70,10 +97,11 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
     });
 
     try {
-      final bookingController = Get.find<BookingController>();
-      await bookingController.createBooking(
+      await _bookingController.createBooking(
         slotIds: widget.slotIds,
-        discountCode: discountCode.isEmpty ? '' : discountCode,
+        discountCode: _bookingController.isDiscountValid.value
+            ? _bookingController.discountCode.value
+            : '',
         note: note.isEmpty ? '' : note,
       );
 
@@ -229,55 +257,122 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
             padding: EdgeInsets.symmetric(vertical: 8),
             child: Divider(height: 1, color: AppColors.inputBorder),
           ),
-          BookingInfoRow(
-            icon: Icons.payments,
-            label: 'Tổng tiền',
-            value: '${widget.totalPrice.toStringAsFixed(0)}đ',
-            valueIcon: Icons.receipt_long,
-            isBold: true,
-            valueColor: AppColors.primary,
-          ),
+          Obx(() {
+            if (_bookingController.isDiscountValid.value) {
+              return Column(
+                children: [
+                  BookingInfoRow(
+                    icon: Icons.money_off,
+                    label: 'Giảm giá',
+                    value:
+                        '-${_bookingController.discountAmount.value.toStringAsFixed(0)}đ',
+                    valueIcon: Icons.local_offer,
+                    valueColor: Colors.green,
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: Divider(height: 1, color: AppColors.inputBorder),
+                  ),
+                ],
+              );
+            }
+            return const SizedBox.shrink();
+          }),
+          Obx(() => BookingInfoRow(
+                icon: Icons.payments,
+                label: 'Tổng tiền',
+                value:
+                    '${_bookingController.finalPrice.value.toStringAsFixed(0)}đ',
+                valueIcon: Icons.receipt_long,
+                isBold: true,
+                valueColor: AppColors.primary,
+              )),
         ],
       ),
     );
   }
 
   Widget _buildDiscountField() {
-    return TextField(
-      controller: _discountController,
-      enabled: _state != _State.loading,
-      style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
-      decoration: InputDecoration(
-        labelText: 'Mã giảm giá',
-        labelStyle: const TextStyle(
-            fontSize: 13,
-            color: AppColors.textSecondary,
-            fontWeight: FontWeight.w500),
-        hintText: 'Nhập mã giảm giá (nếu có)',
-        hintStyle: TextStyle(fontSize: 13, color: Colors.grey.shade400),
-        filled: true,
-        fillColor: AppColors.secondary,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.inputBorder),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _discountController,
+                enabled: _state != _State.loading,
+                style:
+                    const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  labelText: 'Mã giảm giá',
+                  labelStyle: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500),
+                  hintText: 'Nhập mã giảm giá',
+                  hintStyle:
+                      TextStyle(fontSize: 13, color: Colors.grey.shade400),
+                  filled: true,
+                  fillColor: AppColors.secondary,
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: AppColors.inputBorder),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: AppColors.inputBorder),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide:
+                        const BorderSide(color: AppColors.primary, width: 1.5),
+                  ),
+                  disabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  prefixIcon: const Icon(Icons.discount_outlined,
+                      size: 18, color: AppColors.primary),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            ElevatedButton(
+              onPressed: _state == _State.loading ? null : _onValidateDiscount,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: const Text('Áp dụng'),
+            ),
+          ],
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.inputBorder),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-        ),
-        disabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        prefixIcon: const Icon(Icons.discount_outlined,
-            size: 18, color: AppColors.primary),
-      ),
+        Obx(() {
+          if (_bookingController.discountMessage.value.isNotEmpty) {
+            return Padding(
+              padding: const EdgeInsets.only(top: 6, left: 4),
+              child: Text(
+                _bookingController.discountMessage.value,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: _bookingController.isDiscountValid.value
+                      ? Colors.green
+                      : Colors.red,
+                ),
+              ),
+            );
+          }
+          return const SizedBox.shrink();
+        }),
+      ],
     );
   }
 

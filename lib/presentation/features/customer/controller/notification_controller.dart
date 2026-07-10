@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:exe101/data/remote/signalr_service.dart';
 import 'package:exe101/domain/models/notification_model.dart';
 import 'package:exe101/domain/repositories/user_repository.dart';
 import 'package:get/get.dart';
@@ -16,6 +18,9 @@ class NotificationController extends GetxController {
   int _currentPage = 1;
   static const int _pageSize = 20;
 
+  StreamSubscription? _countSubscription;
+  StreamSubscription? _createdSubscription;
+
   NotificationController({required this.userRepository});
 
   @override
@@ -23,6 +28,28 @@ class NotificationController extends GetxController {
     super.onInit();
     loadNotifications();
     loadUnreadCount();
+    _initSignalR();
+  }
+
+  void _initSignalR() {
+    final signalRService = Get.find<SignalRService>();
+    signalRService.initNotificationConnection();
+
+    _countSubscription = signalRService.onNotificationUnreadCountChanged.listen((count) {
+      unreadCount.value = count;
+    });
+
+    _createdSubscription = signalRService.onNotificationCreated.listen((_) {
+      // Reload the first page of notifications so we get the new one at the top
+      loadNotifications(refresh: true);
+    });
+  }
+
+  @override
+  void onClose() {
+    _countSubscription?.cancel();
+    _createdSubscription?.cancel();
+    super.onClose();
   }
 
   Future<void> loadNotifications({bool refresh = false}) async {

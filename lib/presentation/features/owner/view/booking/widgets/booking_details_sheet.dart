@@ -1,5 +1,7 @@
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/domain/models/booking_model.dart';
+import 'package:exe101/domain/models/review_model.dart';
+import 'package:exe101/domain/repositories/review_repository.dart';
 import 'package:exe101/presentation/features/owner/controller/booking_management_controller.dart';
 import 'package:exe101/presentation/features/owner/view/shared/owner_helpers.dart';
 import 'package:flutter/material.dart';
@@ -95,6 +97,16 @@ class _BookingDetailsBody extends StatelessWidget {
               _DetailRow(label: 'Khách hàng', value: booking.customerName!),
             if (booking.note != null && booking.note!.isNotEmpty)
               _DetailRow(label: 'Ghi chú', value: booking.note!),
+            const SizedBox(height: 8),
+            const Text(
+              'Feedback khach hang',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            _OwnerBookingReviewSection(booking: booking),
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
@@ -162,4 +174,109 @@ String _fieldName(BookingDto booking) {
     return booking.items!.first.fieldName ?? 'Sân';
   }
   return 'Sân';
+}
+
+class _OwnerBookingReviewSection extends StatelessWidget {
+  final BookingDto booking;
+
+  const _OwnerBookingReviewSection({required this.booking});
+
+  Future<ReviewModel?> _loadReview() async {
+    if (!Get.isRegistered<ReviewRepository>()) return null;
+    final dto = await Get.find<ReviewRepository>().getBookingReview(booking.id);
+    if (dto == null) return null;
+    final firstItem =
+        booking.items?.isNotEmpty == true ? booking.items!.first : null;
+    return ReviewModel.fromBookingReview(
+      dto,
+      bookingId: booking.id,
+      userId: booking.customerId ?? booking.userId,
+      userName: booking.customerName,
+      venueId: firstItem?.venueId ?? '',
+      venueName: firstItem?.venueName,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<ReviewModel?>(
+      future: _loadReview(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 10),
+            child: LinearProgressIndicator(color: AppColors.primary),
+          );
+        }
+        final review = snapshot.data;
+        if (snapshot.hasError) {
+          return const Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: Text(
+              'Khong the tai feedback cho don nay.',
+              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            ),
+          );
+        }
+        if (review == null) {
+          return const Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: Text(
+              'Chua co feedback cho don nay.',
+              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            ),
+          );
+        }
+
+        return Container(
+          width: double.infinity,
+          margin: const EdgeInsets.only(top: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.secondary,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.inputBorder),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.star_rounded,
+                    color: AppColors.accent,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Đánh giá ${review.rating}/5',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                review.userName ?? 'Khách hàng',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                review.displayComment,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }

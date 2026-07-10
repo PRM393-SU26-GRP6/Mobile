@@ -2,6 +2,7 @@ import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/domain/models/booking_model.dart';
 import 'package:exe101/domain/models/review_model.dart';
 import 'package:exe101/domain/repositories/review_repository.dart';
+import 'package:exe101/domain/models/discount_model.dart';
 import 'package:get/get.dart';
 
 class BookingController extends GetxController {
@@ -21,6 +22,13 @@ class BookingController extends GetxController {
   final myReviews = RxMap<String, ReviewModel>();
   final isLoadingReviews = false.obs;
   final reviewsError = ''.obs;
+
+  // --- Discount State ---
+  final discountCode = ''.obs;
+  final discountAmount = 0.0.obs;
+  final finalPrice = 0.0.obs;
+  final isDiscountValid = false.obs;
+  final discountMessage = ''.obs;
 
   int _currentPage = 1;
   static const int _pageSize = 20;
@@ -153,14 +161,9 @@ class BookingController extends GetxController {
     try {
       final dto = await reviewRepository.getBookingReview(bookingId);
       if (dto != null) {
-        myReviews[bookingId] = ReviewModel(
-          reviewId: dto.reviewId,
-          userId: '',
-          venueId: '',
+        myReviews[bookingId] = ReviewModel.fromBookingReview(
+          dto,
           bookingId: bookingId,
-          rating: dto.rating,
-          comment: dto.comment,
-          createdAt: dto.createdAt,
         );
       }
       return dto;
@@ -234,5 +237,46 @@ class BookingController extends GetxController {
     } catch (e) {
       rethrow;
     }
+  }
+
+  Future<void> validateDiscount({
+    required String code,
+    required String? fieldId,
+    required List<String> slotIds,
+    required double totalAmount,
+  }) async {
+    try {
+      final req = ValidateDiscountRequestDto(
+        code: code,
+        fieldId: fieldId,
+        slotIds: slotIds,
+        totalAmount: totalAmount,
+      );
+      final res = await (apiService as ApiServiceImpl).validateDiscount(req);
+      if (res != null) {
+        isDiscountValid.value = res.isValid;
+        discountMessage.value = res.message ?? '';
+        if (res.isValid) {
+          discountCode.value = code;
+          discountAmount.value = res.discountAmount;
+          finalPrice.value = res.finalAmount;
+        } else {
+          discountCode.value = '';
+          discountAmount.value = 0.0;
+          finalPrice.value = totalAmount;
+        }
+      }
+    } catch (e) {
+      isDiscountValid.value = false;
+      discountMessage.value = 'Lỗi kiểm tra mã';
+    }
+  }
+
+  void clearDiscount(double originalTotal) {
+    discountCode.value = '';
+    discountAmount.value = 0.0;
+    finalPrice.value = originalTotal;
+    isDiscountValid.value = false;
+    discountMessage.value = '';
   }
 }

@@ -18,6 +18,7 @@ class _MessagesPageState extends State<MessagesPage> {
   bool _isLoading = true;
   String? _error;
   String? _currentUserId;
+  String? _currentUserRole;
 
   @override
   void initState() {
@@ -30,9 +31,11 @@ class _MessagesPageState extends State<MessagesPage> {
     try {
       final apiService = Get.find<ApiServiceImpl>();
       final userId = await apiService.getUserId();
+      final userRole = await apiService.getUserRole();
       if (mounted && userId != null) {
         setState(() {
           _currentUserId = userId;
+          _currentUserRole = userRole;
         });
       }
     } catch (_) {}
@@ -204,7 +207,11 @@ class _MessagesPageState extends State<MessagesPage> {
         ),
       ),
       subtitle: Text(
-        room.lastMessagePreview ?? 'Chưa có tin nhắn',
+        '${room.contextLabel} - ${room.getPartnerRoleLabel(
+          _currentUserId,
+          currentUserRole: _currentUserRole,
+        )}'
+        ' - ${room.lastMessagePreview ?? 'Chua co tin nhan'}',
         style: TextStyle(
           color: Colors.grey.shade600,
           fontSize: 14,

@@ -194,6 +194,13 @@ class ApiServiceImpl extends ApiService {
     return verifyResponse;
   }
 
+  Future<void> resendOtp(String email) async {
+    await post<Map<String, dynamic>>(
+      '${Env.baseUrl}/api/v1/auth/resend-otp',
+      data: {'email': email},
+    );
+  }
+
   Future<void> logout() async {
     try {
       final headers = await _authHeaders();

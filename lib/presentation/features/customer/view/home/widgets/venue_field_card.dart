@@ -121,27 +121,7 @@ class VenueFieldCard extends StatelessWidget {
                 ],
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '${field.pricePerHour?.toStringAsFixed(0) ?? '0'}đ',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color:
-                        isSelected ? AppColors.accent : AppColors.textPrimary,
-                  ),
-                ),
-                const Text(
-                  '/giờ',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
+
           ],
         ),
       ),

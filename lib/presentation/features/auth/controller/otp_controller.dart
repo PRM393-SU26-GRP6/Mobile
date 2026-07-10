@@ -96,10 +96,20 @@ class OtpController extends GetxController {
     }
   }
 
-  void resendOtp() {
+  Future<void> resendOtp() async {
     if (!canResend.value) return;
-    Get.snackbar('Thông báo', 'Đã gửi lại mã OTP đến $email');
-    _startCountdown();
+    if (email.isEmpty) return;
+
+    try {
+      isLoading.value = true;
+      await userRepository.resendOtp(email);
+      Get.snackbar('Thông báo', 'Đã gửi lại mã OTP đến $email');
+      _startCountdown();
+    } catch (e) {
+      Get.snackbar('Lỗi', ApiErrorHandler.getMessage(e));
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void onOtpChanged(String value) {

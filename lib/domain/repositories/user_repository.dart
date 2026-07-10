@@ -59,6 +59,13 @@ class UserRepository {
     throw Exception('ApiService must be ApiServiceImpl');
   }
 
+  Future<void> resendOtp(String email) async {
+    if (apiService is ApiServiceImpl) {
+      return (apiService as ApiServiceImpl).resendOtp(email);
+    }
+    throw Exception('ApiService must be ApiServiceImpl');
+  }
+
   Future<UserAuthData?> getUserProfile() async {
     if (apiService is ApiServiceImpl) {
       return (apiService as ApiServiceImpl).getUserProfile();

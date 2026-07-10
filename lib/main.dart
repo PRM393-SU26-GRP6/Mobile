@@ -6,6 +6,7 @@ import 'package:exe101/data/remote/owner_resource_api_service.dart';
 import 'package:exe101/data/remote/owner_stats_api_service.dart';
 import 'package:exe101/data/remote/review_api_service.dart';
 import 'package:exe101/data/remote/slot_api_service.dart';
+import 'package:exe101/data/remote/signalr_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:exe101/domain/repositories/review_repository.dart';
@@ -85,6 +86,9 @@ void main() {
 
   final apiService = ApiServiceImpl(dio);
   Get.put(apiService);
+
+  // Initialize SignalR Service globally
+  Get.put<SignalRService>(SignalRService());
 
   // Focused owner services. Registered at app-level so feature bindings
   // can resolve them via Get.find without rebuilding Dio clients.

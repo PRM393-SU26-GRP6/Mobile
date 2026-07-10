@@ -7,6 +7,7 @@ import 'package:exe101/domain/models/chat_model.dart';
 import 'package:exe101/presentation/features/customer/view/messages/widgets/booking_context_card.dart';
 import 'package:exe101/presentation/features/customer/view/messages/widgets/chat_date_separator.dart';
 import 'package:exe101/presentation/features/customer/view/messages/widgets/chat_message_bubble.dart';
+import 'package:exe101/data/remote/signalr_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -30,7 +31,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   bool _isLoading = true;
   bool _isSending = false;
   String? _currentUserId;
-  Timer? _autoRefreshTimer;
+  StreamSubscription? _chatSubscription;
 
   String get _chatPartnerName => widget.chatRoom.getPartnerName(_currentUserId);
 
@@ -39,7 +40,24 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     super.initState();
     _loadCurrentUser();
     _loadMessages();
-    _startAutoRefresh();
+    _initSignalR();
+  }
+
+  void _initSignalR() {
+    final signalRService = Get.find<SignalRService>();
+    signalRService.initChatConnection().then((_) {
+      signalRService.joinChatRoom(widget.chatRoom.roomId);
+    });
+
+    _chatSubscription = signalRService.onChatMessageReceived.listen((msgData) {
+      if (!mounted) return;
+      // Convert map to MessageModel and append
+      if (msgData['roomId'] == widget.chatRoom.roomId) {
+        // To be completely safe and avoid missing messages or duplicating, 
+        // we can just reload the message list when a new message event arrives
+        _loadMessages();
+      }
+    });
   }
 
   Future<void> _loadCurrentUser() async {
@@ -80,12 +98,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     }
   }
 
-  void _startAutoRefresh() {
-    _autoRefreshTimer = Timer.periodic(
-      const Duration(seconds: 5),
-      (_) => _loadMessages(),
-    );
-  }
+
 
   Future<void> _sendMessage() async {
     final text = _messageController.text.trim();
@@ -123,7 +136,9 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
 
   @override
   void dispose() {
-    _autoRefreshTimer?.cancel();
+    _chatSubscription?.cancel();
+    final signalRService = Get.find<SignalRService>();
+    signalRService.leaveChatRoom(widget.chatRoom.roomId);
     _messageController.dispose();
     super.dispose();
   }

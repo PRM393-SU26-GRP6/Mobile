@@ -10,6 +10,7 @@ import 'package:exe101/domain/models/review_model.dart';
 import 'package:exe101/domain/models/time_slot_model.dart';
 import 'package:exe101/domain/models/field_schedule_model.dart';
 import 'package:exe101/domain/models/venue_model.dart';
+import 'package:exe101/domain/models/discount_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
@@ -1515,4 +1516,107 @@ class ApiServiceImpl extends ApiService {
             PaymentModel.fromJson(Map<String, dynamic>.from(json as Map)))
         .toList();
   }
+
+  // ---------------------------------------------------------------------------
+  // DISCOUNT / PROMOTION (Customer & Owner)
+  // ---------------------------------------------------------------------------
+
+  /// Customer: Validate a discount code
+  Future<ValidateDiscountResponseDto?> validateDiscount(
+      ValidateDiscountRequestDto request) async {
+    try {
+      final headers = await _authHeaders();
+      final res = await post(
+        '/discounts/validate',
+        data: request.toJson(),
+        headers: headers,
+      );
+      if (res.data != null && res.data is Map<String, dynamic>) {
+        if (res.data['data'] != null) {
+          return ValidateDiscountResponseDto.fromJson(res.data['data']);
+        }
+        return ValidateDiscountResponseDto.fromJson(res.data);
+      }
+      return null;
+    } catch (e) {
+      print('validateDiscount error: $e');
+      return null;
+    }
+  }
+
+  /// Owner: Get list of discounts
+  Future<List<DiscountDto>> getOwnerDiscounts() async {
+    try {
+      final headers = await _authHeaders();
+      final res = await get('/owner/discounts', headers: headers);
+      final list = _extractList(res.data);
+      return list.map((e) => DiscountDto.fromJson(e)).toList();
+    } catch (e) {
+      print('getOwnerDiscounts error: $e');
+      return [];
+    }
+  }
+
+  /// Owner: Create discount
+  Future<bool> createDiscount(DiscountDto discount) async {
+    try {
+      final headers = await _authHeaders();
+      await post(
+        '/owner/discounts',
+        data: discount.toJson(),
+        headers: headers,
+      );
+      return true;
+    } catch (e) {
+      print('createDiscount error: $e');
+      return false;
+    }
+  }
+
+  /// Owner: Update discount
+  Future<bool> updateDiscount(String id, DiscountDto discount) async {
+    try {
+      final headers = await _authHeaders();
+      await put(
+        '/owner/discounts/$id',
+        data: discount.toJson(),
+        headers: headers,
+      );
+      return true;
+    } catch (e) {
+      print('updateDiscount error: $e');
+      return false;
+    }
+  }
+
+  /// Owner: Toggle discount status
+  Future<bool> toggleDiscountStatus(String id) async {
+    try {
+      final headers = await _authHeaders();
+      await put(
+        '/owner/discounts/$id/status',
+        headers: headers,
+      );
+      return true;
+    } catch (e) {
+      print('toggleDiscountStatus error: $e');
+      return false;
+    }
+  }
+
+  /// Owner: Delete discount
+  Future<bool> deleteDiscount(String id) async {
+    try {
+      final headers = await _authHeaders();
+      await delete(
+        '/owner/discounts/$id',
+        headers: headers,
+      );
+      return true;
+    } catch (e) {
+      print('deleteDiscount error: $e');
+      return false;
+    }
+  }
 }
+

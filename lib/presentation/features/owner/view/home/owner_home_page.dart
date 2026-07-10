@@ -31,6 +31,10 @@ class OwnerHomePage extends StatelessWidget {
         centerTitle: true,
         actions: [
           IconButton(
+            icon: const Icon(Icons.discount),
+            onPressed: () => Get.toNamed(AppPages.ownerDiscountManagement),
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () => controller.refreshAll(),
           ),

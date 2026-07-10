@@ -180,6 +180,9 @@ class VenueDetailController extends GetxController {
 
   List<DateTime> get availableDates {
     final dates = <String, DateTime>{};
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
     for (final slot in timeSlots) {
       if (slot.selectedDate.isEmpty) continue;
       final parts = slot.selectedDate.split('-');
@@ -190,6 +193,7 @@ class VenueDetailController extends GetxController {
           int.parse(parts[1]),
           int.parse(parts[2]),
         );
+        if (d.isBefore(today)) continue;
         dates[slot.selectedDate] = d;
       } catch (_) {
         continue;

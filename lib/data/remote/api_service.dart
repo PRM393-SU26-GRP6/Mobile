@@ -289,6 +289,7 @@ class ApiServiceImpl extends ApiService {
   Future<List<VenueModel>> getVenues({
     String? q,
     String? fieldType,
+    String? amenityIds,
     double? minRating,
     double? priceMin,
     double? priceMax,
@@ -303,6 +304,7 @@ class ApiServiceImpl extends ApiService {
     };
     if (q != null) params['Q'] = q;
     if (fieldType != null) params['FieldType'] = fieldType;
+    if (amenityIds != null) params['AmenityIds'] = amenityIds;
     if (minRating != null) params['MinRating'] = minRating;
     if (priceMin != null) params['PriceMin'] = priceMin;
     if (priceMax != null) params['PriceMax'] = priceMax;
@@ -331,6 +333,66 @@ class ApiServiceImpl extends ApiService {
     return list
         .map((json) =>
             VenueModel.fromJson(Map<String, dynamic>.from(json as Map)))
+        .toList();
+  }
+
+  Future<List<VenueModel>> searchVenues({
+    String? q,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    final headers = await _authHeaders();
+    final params = <String, dynamic>{
+      'page': page,
+      'pageSize': pageSize,
+    };
+    if (q != null && q.isNotEmpty) params['q'] = q;
+
+    final response = await get<dynamic>(
+      '${Env.baseUrl}/api/v1/Venues/search',
+      params: params,
+      headers: headers,
+    );
+
+    if (response.data == null) return [];
+
+    final list = _extractList(response.data);
+    if (list.isEmpty && response.data is Map<String, dynamic>) {
+      final inner =
+          _extractList((response.data as Map<String, dynamic>)['data']);
+      if (inner.isNotEmpty) {
+        return inner
+            .map((json) =>
+                VenueModel.fromJson(Map<String, dynamic>.from(json as Map)))
+            .toList();
+      }
+    }
+
+    return list
+        .map((json) =>
+            VenueModel.fromJson(Map<String, dynamic>.from(json as Map)))
+        .toList();
+  }
+
+  Future<List<AmenityModel>> getAllAmenities() async {
+    final response = await get<dynamic>(
+      '${Env.baseUrl}/api/v1/amenities',
+    );
+    if (response.data == null) return [];
+    final list = _extractList(response.data);
+    if (list.isEmpty && response.data is Map<String, dynamic>) {
+      final inner =
+          _extractList((response.data as Map<String, dynamic>)['data']);
+      if (inner.isNotEmpty) {
+        return inner
+            .map((json) =>
+                AmenityModel.fromJson(Map<String, dynamic>.from(json as Map)))
+            .toList();
+      }
+    }
+    return list
+        .map((json) =>
+            AmenityModel.fromJson(Map<String, dynamic>.from(json as Map)))
         .toList();
   }
 
@@ -1415,5 +1477,42 @@ class ApiServiceImpl extends ApiService {
     } catch (_) {
       return false;
     }
+  }
+
+  // --- Payment APIs ---
+
+  Future<List<PaymentModel>> getPaymentHistory({
+    int pageNumber = 1,
+    int pageSize = 20,
+  }) async {
+    final headers = await _authHeaders();
+    final params = <String, dynamic>{
+      'pageNumber': pageNumber,
+      'pageSize': pageSize,
+    };
+
+    final response = await get<dynamic>(
+      '${Env.baseUrl}/api/v1/payments/history',
+      params: params,
+      headers: headers,
+    );
+
+    if (response.data == null) return [];
+
+    final list = _extractList(response.data);
+    if (list.isEmpty && response.data is Map<String, dynamic>) {
+      final inner =
+          _extractList((response.data as Map<String, dynamic>)['data']);
+      if (inner.isNotEmpty) {
+        return inner
+            .map((json) =>
+                PaymentModel.fromJson(Map<String, dynamic>.from(json as Map)))
+            .toList();
+      }
+    }
+    return list
+        .map((json) =>
+            PaymentModel.fromJson(Map<String, dynamic>.from(json as Map)))
+        .toList();
   }
 }

@@ -8,6 +8,7 @@ import 'package:exe101/presentation/features/customer/binding/notification_bindi
 import 'package:exe101/presentation/features/customer/view/customer_home_page.dart';
 import 'package:exe101/presentation/features/customer/view/home/venue_detail_page.dart';
 import 'package:exe101/presentation/features/customer/view/notifications/notifications_page.dart';
+import 'package:exe101/presentation/features/customer/view/orders/payment_history_page.dart';
 import 'package:exe101/presentation/features/customer/view/orders/payment_qr_page.dart';
 import 'package:exe101/presentation/features/customer/view/orders/select_payment_method_page.dart';
 import 'package:exe101/presentation/features/customer/view/profile/user_profile_page.dart';
@@ -45,6 +46,7 @@ class AppPages {
   static const String notifications = '/notifications';
   static const String revenue = '/owner/revenue';
   static const String venueImages = '/owner/venue-images';
+  static const String paymentHistory = '/payment-history';
 
   // GetX pages configuration
   static final List<GetPage> pages = [
@@ -139,6 +141,11 @@ class AppPages {
       name: venueImages,
       page: () => const VenueImagesPage(),
       binding: OwnerBinding(),
+    ),
+    GetPage(
+      name: paymentHistory,
+      page: () => const PaymentHistoryPage(),
+      binding: CustomerBinding(),
     ),
   ];
 

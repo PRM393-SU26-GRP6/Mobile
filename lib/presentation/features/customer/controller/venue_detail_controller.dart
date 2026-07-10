@@ -5,7 +5,9 @@ import 'package:exe101/domain/models/venue_model.dart';
 import 'package:exe101/domain/repositories/review_repository.dart';
 import 'package:exe101/domain/repositories/slot_repository.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:exe101/core/theme/app_theme.dart';
 
 class VenueDetailController extends GetxController {
   final ApiService apiService;
@@ -141,11 +143,38 @@ class VenueDetailController extends GetxController {
     selectedDate.value = date;
   }
 
-  void toggleSlot(String slotId) {
+  Future<void> toggleSlot(String slotId) async {
     if (selectedSlotIds.contains(slotId)) {
       selectedSlotIds.remove(slotId);
+      slotRepository.unlockSlot(slotId);
     } else {
-      selectedSlotIds.add(slotId);
+      final slot = timeSlots.firstWhereOrNull((s) => s.slotId == slotId);
+      if (slot == null || selectedField.value == null) return;
+
+      Get.dialog(
+        const Center(child: CircularProgressIndicator(color: AppColors.accent)),
+        barrierDismissible: false,
+      );
+
+      final success = await slotRepository.lockSlot(
+        slotId: slot.slotId,
+        fieldId: selectedField.value!.id,
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        selectedDate: slot.selectedDate,
+      );
+
+      Get.back(); // close loading dialog
+
+      if (success) {
+        selectedSlotIds.add(slotId);
+      } else {
+        Get.snackbar(
+          'Lỗi',
+          'Khung giờ này đã có người đặt hoặc đang giữ chỗ.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
     }
   }
 

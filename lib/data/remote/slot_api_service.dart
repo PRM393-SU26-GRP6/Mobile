@@ -42,4 +42,32 @@ class SlotApiService {
       return false;
     }
   }
+
+  /// POST /api/v1/slots/lock
+  /// Returns true on success, throws Exception on failure (e.g. 409 Conflict if already locked)
+  Future<bool> lockSlot({
+    String? slotId,
+    required String fieldId,
+    required String startTime,
+    required String endTime,
+    required String selectedDate,
+  }) async {
+    final headers = await _authHeaders();
+    final response = await dio.post(
+      '${Env.baseUrl}/api/v1/slots/lock',
+      data: {
+        if (slotId != null && slotId.isNotEmpty) 'slotId': slotId,
+        'fieldId': fieldId,
+        'startTime': startTime,
+        'endTime': endTime,
+        'selectedDate': selectedDate,
+      },
+      options: Options(headers: headers),
+    );
+    final code = response.statusCode ?? 0;
+    if (code >= 200 && code < 300) {
+      return true;
+    }
+    return false;
+  }
 }

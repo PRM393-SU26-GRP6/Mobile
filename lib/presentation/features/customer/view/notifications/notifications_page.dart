@@ -11,7 +11,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class NotificationsPage extends StatelessWidget {
-  const NotificationsPage({super.key});
+  final bool showBackButton;
+
+  const NotificationsPage({
+    super.key,
+    this.showBackButton = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +60,16 @@ class NotificationsPage extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 12),
       child: Row(
         children: [
+          if (showBackButton) ...[
+            IconButton(
+              onPressed: Get.back,
+              icon: const Icon(
+                Icons.arrow_back,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(width: 4),
+          ],
           const Expanded(
             child: Text(
               'Thông báo',

@@ -9,11 +9,22 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class RevenuePage extends StatelessWidget {
-  const RevenuePage({super.key});
+  final bool embedded;
+
+  const RevenuePage({
+    super.key,
+    this.embedded = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<RevenueController>();
+
+    final content = _RevenueContent(controller: controller);
+
+    if (embedded) {
+      return content;
+    }
 
     return Scaffold(
       backgroundColor: AppColors.secondary,
@@ -33,40 +44,51 @@ class RevenuePage extends StatelessWidget {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: controller.refresh,
-        color: AppColors.primary,
-        child: Obx(() {
-          if (controller.isLoading.value &&
-              controller.revenue.value.groups.isEmpty) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            );
-          }
+      body: content,
+    );
+  }
+}
 
-          if (controller.errorMessage.value.isNotEmpty &&
-              controller.revenue.value.groups.isEmpty) {
-            return RevenueErrorState(
-              message: controller.errorMessage.value,
-              onRetry: controller.refresh,
-            );
-          }
+class _RevenueContent extends StatelessWidget {
+  final RevenueController controller;
 
-          final revenue = controller.revenue.value;
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              RevenueRangeSelector(controller: controller),
-              const SizedBox(height: 16),
-              RevenueSummaryCards(revenue: revenue),
-              const SizedBox(height: 16),
-              RevenueChartCard(groups: revenue.groups),
-              const SizedBox(height: 16),
-              RevenueDetailList(groups: revenue.groups),
-            ],
+  const _RevenueContent({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: controller.refresh,
+      color: AppColors.primary,
+      child: Obx(() {
+        if (controller.isLoading.value &&
+            controller.revenue.value.groups.isEmpty) {
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
           );
-        }),
-      ),
+        }
+
+        if (controller.errorMessage.value.isNotEmpty &&
+            controller.revenue.value.groups.isEmpty) {
+          return RevenueErrorState(
+            message: controller.errorMessage.value,
+            onRetry: controller.refresh,
+          );
+        }
+
+        final revenue = controller.revenue.value;
+        return ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            RevenueRangeSelector(controller: controller),
+            const SizedBox(height: 16),
+            RevenueSummaryCards(revenue: revenue),
+            const SizedBox(height: 16),
+            RevenueChartCard(groups: revenue.groups),
+            const SizedBox(height: 16),
+            RevenueDetailList(groups: revenue.groups),
+          ],
+        );
+      }),
     );
   }
 }

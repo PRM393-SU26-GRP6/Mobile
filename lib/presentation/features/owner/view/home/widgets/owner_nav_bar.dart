@@ -3,28 +3,34 @@ import 'package:flutter/material.dart';
 
 class OwnerNavBar extends StatelessWidget {
   final int pendingCount;
+  final int notificationCount;
+  final int selectedIndex;
   final VoidCallback onFieldsTap;
   final VoidCallback onBookingsTap;
   final VoidCallback onMessagesTap;
   final VoidCallback onRevenueTap;
+  final VoidCallback onNotificationsTap;
 
   const OwnerNavBar({
     super.key,
     required this.pendingCount,
+    required this.notificationCount,
+    required this.selectedIndex,
     required this.onFieldsTap,
     required this.onBookingsTap,
     required this.onMessagesTap,
     required this.onRevenueTap,
+    required this.onNotificationsTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.secondary,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
@@ -32,43 +38,50 @@ class OwnerNavBar extends StatelessWidget {
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Expanded(
                 child: _NavButton(
                   icon: Icons.stadium,
                   label: 'Sân',
-                  isSelected: true,
+                  isSelected: selectedIndex == 0,
                   onTap: onFieldsTap,
                 ),
               ),
-              const SizedBox(width: 8),
               Expanded(
                 child: _NavButton(
                   icon: Icons.calendar_today,
                   label: 'Đặt sân',
-                  isSelected: false,
+                  isSelected: selectedIndex == 1,
                   badge: pendingCount,
                   onTap: onBookingsTap,
                 ),
               ),
-              const SizedBox(width: 8),
               Expanded(
                 child: _NavButton(
                   icon: Icons.bar_chart,
                   label: 'Doanh thu',
-                  isSelected: false,
+                  isSelected: selectedIndex == 2,
                   onTap: onRevenueTap,
                 ),
               ),
-              const SizedBox(width: 8),
               Expanded(
                 child: _NavButton(
                   icon: Icons.chat_bubble_outline,
-                  label: 'Tin nhan',
-                  isSelected: false,
+                  label: 'Tin nhắn',
+                  isSelected: selectedIndex == 3,
                   onTap: onMessagesTap,
+                ),
+              ),
+              Expanded(
+                child: _NavButton(
+                  icon: Icons.notifications_outlined,
+                  label: 'Thông báo',
+                  isSelected: selectedIndex == 4,
+                  badge: notificationCount,
+                  onTap: onNotificationsTap,
                 ),
               ),
             ],
@@ -98,22 +111,20 @@ class _NavButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.secondary,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 56,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Stack(
               clipBehavior: Clip.none,
               children: [
                 Icon(
                   icon,
-                  size: 22,
-                  color: isSelected ? Colors.white : AppColors.textSecondary,
+                  size: 24,
+                  color:
+                      isSelected ? AppColors.primary : AppColors.textSecondary,
                 ),
                 if (badge > 0)
                   Positioned(
@@ -137,16 +148,15 @@ class _NavButton extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                label,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: isSelected ? Colors.white : AppColors.textSecondary,
-                ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                color: isSelected ? AppColors.primary : AppColors.textSecondary,
               ),
             ),
           ],

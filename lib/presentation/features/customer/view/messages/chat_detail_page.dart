@@ -39,13 +39,13 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   StreamSubscription? _chatSubscription;
 
   String get _chatPartnerName => widget.chatRoom.getPartnerName(_currentUserId);
-  String get _partnerRole => widget.chatRoom.getPartnerRoleLabel(
+  String get _partnerRole => widget.chatRoom.getPartnerRoleLabelForAuthRole(
         _currentUserId,
-        currentUserRole: _currentUserRole,
+        _currentUserRole,
       );
-  String get _myRole => widget.chatRoom.getCurrentUserRoleLabel(
+  String get _myRole => widget.chatRoom.getCurrentUserRoleLabelForAuthRole(
         _currentUserId,
-        currentUserRole: _currentUserRole,
+        _currentUserRole,
       );
 
   @override

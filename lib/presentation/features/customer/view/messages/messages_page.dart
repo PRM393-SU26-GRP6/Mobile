@@ -7,7 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class MessagesPage extends StatefulWidget {
-  const MessagesPage({super.key});
+  final bool showBackButton;
+
+  const MessagesPage({
+    super.key,
+    this.showBackButton = false,
+  });
 
   @override
   State<MessagesPage> createState() => _MessagesPageState();
@@ -87,15 +92,7 @@ class _MessagesPageState extends State<MessagesPage> {
       child: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 16),
-            const Text(
-              'Tin nhắn',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
+            _buildHeader(),
             const SizedBox(height: 16),
             Expanded(
               child: Container(
@@ -107,6 +104,41 @@ class _MessagesPageState extends State<MessagesPage> {
                 child: _buildContent(),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+      child: SizedBox(
+        height: 48,
+        child: Row(
+          children: [
+            if (widget.showBackButton)
+              IconButton(
+                onPressed: Get.back,
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: AppColors.textPrimary,
+                ),
+              )
+            else
+              const SizedBox(width: 48),
+            const Expanded(
+              child: Text(
+                'Tin nhắn',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+            const SizedBox(width: 48),
           ],
         ),
       ),
@@ -207,9 +239,9 @@ class _MessagesPageState extends State<MessagesPage> {
         ),
       ),
       subtitle: Text(
-        '${room.contextLabel} - ${room.getPartnerRoleLabel(
+        '${room.contextLabel} - ${room.getPartnerRoleLabelForAuthRole(
           _currentUserId,
-          currentUserRole: _currentUserRole,
+          _currentUserRole,
         )}'
         ' - ${room.lastMessagePreview ?? 'Chua co tin nhan'}',
         style: TextStyle(

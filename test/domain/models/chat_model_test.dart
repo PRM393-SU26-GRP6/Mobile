@@ -33,16 +33,16 @@ void main() {
       );
 
       expect(
-        reversedRoom.getCurrentUserRoleLabel(
+        reversedRoom.getCurrentUserRoleLabelForAuthRole(
           'owner-1',
-          currentUserRole: 'Owner',
+          'Owner',
         ),
         'Owner',
       );
       expect(
-        reversedRoom.getPartnerRoleLabel(
+        reversedRoom.getPartnerRoleLabelForAuthRole(
           'owner-1',
-          currentUserRole: 'Owner',
+          'Owner',
         ),
         'Customer',
       );

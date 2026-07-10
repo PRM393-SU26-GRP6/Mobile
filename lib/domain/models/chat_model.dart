@@ -51,27 +51,35 @@ class ChatRoomModel {
     return displayName;
   }
 
-  String getCurrentUserRoleLabel(
-    String? currentUserId, {
-    String? currentUserRole,
-  }) {
-    final authRole = _normalizeRole(currentUserRole);
-    if (authRole != null) return authRole;
+  String getCurrentUserRoleLabel(String? currentUserId) {
     if (currentUserId == customerId) return 'Customer';
     if (currentUserId == hostId) return 'Owner';
     return 'Thanh vien';
   }
 
-  String getPartnerRoleLabel(
-    String? currentUserId, {
-    String? currentUserRole,
-  }) {
-    final authRole = _normalizeRole(currentUserRole);
-    if (authRole == 'Owner') return 'Customer';
-    if (authRole == 'Customer') return 'Owner';
+  String getPartnerRoleLabel(String? currentUserId) {
     if (currentUserId == customerId) return 'Owner';
     if (currentUserId == hostId) return 'Customer';
     return 'Thanh vien';
+  }
+
+  String getCurrentUserRoleLabelForAuthRole(
+    String? currentUserId,
+    String? currentUserRole,
+  ) {
+    final authRole = _normalizeRole(currentUserRole);
+    if (authRole != null) return authRole;
+    return getCurrentUserRoleLabel(currentUserId);
+  }
+
+  String getPartnerRoleLabelForAuthRole(
+    String? currentUserId,
+    String? currentUserRole,
+  ) {
+    final authRole = _normalizeRole(currentUserRole);
+    if (authRole == 'Owner') return 'Customer';
+    if (authRole == 'Customer') return 'Owner';
+    return getPartnerRoleLabel(currentUserId);
   }
 
   String? _normalizeRole(String? role) {

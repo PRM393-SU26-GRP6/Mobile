@@ -12,11 +12,22 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class BookingManagementPage extends StatelessWidget {
-  const BookingManagementPage({super.key});
+  final bool embedded;
+
+  const BookingManagementPage({
+    super.key,
+    this.embedded = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<BookingManagementController>();
+
+    final content = _BookingManagementContent(controller: controller);
+
+    if (embedded) {
+      return content;
+    }
 
     return Scaffold(
       backgroundColor: AppColors.secondary,
@@ -41,58 +52,7 @@ class BookingManagementPage extends StatelessWidget {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () => controller.refreshAll(),
-        color: AppColors.primary,
-        child: Column(
-          children: [
-            Obx(() => BookingStatsCard(
-                  pendingCount: controller.pendingCount,
-                  todayCount: controller.todayBookings.length,
-                  totalCount: controller.bookings.length,
-                )),
-            Obx(() => BookingFilterChips(
-                  selectedFilter: controller.selectedFilter.value,
-                  onFilterChanged: controller.setFilter,
-                  options: controller.filterOptions
-                      .map((e) => {
-                            'value': e['value'] as String,
-                            'label': e['label'] as String
-                          })
-                      .toList(),
-                )),
-            Expanded(
-              child: Obx(() {
-                if (controller.isLoading.value) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
-                  );
-                }
-                final bookings = controller.filteredBookings;
-                if (bookings.isEmpty) {
-                  return EmptyBookingsWidget(
-                    message: _emptyMessageFor(controller.selectedFilter.value),
-                  );
-                }
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: bookings.length,
-                  itemBuilder: (context, index) {
-                    final booking = bookings[index];
-                    return BookingListItem(
-                      booking: booking,
-                      onTap: () => showBookingDetailsSheet(booking),
-                      onAccept: () => showAcceptBookingDialog(booking),
-                      onReject: () => showRejectBookingDialog(booking),
-                      onComplete: () => showCompleteBookingDialog(booking),
-                    );
-                  },
-                );
-              }),
-            ),
-          ],
-        ),
-      ),
+      body: content,
       floatingActionButton: Obx(() {
         if (controller.pendingCount > 0) {
           return FloatingActionButton.extended(
@@ -110,6 +70,68 @@ class BookingManagementPage extends StatelessWidget {
         }
         return const SizedBox.shrink();
       }),
+    );
+  }
+}
+
+class _BookingManagementContent extends StatelessWidget {
+  final BookingManagementController controller;
+
+  const _BookingManagementContent({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: () => controller.refreshAll(),
+      color: AppColors.primary,
+      child: Column(
+        children: [
+          Obx(() => BookingStatsCard(
+                pendingCount: controller.pendingCount,
+                todayCount: controller.todayBookings.length,
+                totalCount: controller.bookings.length,
+              )),
+          Obx(() => BookingFilterChips(
+                selectedFilter: controller.selectedFilter.value,
+                onFilterChanged: controller.setFilter,
+                options: controller.filterOptions
+                    .map((e) => {
+                          'value': e['value'] as String,
+                          'label': e['label'] as String
+                        })
+                    .toList(),
+              )),
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading.value) {
+                return const Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                );
+              }
+              final bookings = controller.filteredBookings;
+              if (bookings.isEmpty) {
+                return EmptyBookingsWidget(
+                  message: _emptyMessageFor(controller.selectedFilter.value),
+                );
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: bookings.length,
+                itemBuilder: (context, index) {
+                  final booking = bookings[index];
+                  return BookingListItem(
+                    booking: booking,
+                    onTap: () => showBookingDetailsSheet(booking),
+                    onAccept: () => showAcceptBookingDialog(booking),
+                    onReject: () => showRejectBookingDialog(booking),
+                    onComplete: () => showCompleteBookingDialog(booking),
+                  );
+                },
+              );
+            }),
+          ),
+        ],
+      ),
     );
   }
 

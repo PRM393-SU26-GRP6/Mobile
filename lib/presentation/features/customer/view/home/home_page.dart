@@ -124,13 +124,7 @@ class HomePage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12)),
                 child: IconButton(
                   icon: const Icon(Icons.exit_to_app, color: Colors.white),
-                  onPressed: () {
-                    try {
-                      authController.logout();
-                    } catch (_) {
-                      Get.offAllNamed('/login');
-                    }
-                  },
+                  onPressed: () => _showLogoutDialog(authController),
                 ),
               ),
             ],
@@ -165,6 +159,37 @@ class HomePage extends StatelessWidget {
     );
   }
 
+  Future<void> _showLogoutDialog(AuthController authController) async {
+    final shouldLogout = await Get.dialog<bool>(
+      AlertDialog(
+        title: const Text('Đăng xuất'),
+        content: const Text('Bạn có muốn đăng xuất không?'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Get.back(result: true),
+            child: const Text('Đăng xuất'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldLogout != true) return;
+
+    try {
+      authController.logout();
+    } catch (_) {
+      Get.offAllNamed('/login');
+    }
+  }
+
   Widget _buildFilterChips(VenueController controller) {
     return Obx(() {
       final amenities = controller.allAmenities;
@@ -180,7 +205,8 @@ class HomePage extends StatelessWidget {
           itemBuilder: (context, index) {
             final amenity = amenities[index];
             final amenityId = amenity.id ?? '';
-            final isSelected = controller.selectedAmenityIds.contains(amenityId);
+            final isSelected =
+                controller.selectedAmenityIds.contains(amenityId);
 
             return GestureDetector(
               onTap: () {

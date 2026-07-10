@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:exe101/core/config/env.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 import 'package:get/get.dart';
@@ -13,13 +14,18 @@ class SignalRService extends GetxService {
   HubConnection? _notificationHubConnection;
 
   // StreamControllers to broadcast events
-  final _chatMessageController = StreamController<Map<String, dynamic>>.broadcast();
+  final _chatMessageController =
+      StreamController<Map<String, dynamic>>.broadcast();
   final _notificationCountController = StreamController<int>.broadcast();
-  final _notificationCreatedController = StreamController<Map<String, dynamic>>.broadcast();
+  final _notificationCreatedController =
+      StreamController<Map<String, dynamic>>.broadcast();
 
-  Stream<Map<String, dynamic>> get onChatMessageReceived => _chatMessageController.stream;
-  Stream<int> get onNotificationUnreadCountChanged => _notificationCountController.stream;
-  Stream<Map<String, dynamic>> get onNotificationCreated => _notificationCreatedController.stream;
+  Stream<Map<String, dynamic>> get onChatMessageReceived =>
+      _chatMessageController.stream;
+  Stream<int> get onNotificationUnreadCountChanged =>
+      _notificationCountController.stream;
+  Stream<Map<String, dynamic>> get onNotificationCreated =>
+      _notificationCreatedController.stream;
 
   Future<String?> _getToken() async {
     return await _storage.read(key: 'access_token');
@@ -44,21 +50,23 @@ class SignalRService extends GetxService {
         .build();
 
     _chatHubConnection?.onclose(({error}) {
-      print('ChatHub connection closed: $error');
+      debugPrint('ChatHub connection closed: $error');
     });
 
     _chatHubConnection?.on('chat.messageCreated', _handleChatMessage);
 
     try {
       await _chatHubConnection?.start();
-      print('ChatHub connected successfully');
+      debugPrint('ChatHub connected successfully');
     } catch (e) {
-      print('ChatHub connection error: $e');
+      debugPrint('ChatHub connection error: $e');
     }
   }
 
   Future<void> initNotificationConnection() async {
-    if (_notificationHubConnection?.state == HubConnectionState.Connected) return;
+    if (_notificationHubConnection?.state == HubConnectionState.Connected) {
+      return;
+    }
 
     final token = await _getToken();
     if (token == null) return;
@@ -76,17 +84,19 @@ class SignalRService extends GetxService {
         .build();
 
     _notificationHubConnection?.onclose(({error}) {
-      print('NotificationHub connection closed: $error');
+      debugPrint('NotificationHub connection closed: $error');
     });
 
-    _notificationHubConnection?.on('notification.unreadCountChanged', _handleUnreadCount);
-    _notificationHubConnection?.on('notification.created', _handleNotificationCreated);
+    _notificationHubConnection?.on(
+        'notification.unreadCountChanged', _handleUnreadCount);
+    _notificationHubConnection?.on(
+        'notification.created', _handleNotificationCreated);
 
     try {
       await _notificationHubConnection?.start();
-      print('NotificationHub connected successfully');
+      debugPrint('NotificationHub connected successfully');
     } catch (e) {
-      print('NotificationHub connection error: $e');
+      debugPrint('NotificationHub connection error: $e');
     }
   }
 
@@ -95,7 +105,7 @@ class SignalRService extends GetxService {
       try {
         await _chatHubConnection?.invoke('JoinRoom', args: [roomId]);
       } catch (e) {
-        print('Error joining chat room: $e');
+        debugPrint('Error joining chat room: $e');
       }
     }
   }
@@ -105,7 +115,7 @@ class SignalRService extends GetxService {
       try {
         await _chatHubConnection?.invoke('LeaveRoom', args: [roomId]);
       } catch (e) {
-        print('Error leaving chat room: $e');
+        debugPrint('Error leaving chat room: $e');
       }
     }
   }

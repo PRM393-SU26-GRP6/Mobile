@@ -51,6 +51,39 @@ class ChatRoomModel {
     return displayName;
   }
 
+  String getCurrentUserRoleLabel(
+    String? currentUserId, {
+    String? currentUserRole,
+  }) {
+    final authRole = _normalizeRole(currentUserRole);
+    if (authRole != null) return authRole;
+    if (currentUserId == customerId) return 'Customer';
+    if (currentUserId == hostId) return 'Owner';
+    return 'Thanh vien';
+  }
+
+  String getPartnerRoleLabel(
+    String? currentUserId, {
+    String? currentUserRole,
+  }) {
+    final authRole = _normalizeRole(currentUserRole);
+    if (authRole == 'Owner') return 'Customer';
+    if (authRole == 'Customer') return 'Owner';
+    if (currentUserId == customerId) return 'Owner';
+    if (currentUserId == hostId) return 'Customer';
+    return 'Thanh vien';
+  }
+
+  String? _normalizeRole(String? role) {
+    if (role == null) return null;
+    final value = role.trim().toLowerCase();
+    if (value == 'owner') return 'Owner';
+    if (value == 'customer') return 'Customer';
+    return null;
+  }
+
+  String get contextLabel => 'Chat chung';
+
   String getPartnerAvatarText(String? currentUserId) {
     final name = getPartnerName(currentUserId);
     if (name.isEmpty || name == 'Chat') return '?';

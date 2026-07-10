@@ -2,6 +2,7 @@ import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/domain/models/booking_model.dart';
 import 'package:exe101/presentation/features/customer/view/orders/widgets/customer_booking_details_widgets.dart';
+import 'package:exe101/presentation/features/customer/view/orders/widgets/customer_review_section.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -121,6 +122,8 @@ class _BookingDetailsContent extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           ..._paymentRows,
+          const SizedBox(height: 18),
+          CustomerReviewSection(booking: booking),
           const SizedBox(height: 18),
           SizedBox(
             width: double.infinity,

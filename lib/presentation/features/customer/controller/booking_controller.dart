@@ -161,14 +161,9 @@ class BookingController extends GetxController {
     try {
       final dto = await reviewRepository.getBookingReview(bookingId);
       if (dto != null) {
-        myReviews[bookingId] = ReviewModel(
-          reviewId: dto.reviewId,
-          userId: '',
-          venueId: '',
+        myReviews[bookingId] = ReviewModel.fromBookingReview(
+          dto,
           bookingId: bookingId,
-          rating: dto.rating,
-          comment: dto.comment,
-          createdAt: dto.createdAt,
         );
       }
       return dto;

@@ -80,7 +80,8 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
     // For validateDiscount, we might need fieldId. We'll pass null or fetch it.
     await _bookingController.validateDiscount(
       code: code,
-      fieldId: null, // Ideally we have fieldId, but let's pass null or from widget
+      fieldId:
+          null, // Ideally we have fieldId, but let's pass null or from widget
       slotIds: widget.slotIds,
       totalAmount: widget.totalPrice,
     );
@@ -88,7 +89,6 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
   }
 
   Future<void> _onConfirm() async {
-    final discountCode = _discountController.text.trim();
     final note = _noteController.text.trim();
 
     setState(() {
@@ -99,7 +99,9 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
     try {
       await _bookingController.createBooking(
         slotIds: widget.slotIds,
-        discountCode: _bookingController.isDiscountValid.value ? _bookingController.discountCode.value : '',
+        discountCode: _bookingController.isDiscountValid.value
+            ? _bookingController.discountCode.value
+            : '',
         note: note.isEmpty ? '' : note,
       );
 
@@ -262,7 +264,8 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
                   BookingInfoRow(
                     icon: Icons.money_off,
                     label: 'Giảm giá',
-                    value: '-${_bookingController.discountAmount.value.toStringAsFixed(0)}đ',
+                    value:
+                        '-${_bookingController.discountAmount.value.toStringAsFixed(0)}đ',
                     valueIcon: Icons.local_offer,
                     valueColor: Colors.green,
                   ),
@@ -278,7 +281,8 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
           Obx(() => BookingInfoRow(
                 icon: Icons.payments,
                 label: 'Tổng tiền',
-                value: '${_bookingController.finalPrice.value.toStringAsFixed(0)}đ',
+                value:
+                    '${_bookingController.finalPrice.value.toStringAsFixed(0)}đ',
                 valueIcon: Icons.receipt_long,
                 isBold: true,
                 valueColor: AppColors.primary,
@@ -298,7 +302,8 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
               child: TextField(
                 controller: _discountController,
                 enabled: _state != _State.loading,
-                style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+                style:
+                    const TextStyle(fontSize: 14, color: AppColors.textPrimary),
                 decoration: InputDecoration(
                   labelText: 'Mã giảm giá',
                   labelStyle: const TextStyle(
@@ -306,7 +311,8 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
                       color: AppColors.textSecondary,
                       fontWeight: FontWeight.w500),
                   hintText: 'Nhập mã giảm giá',
-                  hintStyle: TextStyle(fontSize: 13, color: Colors.grey.shade400),
+                  hintStyle:
+                      TextStyle(fontSize: 13, color: Colors.grey.shade400),
                   filled: true,
                   fillColor: AppColors.secondary,
                   contentPadding:
@@ -321,7 +327,8 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                    borderSide:
+                        const BorderSide(color: AppColors.primary, width: 1.5),
                   ),
                   disabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -338,7 +345,8 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),

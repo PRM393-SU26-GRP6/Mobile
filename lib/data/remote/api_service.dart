@@ -11,6 +11,7 @@ import 'package:exe101/domain/models/time_slot_model.dart';
 import 'package:exe101/domain/models/field_schedule_model.dart';
 import 'package:exe101/domain/models/venue_model.dart';
 import 'package:exe101/domain/models/discount_model.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
@@ -1539,7 +1540,7 @@ class ApiServiceImpl extends ApiService {
       }
       return null;
     } catch (e) {
-      print('validateDiscount error: $e');
+      debugPrint('validateDiscount error: $e');
       return null;
     }
   }
@@ -1552,7 +1553,7 @@ class ApiServiceImpl extends ApiService {
       final list = _extractList(res.data);
       return list.map((e) => DiscountDto.fromJson(e)).toList();
     } catch (e) {
-      print('getOwnerDiscounts error: $e');
+      debugPrint('getOwnerDiscounts error: $e');
       return [];
     }
   }
@@ -1568,7 +1569,7 @@ class ApiServiceImpl extends ApiService {
       );
       return true;
     } catch (e) {
-      print('createDiscount error: $e');
+      debugPrint('createDiscount error: $e');
       return false;
     }
   }
@@ -1584,7 +1585,7 @@ class ApiServiceImpl extends ApiService {
       );
       return true;
     } catch (e) {
-      print('updateDiscount error: $e');
+      debugPrint('updateDiscount error: $e');
       return false;
     }
   }
@@ -1599,7 +1600,7 @@ class ApiServiceImpl extends ApiService {
       );
       return true;
     } catch (e) {
-      print('toggleDiscountStatus error: $e');
+      debugPrint('toggleDiscountStatus error: $e');
       return false;
     }
   }
@@ -1614,9 +1615,8 @@ class ApiServiceImpl extends ApiService {
       );
       return true;
     } catch (e) {
-      print('deleteDiscount error: $e');
+      debugPrint('deleteDiscount error: $e');
       return false;
     }
   }
 }
-

@@ -36,6 +36,35 @@ class ReviewModel {
           : DateTime.tryParse(json['createdAt'].toString()),
     );
   }
+
+  factory ReviewModel.fromBookingReview(
+    BookingReviewDto dto, {
+    required String bookingId,
+    String userId = '',
+    String venueId = '',
+    String? userName,
+    String? venueName,
+  }) {
+    return ReviewModel(
+      reviewId: dto.reviewId,
+      userId: userId,
+      venueId: venueId,
+      userName: userName,
+      venueName: venueName,
+      bookingId: bookingId,
+      rating: dto.rating,
+      comment: dto.comment,
+      createdAt: dto.createdAt,
+    );
+  }
+
+  String get displayComment {
+    final text = comment?.trim();
+    if (text == null || text.isEmpty) {
+      return 'Khong co noi dung danh gia.';
+    }
+    return text;
+  }
 }
 
 class ReviewListResponse {

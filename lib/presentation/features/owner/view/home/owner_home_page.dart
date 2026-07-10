@@ -8,6 +8,7 @@ import 'package:exe101/presentation/features/owner/view/home/widgets/owner_nav_b
 import 'package:exe101/presentation/features/owner/view/home/widgets/venue_selector.dart';
 import 'package:exe101/presentation/features/owner/view/home/widgets/venue_stats_card.dart';
 import 'package:exe101/presentation/features/owner/view/shared/owner_dialogs.dart';
+import 'package:exe101/presentation/features/customer/view/messages/messages_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -125,6 +126,10 @@ class OwnerHomePage extends StatelessWidget {
             onFieldsTap: () {},
             onBookingsTap: () => Get.toNamed(AppPages.bookingManagement),
             onRevenueTap: () => Get.toNamed(AppPages.revenue),
+            onMessagesTap: () => Get.to(
+              () => const Scaffold(body: MessagesPage()),
+              transition: Transition.rightToLeft,
+            ),
           )),
     );
   }

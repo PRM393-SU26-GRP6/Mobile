@@ -5,6 +5,7 @@ class OwnerNavBar extends StatelessWidget {
   final int pendingCount;
   final VoidCallback onFieldsTap;
   final VoidCallback onBookingsTap;
+  final VoidCallback onMessagesTap;
   final VoidCallback onRevenueTap;
 
   const OwnerNavBar({
@@ -12,6 +13,7 @@ class OwnerNavBar extends StatelessWidget {
     required this.pendingCount,
     required this.onFieldsTap,
     required this.onBookingsTap,
+    required this.onMessagesTap,
     required this.onRevenueTap,
   });
 
@@ -58,6 +60,15 @@ class OwnerNavBar extends StatelessWidget {
                   label: 'Doanh thu',
                   isSelected: false,
                   onTap: onRevenueTap,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _NavButton(
+                  icon: Icons.chat_bubble_outline,
+                  label: 'Tin nhan',
+                  isSelected: false,
+                  onTap: onMessagesTap,
                 ),
               ),
             ],

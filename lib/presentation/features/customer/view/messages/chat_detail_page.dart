@@ -2,23 +2,20 @@ import 'dart:async';
 
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/data/remote/api_service.dart';
-import 'package:exe101/domain/models/booking_model.dart';
-import 'package:exe101/domain/models/chat_model.dart';
-import 'package:exe101/presentation/features/customer/view/messages/widgets/booking_context_card.dart';
-import 'package:exe101/presentation/features/customer/view/messages/widgets/chat_date_separator.dart';
-import 'package:exe101/presentation/features/customer/view/messages/widgets/chat_message_bubble.dart';
 import 'package:exe101/data/remote/signalr_service.dart';
+import 'package:exe101/domain/models/chat_model.dart';
+import 'package:exe101/presentation/features/customer/view/messages/widgets/chat_conversation_header.dart';
+import 'package:exe101/presentation/features/customer/view/messages/widgets/chat_input_area.dart';
+import 'package:exe101/presentation/features/customer/view/messages/widgets/chat_message_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ChatDetailPage extends StatefulWidget {
   final ChatRoomModel chatRoom;
-  final BookingDto? bookingContext;
 
   const ChatDetailPage({
     super.key,
     required this.chatRoom,
-    this.bookingContext,
   });
 
   @override
@@ -26,21 +23,47 @@ class ChatDetailPage extends StatefulWidget {
 }
 
 class _ChatDetailPageState extends State<ChatDetailPage> {
+  static const int _pageSize = 30;
+
   final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   final List<MessageModel> _messages = [];
+
   bool _isLoading = true;
+  bool _isLoadingOlder = false;
+  bool _hasMoreOlder = true;
   bool _isSending = false;
+  int _currentPage = 1;
   String? _currentUserId;
+  String? _currentUserRole;
   StreamSubscription? _chatSubscription;
 
   String get _chatPartnerName => widget.chatRoom.getPartnerName(_currentUserId);
+  String get _partnerRole => widget.chatRoom.getPartnerRoleLabel(
+        _currentUserId,
+        currentUserRole: _currentUserRole,
+      );
+  String get _myRole => widget.chatRoom.getCurrentUserRoleLabel(
+        _currentUserId,
+        currentUserRole: _currentUserRole,
+      );
 
   @override
   void initState() {
     super.initState();
     _loadCurrentUser();
-    _loadMessages();
+    _loadInitialMessages();
+    _scrollController.addListener(_onScroll);
     _initSignalR();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients || _isLoadingOlder || !_hasMoreOlder) {
+      return;
+    }
+    if (_scrollController.position.pixels <= 80) {
+      _loadOlderMessages();
+    }
   }
 
   void _initSignalR() {
@@ -51,11 +74,8 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
 
     _chatSubscription = signalRService.onChatMessageReceived.listen((msgData) {
       if (!mounted) return;
-      // Convert map to MessageModel and append
       if (msgData['roomId'] == widget.chatRoom.roomId) {
-        // To be completely safe and avoid missing messages or duplicating, 
-        // we can just reload the message list when a new message event arrives
-        _loadMessages();
+        _loadInitialMessages();
       }
     });
   }
@@ -64,31 +84,36 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     try {
       final apiService = Get.find<ApiServiceImpl>();
       final userId = await apiService.getUserId();
+      final userRole = await apiService.getUserRole();
       if (mounted && userId != null) {
         setState(() {
           _currentUserId = userId;
+          _currentUserRole = userRole;
         });
       }
     } catch (_) {}
   }
 
-  Future<void> _loadMessages() async {
+  Future<void> _loadInitialMessages() async {
     try {
       final apiService = Get.find<ApiServiceImpl>();
       await _loadCurrentUser();
 
       final messages = await apiService.getChatMessages(
         roomId: widget.chatRoom.roomId,
+        pageNumber: 1,
+        pageSize: _pageSize,
       );
 
-      if (mounted) {
-        setState(() {
-          _messages.clear();
-          messages.sort((a, b) => a.sentAt.compareTo(b.sentAt));
-          _messages.addAll(messages);
-          _isLoading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _currentPage = 1;
+        _hasMoreOlder = messages.length == _pageSize;
+        _messages
+          ..clear()
+          ..addAll(_sortAscending(messages));
+        _isLoading = false;
+      });
     } catch (_) {
       if (mounted) {
         setState(() {
@@ -98,7 +123,54 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     }
   }
 
+  Future<void> _loadOlderMessages() async {
+    if (_isLoadingOlder || !_hasMoreOlder) return;
+    setState(() {
+      _isLoadingOlder = true;
+    });
 
+    try {
+      final nextPage = _currentPage + 1;
+      final beforeHeight = _scrollController.hasClients
+          ? _scrollController.position.maxScrollExtent
+          : 0.0;
+      final apiService = Get.find<ApiServiceImpl>();
+      final older = await apiService.getChatMessages(
+        roomId: widget.chatRoom.roomId,
+        pageNumber: nextPage,
+        pageSize: _pageSize,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _currentPage = nextPage;
+        _hasMoreOlder = older.length == _pageSize;
+        final knownIds = _messages.map((m) => m.messageId).toSet();
+        _messages.insertAll(
+          0,
+          _sortAscending(older)
+              .where((message) => !knownIds.contains(message.messageId)),
+        );
+        _isLoadingOlder = false;
+      });
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_scrollController.hasClients) return;
+        final afterHeight = _scrollController.position.maxScrollExtent;
+        _scrollController.jumpTo(afterHeight - beforeHeight + 80);
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isLoadingOlder = false;
+        });
+      }
+    }
+  }
+
+  List<MessageModel> _sortAscending(List<MessageModel> messages) {
+    return [...messages]..sort((a, b) => a.sentAt.compareTo(b.sentAt));
+  }
 
   Future<void> _sendMessage() async {
     final text = _messageController.text.trim();
@@ -116,11 +188,11 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       );
 
       _messageController.clear();
-      await _loadMessages();
+      await _loadInitialMessages();
     } catch (_) {
       Get.snackbar(
-        'Lỗi',
-        'Không thể gửi tin nhắn. Vui lòng thử lại.',
+        'Loi',
+        'Khong the gui tin nhan. Vui long thu lai.',
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -139,64 +211,9 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     _chatSubscription?.cancel();
     final signalRService = Get.find<SignalRService>();
     signalRService.leaveChatRoom(widget.chatRoom.roomId);
+    _scrollController.dispose();
     _messageController.dispose();
     super.dispose();
-  }
-
-  bool _shouldShowDate(int index) {
-    if (index == 0) return true;
-    final currentDate = _messages[index].sentAt;
-    final previousDate = _messages[index - 1].sentAt;
-    return currentDate.day != previousDate.day ||
-        currentDate.month != previousDate.month ||
-        currentDate.year != previousDate.year;
-  }
-
-  void _showBookingDetails() {
-    final booking = widget.bookingContext;
-    if (booking == null) return;
-
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (_) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 44,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: AppColors.inputBorder,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                const Text(
-                  'Chi tiết đơn đặt sân',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                BookingContextCard(booking: booking),
-              ],
-            ),
-          ),
-        );
-      },
-    );
   }
 
   @override
@@ -206,7 +223,16 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        title: Text(_chatPartnerName),
+        title: Column(
+          children: [
+            Text(_chatPartnerName),
+            const SizedBox(height: 2),
+            Text(
+              '${widget.chatRoom.contextLabel} - Ban la $_myRole',
+              style: const TextStyle(fontSize: 11, color: Colors.white70),
+            ),
+          ],
+        ),
         centerTitle: true,
       ),
       body: _isLoading
@@ -215,96 +241,24 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
             )
           : Column(
               children: [
-                if (widget.bookingContext != null)
-                  BookingContextCard(
-                    booking: widget.bookingContext!,
-                    onViewDetails: _showBookingDetails,
+                ChatConversationHeader(partnerRole: _partnerRole),
+                Expanded(
+                  child: ChatMessageList(
+                    controller: _scrollController,
+                    messages: _messages,
+                    isLoadingOlder: _isLoadingOlder,
+                    currentUserId: _currentUserId,
+                    myRole: _myRole,
+                    partnerRole: _partnerRole,
                   ),
-                Expanded(child: _buildMessageList()),
-                _buildInputArea(),
+                ),
+                ChatInputArea(
+                  controller: _messageController,
+                  isSending: _isSending,
+                  onSend: _sendMessage,
+                ),
               ],
             ),
-    );
-  }
-
-  Widget _buildMessageList() {
-    return ListView.builder(
-      reverse: false,
-      padding: const EdgeInsets.all(16),
-      itemCount: _messages.length,
-      itemBuilder: (context, index) {
-        final message = _messages[index];
-        final isMe = message.senderId == _currentUserId;
-        return Column(
-          children: [
-            if (_shouldShowDate(index)) ChatDateSeparator(date: message.sentAt),
-            ChatMessageBubble(message: message, isMe: isMe),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildInputArea() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Row(
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.secondary,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: TextField(
-                  controller: _messageController,
-                  decoration: const InputDecoration(
-                    hintText: 'Nhập tin nhắn...',
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                  ),
-                  textCapitalization: TextCapitalization.sentences,
-                  onSubmitted: (_) => _sendMessage(),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                onPressed: _isSending ? null : _sendMessage,
-                icon: _isSending
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.send, color: Colors.white),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

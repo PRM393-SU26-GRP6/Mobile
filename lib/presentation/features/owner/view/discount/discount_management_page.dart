@@ -28,7 +28,8 @@ class DiscountManagementPage extends StatelessWidget {
       ),
       body: Obx(() {
         if (controller.isLoading.value && controller.discounts.isEmpty) {
-          return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+          return const Center(
+              child: CircularProgressIndicator(color: AppColors.primary));
         }
 
         if (controller.error.value.isNotEmpty) {
@@ -36,7 +37,8 @@ class DiscountManagementPage extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(controller.error.value, style: const TextStyle(color: Colors.red)),
+                Text(controller.error.value,
+                    style: const TextStyle(color: Colors.red)),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () => controller.loadDiscounts(),
@@ -74,7 +76,8 @@ class DiscountManagementPage extends StatelessWidget {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12),
                   onTap: () {
-                    Get.toNamed(AppPages.ownerDiscountEditor, arguments: discount);
+                    Get.toNamed(AppPages.ownerDiscountEditor,
+                        arguments: discount);
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -94,9 +97,10 @@ class DiscountManagementPage extends StatelessWidget {
                             ),
                             Switch(
                               value: discount.isActive,
-                              activeColor: AppColors.primary,
+                              activeThumbColor: AppColors.primary,
                               onChanged: (val) {
-                                controller.toggleDiscountStatus(discount.discountId);
+                                controller
+                                    .toggleDiscountStatus(discount.discountId);
                               },
                             ),
                           ],
@@ -113,20 +117,24 @@ class DiscountManagementPage extends StatelessWidget {
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            const Icon(Icons.local_offer_outlined, size: 16, color: AppColors.textSecondary),
+                            const Icon(Icons.local_offer_outlined,
+                                size: 16, color: AppColors.textSecondary),
                             const SizedBox(width: 4),
                             Text(
                               discount.discountType == 'Percentage'
                                   ? 'Giảm ${discount.value.toStringAsFixed(0)}%'
                                   : 'Giảm ${discount.value.toStringAsFixed(0)}đ',
-                              style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                              style: const TextStyle(
+                                  fontSize: 14, color: AppColors.textSecondary),
                             ),
                             const Spacer(),
-                            const Icon(Icons.confirmation_number_outlined, size: 16, color: AppColors.textSecondary),
+                            const Icon(Icons.confirmation_number_outlined,
+                                size: 16, color: AppColors.textSecondary),
                             const SizedBox(width: 4),
                             Text(
                               'Đã dùng: ${discount.usedCount}/${discount.usageLimit}',
-                              style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                              style: const TextStyle(
+                                  fontSize: 14, color: AppColors.textSecondary),
                             ),
                           ],
                         ),
@@ -138,7 +146,8 @@ class DiscountManagementPage extends StatelessWidget {
                               Get.dialog(
                                 AlertDialog(
                                   title: const Text('Xác nhận xóa'),
-                                  content: const Text('Bạn có chắc chắn muốn xóa mã này?'),
+                                  content: const Text(
+                                      'Bạn có chắc chắn muốn xóa mã này?'),
                                   actions: [
                                     TextButton(
                                       onPressed: () => Get.back(),
@@ -147,9 +156,11 @@ class DiscountManagementPage extends StatelessWidget {
                                     TextButton(
                                       onPressed: () {
                                         Get.back();
-                                        controller.deleteDiscount(discount.discountId);
+                                        controller.deleteDiscount(
+                                            discount.discountId);
                                       },
-                                      child: const Text('Xóa', style: TextStyle(color: Colors.red)),
+                                      child: const Text('Xóa',
+                                          style: TextStyle(color: Colors.red)),
                                     ),
                                   ],
                                 ),

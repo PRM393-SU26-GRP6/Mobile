@@ -6,11 +6,13 @@ import 'package:flutter/material.dart';
 class ChatMessageBubble extends StatelessWidget {
   final MessageModel message;
   final bool isMe;
+  final String? senderRoleLabel;
 
   const ChatMessageBubble({
     super.key,
     required this.message,
     required this.isMe,
+    this.senderRoleLabel,
   });
 
   @override
@@ -44,6 +46,17 @@ class ChatMessageBubble extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
+            if (senderRoleLabel != null && senderRoleLabel!.isNotEmpty) ...[
+              Text(
+                senderRoleLabel!,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: isMe ? Colors.white70 : AppColors.primary,
+                ),
+              ),
+              const SizedBox(height: 3),
+            ],
             Text(
               message.messageText ?? '',
               style: TextStyle(

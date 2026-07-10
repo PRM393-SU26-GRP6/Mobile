@@ -4,7 +4,6 @@ import 'package:exe101/domain/models/time_slot_model.dart';
 import 'package:exe101/domain/models/venue_model.dart';
 import 'package:exe101/domain/repositories/review_repository.dart';
 import 'package:exe101/domain/repositories/slot_repository.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:exe101/core/theme/app_theme.dart';

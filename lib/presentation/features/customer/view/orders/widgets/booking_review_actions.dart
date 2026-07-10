@@ -18,62 +18,58 @@ class BookingReviewActions extends StatelessWidget {
       runSpacing: 8,
       alignment: WrapAlignment.end,
       children: [
-        _buildEditButton(),
-        _buildDeleteButton(),
+        _ReviewActionButton(
+          icon: Icons.rate_review_outlined,
+          label: 'Sua feedback',
+          color: AppColors.accent,
+          onTap: onEditTap,
+        ),
+        _ReviewActionButton(
+          icon: Icons.delete_outline,
+          label: 'Xoa feedback',
+          color: Colors.red.shade600,
+          onTap: onDeleteTap,
+        ),
       ],
     );
   }
+}
 
-  Widget _buildEditButton() {
+class _ReviewActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _ReviewActionButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onEditTap,
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: AppColors.accent),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.edit_outlined, size: 14, color: AppColors.accent),
-            SizedBox(width: 4),
-            Text(
-              'Sửa',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: AppColors.accent,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDeleteButton() {
-    return GestureDetector(
-      onTap: onDeleteTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.red.shade400),
+          border: Border.all(color: color),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.delete_outline, size: 14, color: Colors.red.shade600),
+            Icon(icon, size: 14, color: color),
             const SizedBox(width: 4),
             Text(
-              'Xóa',
+              label,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: Colors.red.shade600,
+                color: color,
               ),
             ),
           ],

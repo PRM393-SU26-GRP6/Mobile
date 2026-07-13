@@ -3,19 +3,15 @@ import 'package:flutter/material.dart';
 
 class BookingPaymentButtons extends StatelessWidget {
   final bool showDeposit;
-  final bool showFullUpfront;
   final bool showRemaining;
   final VoidCallback onDepositTap;
-  final VoidCallback onFullUpfrontTap;
   final VoidCallback onRemainingTap;
 
   const BookingPaymentButtons({
     super.key,
     required this.showDeposit,
-    required this.showFullUpfront,
     required this.showRemaining,
     required this.onDepositTap,
-    required this.onFullUpfrontTap,
     required this.onRemainingTap,
   });
 
@@ -31,20 +27,6 @@ class BookingPaymentButtons extends StatelessWidget {
             icon: Icons.qr_code_2,
             onTap: onDepositTap,
             backgroundColor: const Color(0xFF0D6EFD),
-          ),
-        ),
-      );
-    }
-
-    if (showFullUpfront) {
-      _addGap(buttons);
-      buttons.add(
-        Expanded(
-          child: _PaymentActionButton(
-            label: 'Thanh toan het',
-            icon: Icons.payments_outlined,
-            onTap: onFullUpfrontTap,
-            backgroundColor: AppColors.primary,
           ),
         ),
       );

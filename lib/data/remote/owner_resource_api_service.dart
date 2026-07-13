@@ -106,7 +106,8 @@ class OwnerResourceApiService {
         options: Options(headers: headers),
       );
 
-      debugPrint('[OwnerResourceApi] response.statusCode: ${response.statusCode}');
+      debugPrint(
+          '[OwnerResourceApi] response.statusCode: ${response.statusCode}');
       debugPrint('[OwnerResourceApi] response.data: ${response.data}');
 
       if (response.data == null) return const [];
@@ -206,8 +207,7 @@ class OwnerResourceApiService {
 
     debugPrint(
         '[OwnerResourceApi] upload response.statusCode: ${response.statusCode}');
-    debugPrint(
-        '[OwnerResourceApi] upload response.data: ${response.data}');
+    debugPrint('[OwnerResourceApi] upload response.data: ${response.data}');
 
     if (response.statusCode != null && response.statusCode! >= 400) {
       throw DioException(

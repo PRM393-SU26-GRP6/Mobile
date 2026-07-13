@@ -187,7 +187,5 @@ class BookingDto {
 
   bool get canPayDeposit => bookingStatus?.toLowerCase() == 'accepted';
 
-  bool get canPayFullUpfront => bookingStatus?.toLowerCase() == 'accepted';
-
   bool get canPayRemaining => bookingStatus?.toLowerCase() == 'deposited';
 }

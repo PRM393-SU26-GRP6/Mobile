@@ -40,7 +40,6 @@ void main() {
       );
 
       expect(booking.canPayDeposit, isTrue);
-      expect(booking.canPayFullUpfront, isTrue);
       expect(booking.canPayRemaining, isFalse);
     });
 
@@ -58,7 +57,6 @@ void main() {
       );
 
       expect(booking.canPayDeposit, isFalse);
-      expect(booking.canPayFullUpfront, isFalse);
       expect(booking.canPayRemaining, isTrue);
     });
   });

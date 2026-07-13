@@ -29,7 +29,6 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
       Get.arguments['paymentMethod'] ?? PaymentMethod.sePay;
 
   bool get isDeposit => paymentType == 'deposit';
-  bool get isFullUpfront => paymentType == 'full';
 
   bool get isSePay => paymentMethod == PaymentMethod.sePay;
 
@@ -122,12 +121,6 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
   Future<PaymentModel> _createPaymentByType(ApiServiceImpl apiService) {
     if (isDeposit) {
       return apiService.createDepositPayment(
-        bookingId,
-        paymentMethod: paymentMethod.value,
-      );
-    }
-    if (isFullUpfront) {
-      return apiService.createFullPayment(
         bookingId,
         paymentMethod: paymentMethod.value,
       );

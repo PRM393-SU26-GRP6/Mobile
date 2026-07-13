@@ -91,8 +91,7 @@ void main() {
       expect(payment?.id, 'final-payment');
     });
 
-    test('selects reusable pending SePay full upfront payment as final payment',
-        () {
+    test('does not resolve full upfront payment flow', () {
       final payments = [
         _payment(
           id: 'full-payment',
@@ -107,7 +106,7 @@ void main() {
         paymentType: 'full',
       );
 
-      expect(payment?.id, 'full-payment');
+      expect(payment, isNull);
     });
 
     test('does not reuse completed deposit payment', () {

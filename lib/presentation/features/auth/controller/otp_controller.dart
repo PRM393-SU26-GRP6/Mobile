@@ -2,6 +2,7 @@ import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/domain/repositories/user_repository.dart';
 import 'package:exe101/main.dart';
+import 'package:exe101/presentation/features/auth/controller/session_state_resetter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -81,6 +82,7 @@ class OtpController extends GetxController {
       if (response.success) {
         Get.snackbar('Thành công', 'Xác thực thành công!');
         final role = await Get.find<ApiServiceImpl>().getUserRole();
+        await SessionStateResetter.clearUserBoundState();
         if (role == 'Owner') {
           Get.offAllNamed(AppPages.ownerHome);
         } else {

@@ -121,7 +121,6 @@ class VenueFieldCard extends StatelessWidget {
                 ],
               ),
             ),
-
           ],
         ),
       ),

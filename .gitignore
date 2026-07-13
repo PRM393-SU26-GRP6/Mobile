@@ -12,6 +12,7 @@
 .swiftpm/
 migrate_working_dir/
 .env
+docs
 .env.*
 *.g.dart
 android/app/google-services.json

@@ -3,6 +3,7 @@ import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/domain/repositories/user_repository.dart';
 import 'package:exe101/main.dart';
 import 'package:exe101/presentation/features/auth/controller/auth_flow_resolver.dart';
+import 'package:exe101/presentation/features/auth/controller/session_state_resetter.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -31,6 +32,7 @@ class AuthController extends GetxController {
 
       if (loginResponse.success) {
         final role = await Get.find<ApiServiceImpl>().getUserRole();
+        await SessionStateResetter.clearUserBoundState();
         if (role == 'Owner') {
           Get.offAllNamed(AppPages.ownerHome);
         } else {
@@ -68,10 +70,13 @@ class AuthController extends GetxController {
     );
   }
 
-  void logout() async {
+  Future<void> logout() async {
     if (Get.isRegistered<ApiServiceImpl>()) {
       await Get.find<ApiServiceImpl>().logout();
     }
+    await SessionStateResetter.clearUserBoundState();
+    emailController.clear();
+    passwordController.clear();
     Get.offAllNamed(AppPages.login);
   }
 

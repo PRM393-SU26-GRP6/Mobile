@@ -3,6 +3,7 @@ import 'package:exe101/domain/repositories/review_repository.dart';
 import 'package:exe101/domain/repositories/slot_repository.dart';
 import 'package:exe101/domain/repositories/user_repository.dart';
 import 'package:exe101/presentation/features/customer/controller/booking_controller.dart';
+import 'package:exe101/presentation/features/customer/controller/customer_home_controller.dart';
 import 'package:exe101/presentation/features/customer/controller/venue_controller.dart';
 import 'package:exe101/presentation/features/customer/controller/venue_detail_controller.dart';
 import 'package:exe101/presentation/features/customer/controller/payment_history_controller.dart';
@@ -30,5 +31,7 @@ class CustomerBinding extends Bindings {
     Get.lazyPut<PaymentHistoryController>(() => PaymentHistoryController(
           apiService: apiService,
         ));
+    Get.lazyPut<CustomerHomeController>(CustomerHomeController.new,
+        fenix: true);
   }
 }

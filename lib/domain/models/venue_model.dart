@@ -76,17 +76,16 @@ class VenueModel {
       images: resolvedImages,
       amenities: json["amenities"] != null
           ? (json["amenities"] as List)
-                .map((e) => AmenityModel.fromJson(e))
-                .toList()
+              .map((e) => AmenityModel.fromJson(e))
+              .toList()
           : null,
       fields: json["fields"] != null
           ? (json["fields"] as List)
-                .map((e) => FootballFieldDto.fromJson(e))
-                .toList()
+              .map((e) => FootballFieldDto.fromJson(e))
+              .toList()
           : null,
       isActive: json["isActive"] as bool?,
-      ownerId:
-          json["ownerId"] ??
+      ownerId: json["ownerId"] ??
           (json["fields"] != null && (json["fields"] as List).isNotEmpty
               ? (json["fields"] as List)[0]["ownerId"]
               : null),
@@ -103,10 +102,10 @@ class AmenityModel {
   AmenityModel({this.id, this.amenityName, this.icon});
 
   factory AmenityModel.fromJson(Map<String, dynamic> json) => AmenityModel(
-    id: json["amenityId"] ?? json["id"],
-    amenityName: json["name"] ?? json["amenityName"],
-    icon: json["icon"],
-  );
+        id: json["amenityId"] ?? json["id"],
+        amenityName: json["name"] ?? json["amenityName"],
+        icon: json["icon"],
+      );
 }
 
 class FootballFieldDto {

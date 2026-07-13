@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:exe101/app.dart';
 import 'package:exe101/core/config/env.dart';
 import 'package:exe101/data/remote/api_service.dart';
+import 'package:exe101/data/remote/auth_refresh_interceptor.dart';
 import 'package:exe101/data/remote/owner_resource_api_service.dart';
 import 'package:exe101/data/remote/owner_stats_api_service.dart';
 import 'package:exe101/data/remote/review_api_service.dart';
@@ -15,6 +16,7 @@ import 'package:exe101/domain/repositories/user_repository.dart';
 import 'package:exe101/domain/repositories/owner_management_repository.dart';
 import 'package:exe101/presentation/features/auth/controller/auth_controller.dart';
 import 'package:exe101/presentation/features/auth/controller/register_controller.dart';
+import 'package:exe101/presentation/features/auth/controller/session_state_resetter.dart';
 import 'package:exe101/presentation/features/customer/controller/booking_controller.dart';
 
 class ApiErrorHandler {
@@ -85,6 +87,14 @@ void main() {
   ));
 
   final apiService = ApiServiceImpl(dio);
+  dio.interceptors.add(AuthRefreshInterceptor(
+    dio: dio,
+    apiService: apiService,
+    onSessionExpired: () async {
+      await apiService.logout();
+      await SessionStateResetter.clearUserBoundState();
+    },
+  ));
   Get.put(apiService);
 
   // Initialize SignalR Service globally

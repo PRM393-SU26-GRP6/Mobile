@@ -71,9 +71,19 @@ class FieldScheduleDto {
     'Chủ nhật',
   ];
 
+  static const List<String> backendDayNames = [
+    'Thu 2',
+    'Thu 3',
+    'Thu 4',
+    'Thu 5',
+    'Thu 6',
+    'Thu 7',
+    'Chu nhat',
+  ];
+
   String get dayName {
-    if (dayOfWeek >= 1 && dayOfWeek <= 7) {
-      return dayNames[dayOfWeek - 1];
+    if (dayOfWeek >= 0 && dayOfWeek <= 6) {
+      return backendDayNames[dayOfWeek];
     }
     return 'Ngày $dayOfWeek';
   }

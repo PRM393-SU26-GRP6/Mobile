@@ -18,7 +18,8 @@ class PaymentHistoryPage extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary, size: 20),
+          icon: const Icon(Icons.arrow_back_ios,
+              color: AppColors.textPrimary, size: 20),
           onPressed: () => Get.back(),
         ),
         title: const Text(
@@ -40,19 +41,23 @@ class PaymentHistoryPage extends StatelessWidget {
             );
           }
 
-          if (controller.error.value.isNotEmpty && controller.payments.isEmpty) {
+          if (controller.error.value.isNotEmpty &&
+              controller.payments.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(Icons.error_outline, size: 48, color: Colors.red),
                   const SizedBox(height: 16),
-                  Text(controller.error.value, style: const TextStyle(color: Colors.red)),
+                  Text(controller.error.value,
+                      style: const TextStyle(color: Colors.red)),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: controller.refreshPayments,
-                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.accent),
-                    child: const Text('Thử lại', style: TextStyle(color: Colors.white)),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.accent),
+                    child: const Text('Thử lại',
+                        style: TextStyle(color: Colors.white)),
                   ),
                 ],
               ),
@@ -65,7 +70,8 @@ class PaymentHistoryPage extends StatelessWidget {
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: controller.payments.length + (controller.hasMore.value ? 1 : 0),
+            itemCount:
+                controller.payments.length + (controller.hasMore.value ? 1 : 0),
             itemBuilder: (context, index) {
               if (index == controller.payments.length) {
                 if (!controller.isLoadingMore.value) {

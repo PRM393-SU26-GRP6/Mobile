@@ -72,4 +72,31 @@ class SlotActionsController extends GetxController {
       return false;
     }
   }
+
+  Future<int> deleteSlots(Iterable<String> slotIds) async {
+    var deletedCount = 0;
+    for (final slotId in slotIds) {
+      try {
+        await ownerRepository.deleteOwnerSlot(slotId);
+        deletedCount++;
+      } catch (_) {
+        // Continue deleting other selected slots; summary snackbar is shown below.
+      }
+    }
+
+    if (deletedCount > 0) {
+      Get.snackbar(
+        'ThÃ nh cÃ´ng',
+        'ÄÃ£ xoÃ¡ $deletedCount slot',
+        snackPosition: SnackPosition.TOP,
+      );
+    } else {
+      Get.snackbar(
+        'Lá»—i',
+        'KhÃ´ng thá»ƒ xoÃ¡ cÃ¡c slot Ä‘Ã£ chá»n',
+        snackPosition: SnackPosition.TOP,
+      );
+    }
+    return deletedCount;
+  }
 }

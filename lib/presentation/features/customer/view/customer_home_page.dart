@@ -1,27 +1,56 @@
 import 'package:exe101/core/theme/app_theme.dart';
+import 'package:exe101/presentation/features/customer/controller/customer_home_controller.dart';
+import 'package:exe101/presentation/features/customer/view/cart/cart_page.dart';
 import 'package:exe101/presentation/features/customer/view/home/home_page.dart';
 import 'package:exe101/presentation/features/customer/view/map/map_page.dart';
-import 'package:exe101/presentation/features/customer/view/cart/cart_page.dart';
-import 'package:exe101/presentation/features/customer/view/orders/orders_page.dart';
 import 'package:exe101/presentation/features/customer/view/messages/messages_page.dart';
 import 'package:exe101/presentation/features/customer/view/notifications/notifications_page.dart';
+import 'package:exe101/presentation/features/customer/view/orders/orders_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class CustomerHomePage extends StatelessWidget {
   const CustomerHomePage({super.key});
 
+  static const _pages = [
+    HomePage(),
+    MapPage(),
+    CartPage(),
+    OrdersPage(),
+    MessagesPage(),
+    NotificationsPage(),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(_CustomerHomeController());
+    final controller = Get.find<CustomerHomeController>();
 
     return Scaffold(
-      body: Obx(() => controller.pages[controller.currentIndex.value]),
-      bottomNavigationBar: Obx(() => _buildBottomNav(controller)),
+      body: Obx(() => IndexedStack(
+            index: controller.currentIndex.value,
+            children: _pages,
+          )),
+      bottomNavigationBar: Obx(
+        () => _CustomerBottomNav(
+          controller: controller,
+          selectedIndex: controller.currentIndex.value,
+        ),
+      ),
     );
   }
+}
 
-  Widget _buildBottomNav(_CustomerHomeController controller) {
+class _CustomerBottomNav extends StatelessWidget {
+  const _CustomerBottomNav({
+    required this.controller,
+    required this.selectedIndex,
+  });
+
+  final CustomerHomeController controller;
+  final int selectedIndex;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.secondary,
@@ -39,49 +68,48 @@ class CustomerHomePage extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _NavItem(
-                icon: Icons.home_outlined,
-                activeIcon: Icons.home,
-                label: 'Trang chủ',
-                isActive: controller.currentIndex.value == 0,
-                onTap: () => controller.changePage(0),
-              ),
-              _NavItem(
-                icon: Icons.map_outlined,
-                activeIcon: Icons.map,
-                label: 'Bản đồ',
-                isActive: controller.currentIndex.value == 1,
-                onTap: () => controller.changePage(1),
-              ),
-              _NavItem(
-                icon: Icons.shopping_cart_outlined,
-                activeIcon: Icons.shopping_cart,
-                label: 'Giỏ hàng',
-                isActive: controller.currentIndex.value == 2,
-                onTap: () => controller.changePage(2),
-              ),
-              _NavItem(
-                icon: Icons.receipt_long_outlined,
-                activeIcon: Icons.receipt_long,
-                label: 'Đơn hàng',
-                isActive: controller.currentIndex.value == 3,
-                onTap: () => controller.changePage(3),
-              ),
-              _NavItem(
-                icon: Icons.chat_bubble_outline,
-                activeIcon: Icons.chat_bubble,
-                label: 'Tin nhắn',
-                isActive: controller.currentIndex.value == 4,
-                onTap: () => controller.changePage(4),
-              ),
-              _NavItem(
-                icon: Icons.notifications_outlined,
-                activeIcon: Icons.notifications,
-                label: 'Thông báo',
-                isActive: controller.currentIndex.value == 5,
-                onTap: () => controller.changePage(5),
-              ),
-              // Removed explicit logout from bottom nav - logout is available in header
+              _CustomerNavItem(
+                  controller: controller,
+                  selectedIndex: selectedIndex,
+                  index: 0,
+                  icon: Icons.home_outlined,
+                  activeIcon: Icons.home,
+                  label: 'Trang chu'),
+              _CustomerNavItem(
+                  controller: controller,
+                  selectedIndex: selectedIndex,
+                  index: 1,
+                  icon: Icons.map_outlined,
+                  activeIcon: Icons.map,
+                  label: 'Ban do'),
+              _CustomerNavItem(
+                  controller: controller,
+                  selectedIndex: selectedIndex,
+                  index: 2,
+                  icon: Icons.shopping_cart_outlined,
+                  activeIcon: Icons.shopping_cart,
+                  label: 'Gio hang'),
+              _CustomerNavItem(
+                  controller: controller,
+                  selectedIndex: selectedIndex,
+                  index: 3,
+                  icon: Icons.receipt_long_outlined,
+                  activeIcon: Icons.receipt_long,
+                  label: 'Don hang'),
+              _CustomerNavItem(
+                  controller: controller,
+                  selectedIndex: selectedIndex,
+                  index: 4,
+                  icon: Icons.chat_bubble_outline,
+                  activeIcon: Icons.chat_bubble,
+                  label: 'Tin nhan'),
+              _CustomerNavItem(
+                  controller: controller,
+                  selectedIndex: selectedIndex,
+                  index: 5,
+                  icon: Icons.notifications_outlined,
+                  activeIcon: Icons.notifications,
+                  label: 'Thong bao'),
             ],
           ),
         ),
@@ -90,42 +118,28 @@ class CustomerHomePage extends StatelessWidget {
   }
 }
 
-class _CustomerHomeController extends GetxController {
-  final currentIndex = 0.obs;
-
-  final pages = [
-    const HomePage(),
-    const MapPage(),
-    const CartPage(),
-    const OrdersPage(),
-    const MessagesPage(),
-    const NotificationsPage(),
-  ];
-
-  void changePage(int index) {
-    currentIndex.value = index;
-  }
-}
-
-class _NavItem extends StatelessWidget {
-  final IconData icon;
-  final IconData activeIcon;
-  final String label;
-  final bool isActive;
-  final VoidCallback onTap;
-
-  const _NavItem({
+class _CustomerNavItem extends StatelessWidget {
+  const _CustomerNavItem({
+    required this.controller,
+    required this.selectedIndex,
+    required this.index,
     required this.icon,
     required this.activeIcon,
     required this.label,
-    required this.isActive,
-    required this.onTap,
   });
+
+  final CustomerHomeController controller;
+  final int selectedIndex;
+  final int index;
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
+    final isActive = selectedIndex == index;
     return GestureDetector(
-      onTap: onTap,
+      onTap: () => controller.changePage(index),
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
         width: 52,

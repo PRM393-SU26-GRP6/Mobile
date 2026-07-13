@@ -42,6 +42,11 @@ class FieldDetailController extends GetxController {
     }
   }
 
+  Future<void> reload() async {
+    if (_fieldId == null || _fieldId!.isEmpty) return;
+    await loadFieldDetail(_fieldId!);
+  }
+
   Future<void> toggleFieldStatus() async {
     if (field.value == null) return;
 
@@ -56,10 +61,6 @@ class FieldDetailController extends GetxController {
         fieldName: field.value!.fieldName,
         description: field.value!.description,
         fieldType: field.value!.fieldType,
-        priceMorning: field.value!.priceMorning,
-        priceAfternoon: field.value!.priceAfternoon,
-        priceEvening: field.value!.priceEvening,
-        pricePerHour: field.value!.pricePerHour,
         amenities: field.value!.amenities,
         isActive: newStatus,
         images: field.value!.images,

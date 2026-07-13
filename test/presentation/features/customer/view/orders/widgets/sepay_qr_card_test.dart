@@ -31,6 +31,7 @@ void main() {
 
     final image = tester.widget<Image>(find.byType(Image));
     expect((image.image as NetworkImage).url, qrInfo.qrUrl);
+    expect(find.byKey(const Key('sepay-network-qr')), findsOneWidget);
     expect(find.byType(QrImageView), findsNothing);
     expect(find.text('NgÃ¢n hÃ ng'), findsNothing);
     expect(find.text('Sá»‘ tÃ i khoáº£n'), findsNothing);

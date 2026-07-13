@@ -1,8 +1,7 @@
-import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/domain/models/venue_model.dart';
+import 'package:exe101/presentation/features/owner/view/home/widgets/venue_stats_card_parts.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class VenueStatsCard extends StatelessWidget {
   final VenueModel venue;
@@ -34,152 +33,38 @@ class VenueStatsCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.stadium,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
+              const VenueIcon(),
               const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      venue.venueName ?? 'Sân của tôi',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on,
-                          size: 14,
-                          color: Colors.white.withValues(alpha: 0.8),
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            venue.address ?? 'Chưa có địa chỉ',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.white.withValues(alpha: 0.8),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              _ImagesActionButton(venue: venue),
+              Expanded(child: VenueText(venue: venue)),
+              VenueImagesActionButton(venue: venue),
             ],
           ),
           const SizedBox(height: 16),
           Row(
             children: [
-              _buildStatItem(
+              VenueStatItem(
                 icon: Icons.sports_soccer,
-                label: 'Sân con',
+                label: 'San con',
                 value: '${venue.fields?.length ?? 0}',
               ),
-              _buildStatItem(
+              VenueStatItem(
                 icon: Icons.star,
-                label: 'Đánh giá',
+                label: 'Danh gia',
                 value: venue.averageRating?.toStringAsFixed(1) ?? '-',
               ),
-              _buildStatItem(
-                icon: Icons.attach_money,
-                label: 'Giá từ',
-                value: venue.minPrice != null
-                    ? '${venue.minPrice!.toStringAsFixed(0)}K'
-                    : '-',
+              VenueStatItem(
+                icon: Icons.reviews_outlined,
+                label: 'Luot review',
+                value: '${venue.totalReviews ?? 0}',
               ),
-              _buildStatItem(
+              VenueStatItem(
                 icon: Icons.check_circle,
-                label: 'Trạng thái',
-                value: venue.isActive == true ? 'Mở' : 'Đóng',
+                label: 'Trang thai',
+                value: venue.isActive == true ? 'Mo' : 'Dong',
               ),
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildStatItem({
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
-    return Expanded(
-      child: Column(
-        children: [
-          Icon(icon, size: 18, color: Colors.white.withValues(alpha: 0.8)),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              color: Colors.white.withValues(alpha: 0.7),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ImagesActionButton extends StatelessWidget {
-  final VenueModel venue;
-  const _ImagesActionButton({required this.venue});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white.withValues(alpha: 0.2),
-      borderRadius: BorderRadius.circular(10),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(10),
-        onTap: () => Get.toNamed(AppPages.venueImages, arguments: venue),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.image_outlined, color: Colors.white, size: 16),
-              const SizedBox(width: 4),
-              const Text(
-                'Ảnh',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

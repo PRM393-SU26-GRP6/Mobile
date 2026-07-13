@@ -9,9 +9,9 @@ class PaymentFlowResolver {
   static bool isExistingPaymentError(dynamic error, String paymentType) {
     final message = _extractMessage(error)?.toLowerCase() ?? '';
     final type = paymentType.toLowerCase();
-    final isFullUpfront = type == 'full';
+    if (type == 'full') return false;
+
     final isMatchingPayment = message.contains('$type payment') ||
-        (isFullUpfront && message.contains('payment')) ||
         (type == 'final' && message.contains('remaining amount'));
 
     return isMatchingPayment &&
@@ -27,9 +27,9 @@ class PaymentFlowResolver {
     List<PaymentModel> payments, {
     required String paymentType,
   }) {
-    final expectedType = paymentType.toLowerCase() == 'full'
-        ? 'final'
-        : paymentType.toLowerCase();
+    final expectedType = paymentType.toLowerCase();
+    if (expectedType == 'full') return null;
+
     for (final payment in payments) {
       final type = payment.paymentType.toLowerCase();
       if (!type.contains(expectedType)) continue;

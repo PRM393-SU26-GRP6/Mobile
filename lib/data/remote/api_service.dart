@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:exe101/core/config/env.dart';
 import 'package:exe101/domain/models/booking_model.dart';
@@ -97,6 +99,7 @@ class ApiServiceImpl extends ApiService {
   static const _keyRefreshToken = 'refresh_token';
   static const _keyUserRole = 'user_role';
   static const _keyUserId = 'user_id';
+  static const _keyUserProfile = 'user_profile';
 
   Future<Map<String, String>> _authHeaders() async {
     final token = await _readToken();
@@ -127,7 +130,7 @@ class ApiServiceImpl extends ApiService {
         key: _keyRefreshToken,
         value: loginResponse.data!.refreshToken ?? '',
       );
-      await _saveUserRole(loginResponse.data!.user);
+      await _saveAuthenticatedUser(loginResponse.data!.user);
     }
 
     return loginResponse;
@@ -190,7 +193,7 @@ class ApiServiceImpl extends ApiService {
         key: _keyRefreshToken,
         value: verifyResponse.data!.refreshToken ?? '',
       );
-      await _saveUserRole(verifyResponse.data!.user);
+      await _saveAuthenticatedUser(verifyResponse.data!.user);
     }
 
     return verifyResponse;
@@ -270,12 +273,29 @@ class ApiServiceImpl extends ApiService {
 
   // --- Private helpers ---
 
-  Future<void> _saveUserRole(UserAuthData? user) async {
-    if (user != null && user.roles != null && user.roles!.isNotEmpty) {
+  Future<void> _saveAuthenticatedUser(UserAuthData? user) async {
+    if (user == null) return;
+
+    if (user.roles != null && user.roles!.isNotEmpty) {
       await _storage.write(key: _keyUserRole, value: user.roles!.first);
     }
-    if (user != null && user.id != null && user.id!.isNotEmpty) {
+    if (user.id != null && user.id!.isNotEmpty) {
       await _storage.write(key: _keyUserId, value: user.id!);
+    }
+    await _storage.write(
+        key: _keyUserProfile, value: jsonEncode(user.toJson()));
+  }
+
+  Future<UserAuthData?> _readStoredUser() async {
+    final raw = await _storage.read(key: _keyUserProfile);
+    if (raw == null || raw.isEmpty) return null;
+
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map<String, dynamic>) return null;
+      return UserAuthData.fromJson(decoded);
+    } on FormatException {
+      return null;
     }
   }
 
@@ -284,6 +304,7 @@ class ApiServiceImpl extends ApiService {
     await _storage.delete(key: _keyRefreshToken);
     await _storage.delete(key: _keyUserRole);
     await _storage.delete(key: _keyUserId);
+    await _storage.delete(key: _keyUserProfile);
   }
 
   // --- Venue APIs ---
@@ -998,11 +1019,6 @@ class ApiServiceImpl extends ApiService {
     return PaymentModel.fromJson(data is Map<String, dynamic> ? data : {});
   }
 
-  Future<PaymentModel> createFullPayment(String bookingId,
-      {String paymentMethod = 'SePay'}) async {
-    return createFinalPayment(bookingId, paymentMethod: paymentMethod);
-  }
-
   Future<SePayQRInfoModel?> getSePayQRInfo(String paymentId) async {
     final headers = await _authHeaders();
     final response = await get<Map<String, dynamic>>(
@@ -1245,18 +1261,7 @@ class ApiServiceImpl extends ApiService {
   // --- User Profile APIs ---
 
   Future<UserAuthData?> getUserProfile() async {
-    final headers = await _authHeaders();
-    final response = await get<Map<String, dynamic>>(
-      '${Env.baseUrl}/api/v1/users/profile',
-      headers: headers,
-    );
-
-    if (response.data == null) return null;
-
-    final data = response.data!['data'] ?? response.data;
-    if (data is! Map<String, dynamic>) return null;
-
-    return UserAuthData.fromJson(data);
+    return _readStoredUser();
   }
 
   Future<bool> updateUserProfile({
@@ -1281,7 +1286,17 @@ class ApiServiceImpl extends ApiService {
         headers: headers,
       );
 
-      return response.statusCode == 200;
+      if (response.statusCode != 200) return false;
+
+      final currentUser = await _readStoredUser();
+      if (currentUser != null) {
+        await _saveAuthenticatedUser(currentUser.copyWith(
+          fullName: fullName,
+          phoneNumber: phone,
+          avatarUrl: avatarUrl,
+        ));
+      }
+      return true;
     } catch (_) {
       return false;
     }

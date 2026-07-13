@@ -1,6 +1,7 @@
 import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/data/remote/api_service.dart';
+import 'package:exe101/domain/models/venue_model.dart';
 import 'package:exe101/domain/repositories/user_repository.dart';
 import 'package:exe101/presentation/features/customer/controller/notification_controller.dart';
 import 'package:exe101/presentation/features/customer/view/messages/messages_page.dart';
@@ -44,6 +45,7 @@ class _OwnerHomePageState extends State<OwnerHomePage> {
             onCreateField: _openCreateField,
             onOpenField: _openFieldDetail,
             onEditField: _showEditFieldDialog,
+            onEditVenue: _openVenueEdit,
           ),
           const BookingManagementPage(embedded: true),
           const RevenuePage(embedded: true),
@@ -143,6 +145,11 @@ class _OwnerHomePageState extends State<OwnerHomePage> {
 
   void _openCreateVenue() {
     Get.toNamed(AppPages.venueCreation)
+        ?.then((_) => Get.find<OwnerHomeController>().refreshAll());
+  }
+
+  void _openVenueEdit(VenueModel venue) {
+    Get.toNamed(AppPages.venueEdit, arguments: venue)
         ?.then((_) => Get.find<OwnerHomeController>().refreshAll());
   }
 

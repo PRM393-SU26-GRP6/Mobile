@@ -94,10 +94,8 @@ class BookingCard extends StatelessWidget {
               const SizedBox(height: 10),
               BookingPaymentButtons(
                 showDeposit: booking.canPayDeposit,
-                showFullUpfront: booking.canPayFullUpfront,
                 showRemaining: booking.canPayRemaining,
                 onDepositTap: () => _onDepositTap(),
-                onFullUpfrontTap: () => _onFullUpfrontTap(),
                 onRemainingTap: () => _onRemainingTap(),
               ),
             ],
@@ -252,9 +250,7 @@ class BookingCard extends StatelessWidget {
   }
 
   bool get _showPaymentButtons =>
-      booking.canPayDeposit ||
-      booking.canPayFullUpfront ||
-      booking.canPayRemaining;
+      booking.canPayDeposit || booking.canPayRemaining;
 
   void _onDepositTap() {
     Get.toNamed(
@@ -267,23 +263,6 @@ class BookingCard extends StatelessWidget {
             ? booking.depositAmount
             : booking.totalPrice * 0.3,
         'paymentType': 'deposit',
-      },
-    )?.then((_) {
-      if (Get.isRegistered<BookingController>()) {
-        Get.find<BookingController>().refreshBookings();
-      }
-    });
-  }
-
-  void _onFullUpfrontTap() {
-    Get.toNamed(
-      AppPages.selectPaymentMethod,
-      arguments: {
-        'bookingId': booking.id,
-        'venueName': _venueName,
-        'totalPrice': booking.totalPrice,
-        'paymentAmount': booking.totalPrice,
-        'paymentType': 'full',
       },
     )?.then((_) {
       if (Get.isRegistered<BookingController>()) {

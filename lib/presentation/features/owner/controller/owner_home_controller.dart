@@ -25,7 +25,18 @@ class OwnerHomeController extends GetxController {
     try {
       final result = await apiService.getMyVenues();
       venues.assignAll(result);
-      if (result.isNotEmpty && selectedVenue.value == null) {
+      if (result.isEmpty) {
+        selectedVenue.value = null;
+        fields.clear();
+        return;
+      }
+
+      final selectedVenueId = selectedVenue.value?.id;
+      final matchingVenue =
+          result.where((venue) => venue.id == selectedVenueId);
+      if (matchingVenue.isNotEmpty) {
+        selectVenue(matchingVenue.first);
+      } else {
         selectVenue(result.first);
       }
     } catch (e) {

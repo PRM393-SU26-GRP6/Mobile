@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 
 class DiscountManagementController extends GetxController {
   final ApiService apiService;
-  
+
   final discounts = <DiscountDto>[].obs;
   final isLoading = false.obs;
   final error = ''.obs;
@@ -31,7 +31,8 @@ class DiscountManagementController extends GetxController {
   }
 
   Future<bool> createDiscount(DiscountDto discount) async {
-    final success = await (apiService as ApiServiceImpl).createDiscount(discount);
+    final success =
+        await (apiService as ApiServiceImpl).createDiscount(discount);
     if (success) {
       loadDiscounts();
     }
@@ -39,7 +40,8 @@ class DiscountManagementController extends GetxController {
   }
 
   Future<bool> updateDiscount(String id, DiscountDto discount) async {
-    final success = await (apiService as ApiServiceImpl).updateDiscount(id, discount);
+    final success =
+        await (apiService as ApiServiceImpl).updateDiscount(id, discount);
     if (success) {
       loadDiscounts();
     }
@@ -47,7 +49,8 @@ class DiscountManagementController extends GetxController {
   }
 
   Future<bool> toggleDiscountStatus(String id) async {
-    final success = await (apiService as ApiServiceImpl).toggleDiscountStatus(id);
+    final success =
+        await (apiService as ApiServiceImpl).toggleDiscountStatus(id);
     if (success) {
       // Optimitic update
       final index = discounts.indexWhere((d) => d.discountId == id);

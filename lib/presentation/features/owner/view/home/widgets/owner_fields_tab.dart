@@ -1,4 +1,5 @@
 import 'package:exe101/core/theme/app_theme.dart';
+import 'package:exe101/domain/models/venue_model.dart';
 import 'package:exe101/presentation/features/owner/controller/owner_home_controller.dart';
 import 'package:exe101/presentation/features/owner/view/home/widgets/empty_fields_widget.dart';
 import 'package:exe101/presentation/features/owner/view/home/widgets/field_list_item.dart';
@@ -13,6 +14,7 @@ class OwnerFieldsTab extends StatelessWidget {
   final void Function(String venueId, String venueName) onCreateField;
   final void Function(String fieldId) onOpenField;
   final void Function(String fieldName) onEditField;
+  final ValueChanged<VenueModel> onEditVenue;
 
   const OwnerFieldsTab({
     super.key,
@@ -21,6 +23,7 @@ class OwnerFieldsTab extends StatelessWidget {
     required this.onCreateField,
     required this.onOpenField,
     required this.onEditField,
+    required this.onEditVenue,
   });
 
   @override
@@ -54,6 +57,16 @@ class OwnerFieldsTab extends StatelessWidget {
                 slivers: [
                   SliverToBoxAdapter(
                     child: VenueStatsCard(venue: selectedVenue),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: OutlinedButton.icon(
+                        onPressed: () => onEditVenue(selectedVenue),
+                        icon: const Icon(Icons.edit_outlined),
+                        label: const Text('Cap nhat venue'),
+                      ),
+                    ),
                   ),
                   SliverToBoxAdapter(
                     child: _FieldsHeader(

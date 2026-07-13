@@ -35,7 +35,8 @@ class NotificationController extends GetxController {
     final signalRService = Get.find<SignalRService>();
     signalRService.initNotificationConnection();
 
-    _countSubscription = signalRService.onNotificationUnreadCountChanged.listen((count) {
+    _countSubscription =
+        signalRService.onNotificationUnreadCountChanged.listen((count) {
       unreadCount.value = count;
     });
 

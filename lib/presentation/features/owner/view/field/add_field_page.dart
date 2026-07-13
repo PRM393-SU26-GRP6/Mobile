@@ -1,6 +1,11 @@
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/presentation/features/owner/controller/add_field_controller.dart';
+import 'package:exe101/presentation/features/owner/view/field/widgets/add_field_amenities_section.dart';
+import 'package:exe101/presentation/features/owner/view/field/widgets/add_field_submit_section.dart';
+import 'package:exe101/presentation/features/owner/view/field/widgets/created_fields_bar.dart';
 import 'package:exe101/presentation/features/owner/view/field/widgets/exit_confirmation_dialog.dart';
+import 'package:exe101/presentation/features/owner/view/field/widgets/field_info_section.dart';
+import 'package:exe101/presentation/features/owner/view/field/widgets/field_type_section.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -17,13 +22,12 @@ class AddFieldPage extends StatelessWidget {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
-        title: Obx(() => Text(
-              'Thêm Sân - ${controller.venueName.value}',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            )),
+        title: Obx(
+          () => Text(
+            'Them san - ${controller.venueName.value}',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -39,124 +43,45 @@ class AddFieldPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionTitle('Thông Tin Sân'),
-                    const SizedBox(height: 12),
-                    _buildFieldInfoSection(controller),
-                    const SizedBox(height: 24),
-                    _buildSectionTitle('Loại Sân'),
-                    const SizedBox(height: 12),
-                    _buildFieldTypeSection(controller),
-                    const SizedBox(height: 24),
-                    _buildSectionTitle('Khung Giờ & Giá'),
-                    const SizedBox(height: 12),
-                    _buildPricingSection(controller),
-                    const SizedBox(height: 24),
-                    _buildSectionTitle('Tiện Nghi'),
-                    const SizedBox(height: 12),
-                    _buildAmenitiesSection(controller),
-                    const SizedBox(height: 32),
-                    Obx(() {
-                      if (controller.errorMessage.value.isNotEmpty) {
-                        return Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          margin: const EdgeInsets.only(bottom: 16),
-                          decoration: BoxDecoration(
-                            color: Colors.red.shade50,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: Colors.red.shade200),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.error_outline,
-                                  size: 20, color: Colors.red.shade700),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  controller.errorMessage.value,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.red.shade700,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    }),
-                    SizedBox(
-                      width: double.infinity,
-                      child: Obx(() => GestureDetector(
-                            onTap: controller.isLoading.value
-                                ? null
-                                : () => _handleAddField(controller),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    AppColors.buttonGradientStart,
-                                    AppColors.buttonGradientEnd
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.primary
-                                        .withValues(alpha: 0.3),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Center(
-                                child: controller.isLoading.value
-                                    ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    : const Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(Icons.add, color: Colors.white),
-                                          SizedBox(width: 8),
-                                          Text(
-                                            'Thêm Sân Này',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                              ),
-                            ),
-                          )),
+                    FieldInfoSection(
+                      nameController: controller.nameController,
+                      descController: controller.descController,
                     ),
+                    const SizedBox(height: 24),
+                    Obx(
+                      () => FieldTypeSection(
+                        selectedType: controller.selectedFieldType.value,
+                        onTypeChanged: controller.setFieldType,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    _SlotPricingNotice(),
+                    const SizedBox(height: 24),
+                    _SectionTitle('Tien nghi'),
+                    const SizedBox(height: 12),
+                    AddFieldAmenitiesSection(controller: controller),
+                    const SizedBox(height: 32),
+                    AddFieldSubmitSection(controller: controller),
                     const SizedBox(height: 16),
                   ],
                 ),
               ),
             ),
-            _buildCreatedFieldsBar(controller),
+            CreatedFieldsBar(controller: controller),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildSectionTitle(String title) {
+class _SectionTitle extends StatelessWidget {
+  final String title;
+
+  const _SectionTitle(this.title);
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       children: [
         Container(
@@ -179,459 +104,34 @@ class AddFieldPage extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _buildFieldInfoSection(AddFieldController controller) {
+class _SlotPricingNotice extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
       ),
-      child: Column(
+      child: const Row(
         children: [
-          _buildTextField(
-            controller: controller.nameController,
-            label: 'Tên sân *',
-            hint: 'VD: Sân 1, Sân A, Sân Cỏ...',
-            prefixIcon: Icons.stadium,
-          ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: controller.descController,
-            label: 'Mô tả',
-            hint: 'VD: Sân cỏ nhân tạo, kích thước tiêu chuẩn...',
-            prefixIcon: Icons.description,
-            maxLines: 3,
+          Icon(Icons.calendar_month, color: AppColors.primary),
+          SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Gia tien duoc cau hinh theo tung slot sau khi tao san.',
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
     );
-  }
-
-  Widget _buildFieldTypeSection(AddFieldController controller) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Obx(() => Row(
-            children: controller.fieldTypes.map((type) {
-              final isSelected =
-                  controller.selectedFieldType.value == type['value'];
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () => controller.setFieldType(type['value']!),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: BoxDecoration(
-                      color:
-                          isSelected ? AppColors.primary : AppColors.secondary,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: isSelected
-                            ? AppColors.primary
-                            : AppColors.inputBorder,
-                        width: isSelected ? 2 : 1,
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          type['icon']!,
-                          style: const TextStyle(fontSize: 24),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          type['label']!,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: isSelected
-                                ? Colors.white
-                                : AppColors.textPrimary,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          )),
-    );
-  }
-
-  Widget _buildPricingSection(AddFieldController controller) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          _buildTimeSlotRow(
-            context: Get.context!,
-            icon: Icons.wb_sunny,
-            iconColor: Colors.orange,
-            label: 'Buổi sáng',
-            startController: controller.morningStartController,
-            endController: controller.morningEndController,
-            priceController: controller.morningPriceController,
-            timeEditable: false,
-          ),
-          const Divider(height: 24),
-          _buildTimeSlotRow(
-            context: Get.context!,
-            icon: Icons.wb_cloudy,
-            iconColor: Colors.amber,
-            label: 'Buổi chiều',
-            startController: controller.afternoonStartController,
-            endController: controller.afternoonEndController,
-            priceController: controller.afternoonPriceController,
-            timeEditable: false,
-          ),
-          const Divider(height: 24),
-          _buildTimeSlotRow(
-            context: Get.context!,
-            icon: Icons.nightlight_round,
-            iconColor: Colors.indigo,
-            label: 'Buổi tối',
-            startController: controller.eveningStartController,
-            endController: controller.eveningEndController,
-            priceController: controller.eveningPriceController,
-            timeEditable: false,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTimeSlotRow({
-    required BuildContext context,
-    required IconData icon,
-    required Color iconColor,
-    required String label,
-    required TextEditingController startController,
-    required TextEditingController endController,
-    required TextEditingController priceController,
-    required bool timeEditable,
-  }) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(icon, color: iconColor, size: 20),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                color: AppColors.secondary,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Text(
-                    '${startController.text} - ${endController.text}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: TextField(
-                controller: priceController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'Giá (VNĐ)',
-                  suffixText: 'VNĐ',
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: AppColors.inputBorder),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: AppColors.inputBorder),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: AppColors.primary),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAmenitiesSection(AddFieldController controller) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Obx(() => Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: controller.amenityOptions.map((amenity) {
-              final isSelected = controller.isAmenitySelected(amenity['id']!);
-              return GestureDetector(
-                onTap: () => controller.toggleAmenity(amenity['id']!),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.primary.withValues(alpha: 0.1)
-                        : AppColors.secondary,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isSelected
-                          ? AppColors.primary
-                          : AppColors.inputBorder,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(amenity['icon']!),
-                      const SizedBox(width: 6),
-                      Text(
-                        amenity['name']!,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.w500,
-                          color: isSelected
-                              ? AppColors.primary
-                              : AppColors.textPrimary,
-                        ),
-                      ),
-                      if (isSelected) ...[
-                        const SizedBox(width: 4),
-                        const Icon(Icons.check_circle,
-                            size: 14, color: AppColors.primary),
-                      ],
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
-          )),
-    );
-  }
-
-  Widget _buildCreatedFieldsBar(AddFieldController controller) {
-    return Obx(() {
-      if (controller.createdFields.isEmpty) {
-        return const SizedBox.shrink();
-      }
-      return Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.check_circle,
-                      color: AppColors.primary, size: 20),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Đã thêm ${controller.createdFields.length} sân',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      Text(
-                        controller.createdFields
-                            .map((f) => f.fieldName ?? 'Sân')
-                            .join(', '),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                TextButton(
-                  onPressed: () => showFinishDialog(controller),
-                  child: const Text(
-                    'Xong',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  controller.resetForm();
-                  Get.snackbar(
-                    'Thành công',
-                    'Form đã được reset, bạn có thể thêm sân tiếp',
-                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                    colorText: AppColors.primary,
-                  );
-                },
-                icon: const Icon(Icons.add),
-                label: const Text('Thêm Sân Khác'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  side: const BorderSide(color: AppColors.primary),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    });
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    required IconData prefixIcon,
-    int maxLines = 1,
-  }) {
-    return TextField(
-      controller: controller,
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        prefixIcon: Icon(prefixIcon, color: AppColors.primary),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.inputBorder),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.inputBorder),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
-        ),
-        filled: true,
-        fillColor: AppColors.secondary,
-      ),
-    );
-  }
-
-  Future<void> _handleAddField(AddFieldController controller) async {
-    final field = await controller.createField();
-
-    if (field != null) {
-      Get.snackbar(
-        'Thành công',
-        'Đã thêm sân "${field.fieldName}"',
-        backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-        colorText: AppColors.primary,
-        snackPosition: SnackPosition.TOP,
-        margin: const EdgeInsets.all(16),
-        borderRadius: 10,
-      );
-    }
   }
 }

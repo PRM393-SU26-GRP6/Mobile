@@ -25,10 +25,10 @@ void main() {
       ),
     );
 
-    expect(find.text('Thong bao'), findsOneWidget);
+    expect(find.text('Thông báo'), findsOneWidget);
     expect(find.text('9+'), findsOneWidget);
 
-    await tester.tap(find.text('Thong bao'));
+    await tester.tap(find.text('Thông báo'));
     expect(notificationTapped, isTrue);
   });
 }

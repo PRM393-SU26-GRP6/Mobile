@@ -26,11 +26,9 @@ class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
   final String paymentType = Get.arguments['paymentType'] ?? 'deposit';
 
   bool get isDeposit => paymentType == 'deposit';
-  bool get isFullUpfront => paymentType == 'full';
 
   String get paymentAmountLabel {
     if (isDeposit) return 'So tien coc';
-    if (isFullUpfront) return 'Thanh toan het';
     return 'Thanh toan con lai';
   }
 
@@ -235,11 +233,6 @@ class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
       final apiService = Get.find<ApiServiceImpl>();
       if (isDeposit) {
         await apiService.createDepositPayment(
-          bookingId,
-          paymentMethod: _selectedMethod.value,
-        );
-      } else if (isFullUpfront) {
-        await apiService.createFullPayment(
           bookingId,
           paymentMethod: _selectedMethod.value,
         );

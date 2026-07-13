@@ -17,7 +17,7 @@ class FieldListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fieldTypeLabel =
-        FieldModel.fieldTypeLabels[field.fieldType] ?? field.fieldType ?? 'Sân';
+        FieldModel.fieldTypeLabels[field.fieldType] ?? field.fieldType ?? 'San';
 
     return GestureDetector(
       onTap: onTap,
@@ -36,176 +36,140 @@ class FieldListItem extends StatelessWidget {
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    Icons.sports_soccer,
-                    color: AppColors.primary,
-                    size: 26,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        field.fieldName ?? 'Sân không tên',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: AppColors.secondary,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              fieldTypeLabel,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          _buildPriceChip(),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: field.isActive == true
-                            ? Colors.green.shade50
-                            : Colors.red.shade50,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        field.isActive == true ? 'Hoạt động' : 'Tắt',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          color: field.isActive == true
-                              ? Colors.green.shade700
-                              : Colors.red.shade700,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: onEdit,
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: AppColors.secondary,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Icon(
-                          Icons.edit_outlined,
-                          size: 16,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            // Show description if available
-            if (field.description != null && field.description!.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Text(
-                field.description!,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
-                  height: 1.4,
-                ),
+            _FieldIcon(),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _FieldSummary(
+                name: field.fieldName ?? 'San khong ten',
+                typeLabel: fieldTypeLabel,
+                description: field.description,
               ),
-            ],
+            ),
+            _FieldActions(isActive: field.isActive == true, onEdit: onEdit),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildPriceChip() {
-    final minPrice = _getMinPrice();
-    if (minPrice <= 0) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        decoration: BoxDecoration(
-          color: Colors.orange.shade50,
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Text(
-          'Chưa đặt giá',
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.orange.shade700,
-          ),
-        ),
-      );
-    }
-
+class _FieldIcon extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      width: 50,
+      height: 50,
       decoration: BoxDecoration(
         color: AppColors.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(10),
       ),
-      child: Text(
-        '${minPrice.toStringAsFixed(0)}đ/giờ',
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: AppColors.primary,
-        ),
+      child: const Icon(
+        Icons.sports_soccer,
+        color: AppColors.primary,
+        size: 26,
       ),
     );
   }
+}
 
-  double _getMinPrice() {
-    final prices = <double>[];
-    if (field.pricePerHour != null && field.pricePerHour! > 0) {
-      prices.add(field.pricePerHour!);
-    }
-    if (field.priceMorning != null && field.priceMorning! > 0) {
-      prices.add(field.priceMorning!);
-    }
-    if (field.priceAfternoon != null && field.priceAfternoon! > 0) {
-      prices.add(field.priceAfternoon!);
-    }
-    if (field.priceEvening != null && field.priceEvening! > 0) {
-      prices.add(field.priceEvening!);
-    }
-    return prices.isEmpty ? 0 : prices.reduce((a, b) => a < b ? a : b);
+class _FieldSummary extends StatelessWidget {
+  final String name;
+  final String typeLabel;
+  final String? description;
+
+  const _FieldSummary({
+    required this.name,
+    required this.typeLabel,
+    this.description,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          name,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Chip(
+          label: Text(typeLabel),
+          labelStyle: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: AppColors.primary,
+          ),
+          backgroundColor: AppColors.secondary,
+          side: BorderSide.none,
+          visualDensity: VisualDensity.compact,
+        ),
+        if (description != null && description!.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(
+            description!,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+              height: 1.4,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _FieldActions extends StatelessWidget {
+  final bool isActive;
+  final VoidCallback onEdit;
+
+  const _FieldActions({required this.isActive, required this.onEdit});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: isActive ? Colors.green.shade50 : Colors.red.shade50,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(
+            isActive ? 'Hoat dong' : 'Tat',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              color: isActive ? Colors.green.shade700 : Colors.red.shade700,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: onEdit,
+          child: Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: AppColors.secondary,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: const Icon(
+              Icons.edit_outlined,
+              size: 16,
+              color: AppColors.primary,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

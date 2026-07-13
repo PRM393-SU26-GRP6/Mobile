@@ -53,6 +53,7 @@ class UserAuthData {
   final String? fullName;
   final String? email;
   final String? phoneNumber;
+  final String? avatarUrl;
   final List<String>? roles;
 
   UserAuthData({
@@ -60,6 +61,7 @@ class UserAuthData {
     this.fullName,
     this.email,
     this.phoneNumber,
+    this.avatarUrl,
     this.roles,
   });
 
@@ -68,8 +70,33 @@ class UserAuthData {
         fullName: json["fullName"],
         email: json["email"],
         phoneNumber: json["phoneNumber"],
+        avatarUrl: json["avatarUrl"],
         roles: _parseRoles(json),
       );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'fullName': fullName,
+        'email': email,
+        'phoneNumber': phoneNumber,
+        'avatarUrl': avatarUrl,
+        'roles': roles,
+      };
+
+  UserAuthData copyWith({
+    String? fullName,
+    String? phoneNumber,
+    String? avatarUrl,
+  }) {
+    return UserAuthData(
+      id: id,
+      fullName: fullName ?? this.fullName,
+      email: email,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      roles: roles,
+    );
+  }
 
   static List<String>? _parseRoles(Map<String, dynamic> json) {
     // API có thể trả về "roles" (array) hoặc "role" (string)

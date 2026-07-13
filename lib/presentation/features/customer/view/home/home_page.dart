@@ -1,6 +1,7 @@
 import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/presentation/features/auth/controller/auth_controller.dart';
+import 'package:exe101/presentation/features/customer/controller/customer_home_controller.dart';
 import 'package:exe101/presentation/features/customer/controller/venue_controller.dart';
 import 'package:exe101/presentation/features/customer/view/home/widgets/home_venue_card.dart';
 import 'package:flutter/material.dart';
@@ -76,7 +77,7 @@ class HomePage extends StatelessWidget {
                     color: Colors.white24, shape: BoxShape.circle),
                 child: IconButton(
                   icon: const Icon(Icons.shopping_cart, color: Colors.white),
-                  onPressed: () {},
+                  onPressed: Get.find<CustomerHomeController>().openCart,
                 ),
               ),
               const SizedBox(width: 8),

@@ -97,7 +97,7 @@ class DiscountManagementPage extends StatelessWidget {
                             ),
                             Switch(
                               value: discount.isActive,
-                              activeThumbColor: AppColors.primary,
+                              activeColor: AppColors.primary,
                               onChanged: (val) {
                                 controller
                                     .toggleDiscountStatus(discount.discountId);

@@ -141,7 +141,8 @@ class _LoginPageState extends State<LoginPage> {
                                                 BorderRadius.circular(10),
                                             border: Border.all(
                                                 color: registerController
-                                                            .selectedRole.value ==
+                                                            .selectedRole
+                                                            .value ==
                                                         'Customer'
                                                     ? const Color(0xFF0FA24A)
                                                     : const Color(0xFFDFF1E0)),
@@ -155,7 +156,8 @@ class _LoginPageState extends State<LoginPage> {
                                                 SizedBox(width: 8),
                                                 Text('Khách hàng',
                                                     style: TextStyle(
-                                                        color: Color(0xFF0FA24A)))
+                                                        color:
+                                                            Color(0xFF0FA24A)))
                                               ]),
                                         ),
                                       ))),
@@ -177,7 +179,8 @@ class _LoginPageState extends State<LoginPage> {
                                                 BorderRadius.circular(10),
                                             border: Border.all(
                                                 color: registerController
-                                                            .selectedRole.value ==
+                                                            .selectedRole
+                                                            .value ==
                                                         'Owner'
                                                     ? const Color(0xFF0FA24A)
                                                     : const Color(0xFFDFF1E0)),
@@ -191,7 +194,8 @@ class _LoginPageState extends State<LoginPage> {
                                                 SizedBox(width: 8),
                                                 Text('Chủ sân',
                                                     style: TextStyle(
-                                                        color: Color(0xFF9AA8A0)))
+                                                        color:
+                                                            Color(0xFF9AA8A0)))
                                               ]),
                                         ),
                                       ))),

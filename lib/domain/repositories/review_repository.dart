@@ -1,4 +1,4 @@
-import 'package:exe101/data/remote/review_api_service.dart';
+import 'package:exe101/data/remote/shared/review_api_service.dart';
 import 'package:exe101/domain/models/review_model.dart';
 
 /// Wraps focused review lookup calls so controllers depend on a stable

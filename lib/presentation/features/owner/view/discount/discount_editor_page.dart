@@ -164,7 +164,7 @@ class _DiscountEditorPageState extends State<DiscountEditorPage> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                initialValue: _discountType,
+                value: _discountType,
                 decoration: const InputDecoration(labelText: 'Loại giảm giá'),
                 items: const [
                   DropdownMenuItem(

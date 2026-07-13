@@ -1,5 +1,5 @@
 import 'package:exe101/data/remote/api_service.dart';
-import 'package:exe101/data/remote/owner_resource_api_service.dart';
+import 'package:exe101/data/remote/schedule/owner_resource_api_service.dart';
 import 'package:exe101/domain/models/booking_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

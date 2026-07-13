@@ -60,10 +60,9 @@ class VenueController extends GetxController {
 
       if (apiService is ApiServiceImpl) {
         final svc = apiService as ApiServiceImpl;
-        final amenitiesParam = selectedAmenityIds.isNotEmpty
-            ? selectedAmenityIds.join(',')
-            : null;
-            
+        final amenitiesParam =
+            selectedAmenityIds.isNotEmpty ? selectedAmenityIds.join(',') : null;
+
         List<VenueModel> fetched = [];
         if (searchQuery.value.isNotEmpty) {
           fetched = await svc.searchVenues(

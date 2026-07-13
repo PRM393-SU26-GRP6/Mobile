@@ -1,6 +1,6 @@
 import 'package:exe101/data/remote/api_service.dart';
-import 'package:exe101/data/remote/owner_resource_api_service.dart';
-import 'package:exe101/data/remote/owner_stats_api_service.dart';
+import 'package:exe101/data/remote/schedule/owner_resource_api_service.dart';
+import 'package:exe101/data/remote/owner/owner_stats_api_service.dart';
 import 'package:exe101/domain/repositories/owner_management_repository.dart';
 import 'package:exe101/presentation/features/owner/controller/add_field_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/booking_management_controller.dart';

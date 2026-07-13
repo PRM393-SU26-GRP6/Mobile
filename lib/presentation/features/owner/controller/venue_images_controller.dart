@@ -68,7 +68,8 @@ class VenueImagesController extends GetxController {
       final picked = await _picker.pickMultiImage(imageQuality: 85);
       if (picked.isEmpty) return;
 
-      debugPrint('[VenueImages] pickAndUpload: ${picked.length} images selected');
+      debugPrint(
+          '[VenueImages] pickAndUpload: ${picked.length} images selected');
       isUploading.value = true;
       try {
         final result = await ownerRepository.uploadVenueImages(

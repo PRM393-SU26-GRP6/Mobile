@@ -32,7 +32,9 @@ class PaymentHistoryCard extends StatelessWidget {
       statusText = 'Thất bại';
     } else {
       statusColor = Colors.grey;
-      statusText = payment.paymentStatus.isNotEmpty ? payment.paymentStatus : 'Không xác định';
+      statusText = payment.paymentStatus.isNotEmpty
+          ? payment.paymentStatus
+          : 'Không xác định';
     }
 
     return Container(
@@ -106,12 +108,15 @@ class PaymentHistoryCard extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(Icons.calendar_today_outlined, size: 16, color: Colors.grey.shade600),
+              Icon(Icons.calendar_today_outlined,
+                  size: 16, color: Colors.grey.shade600),
               const SizedBox(width: 8),
               Text(
-                payment.paidAt != null 
-                    ? DateFormat('HH:mm - dd/MM/yyyy').format(payment.paidAt!.toLocal())
-                    : DateFormat('HH:mm - dd/MM/yyyy').format(payment.createdAt.toLocal()),
+                payment.paidAt != null
+                    ? DateFormat('HH:mm - dd/MM/yyyy')
+                        .format(payment.paidAt!.toLocal())
+                    : DateFormat('HH:mm - dd/MM/yyyy')
+                        .format(payment.createdAt.toLocal()),
                 style: TextStyle(
                   fontSize: 13,
                   color: Colors.grey.shade600,
@@ -120,7 +125,11 @@ class PaymentHistoryCard extends StatelessWidget {
               if (payment.paymentType.isNotEmpty) ...[
                 const Spacer(),
                 Text(
-                  payment.paymentType == 'Deposit' ? 'Đặt cọc' : (payment.paymentType == 'Final' ? 'Thanh toán đủ' : payment.paymentType),
+                  payment.paymentType == 'Deposit'
+                      ? 'Đặt cọc'
+                      : (payment.paymentType == 'Final'
+                          ? 'Thanh toán đủ'
+                          : payment.paymentType),
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey.shade500,

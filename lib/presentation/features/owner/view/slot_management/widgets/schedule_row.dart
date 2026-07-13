@@ -86,7 +86,7 @@ class ScheduleRow extends StatelessWidget {
                       closeTime: value ? '22:00' : null,
                     );
                   },
-                  activeThumbColor: AppColors.primary,
+                  activeColor: AppColors.primary,
                 ),
               ],
             ),

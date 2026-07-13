@@ -1,6 +1,6 @@
 import 'package:exe101/data/remote/api_service.dart';
-import 'package:exe101/data/remote/owner_resource_api_service.dart';
-import 'package:exe101/data/remote/owner_stats_api_service.dart';
+import 'package:exe101/data/remote/schedule/owner_resource_api_service.dart';
+import 'package:exe101/data/remote/owner/owner_stats_api_service.dart';
 import 'package:exe101/domain/repositories/owner_management_repository.dart';
 import 'package:exe101/presentation/features/owner/controller/add_field_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/booking_management_controller.dart';
@@ -8,6 +8,7 @@ import 'package:exe101/presentation/features/owner/controller/field_detail_contr
 import 'package:exe101/presentation/features/owner/controller/owner_home_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/revenue_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/slot_actions_controller.dart';
+import 'package:exe101/presentation/features/owner/controller/slot_filter_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/slot_management_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/slot_selection_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/venue_creation_controller.dart';
@@ -66,6 +67,7 @@ class OwnerBinding extends Bindings {
       () => SlotSelectionController(),
       fenix: true,
     );
+    Get.lazyPut<SlotFilterController>(SlotFilterController.new, fenix: true);
     Get.lazyPut<RevenueController>(
       () => RevenueController(ownerRepository: ownerRepository),
     );

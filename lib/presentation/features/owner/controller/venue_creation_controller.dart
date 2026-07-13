@@ -14,6 +14,8 @@ class VenueCreationController extends GetxController {
   final phoneController = TextEditingController();
   final openingHourController = TextEditingController();
   final closingHourController = TextEditingController();
+  final latitude = RxnDouble();
+  final longitude = RxnDouble();
 
   final isLoading = false.obs;
   final errorMessage = ''.obs;
@@ -61,6 +63,8 @@ class VenueCreationController extends GetxController {
         phoneContact: phoneController.text.trim().isNotEmpty
             ? phoneController.text.trim()
             : null,
+        latitude: latitude.value,
+        longitude: longitude.value,
       );
 
       createdVenue.value = venue;
@@ -82,6 +86,13 @@ class VenueCreationController extends GetxController {
     closingHourController.text = '22:00';
     createdVenue.value = null;
     errorMessage.value = '';
+    latitude.value = null;
+    longitude.value = null;
+  }
+
+  void setLocation(double newLatitude, double newLongitude) {
+    latitude.value = newLatitude;
+    longitude.value = newLongitude;
   }
 
   @override

@@ -1,9 +1,11 @@
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/presentation/features/owner/controller/slot_actions_controller.dart';
+import 'package:exe101/presentation/features/owner/controller/slot_filter_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/slot_management_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/slot_selection_controller.dart';
 import 'package:exe101/presentation/features/owner/view/slot_management/widgets/empty_slots_state.dart';
 import 'package:exe101/presentation/features/owner/view/slot_management/widgets/slot_card.dart';
+import 'package:exe101/presentation/features/owner/view/slot_management/widgets/slot_filter_bar.dart';
 import 'package:exe101/presentation/features/owner/view/slot_management/widgets/slot_selection_toolbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -22,6 +24,7 @@ class SlotsListTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final selectionController = Get.find<SlotSelectionController>();
     final actionsController = Get.find<SlotActionsController>();
+    final filterController = Get.find<SlotFilterController>();
 
     return Obx(() {
       if (controller.isLoading.value && controller.slots.isEmpty) {
@@ -32,17 +35,19 @@ class SlotsListTab extends StatelessWidget {
       if (controller.slots.isEmpty) {
         return EmptySlotsState(onCreateTap: onSwitchToCreate);
       }
+      final filteredSlots = filterController.apply(controller.slots);
       return RefreshIndicator(
         onRefresh: () => controller.loadSlots(),
         color: AppColors.primary,
         child: ListView(
           padding: const EdgeInsets.only(bottom: 16),
           children: [
+            SlotFilterBar(controller: filterController),
             if (selectionController.isSelecting)
               SlotSelectionToolbar(
                 selectedCount: selectionController.selectedCount,
                 onSelectAll: () => selectionController.selectAll(
-                  controller.slots.map((slot) => slot.slotId),
+                  filteredSlots.map((slot) => slot.slotId),
                 ),
                 onDelete: () => _confirmDeleteSelected(
                   context,
@@ -51,7 +56,12 @@ class SlotsListTab extends StatelessWidget {
                 ),
                 onClear: selectionController.clear,
               ),
-            ...controller.slots.map((slot) {
+            if (filteredSlots.isEmpty)
+              const Padding(
+                padding: EdgeInsets.all(32),
+                child: Center(child: Text('Không tìm thấy slot phù hợp')),
+              ),
+            ...filteredSlots.map((slot) {
               return Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                 child: Obx(

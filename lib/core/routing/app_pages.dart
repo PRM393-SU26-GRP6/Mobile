@@ -24,6 +24,7 @@ import 'package:exe101/presentation/features/owner/view/slot_management/slot_man
 import 'package:exe101/presentation/features/owner/view/venue_creation_page.dart';
 import 'package:exe101/presentation/features/owner/view/venue_images/venue_images_page.dart';
 import 'package:exe101/presentation/features/owner/view/venue_edit/venue_edit_page.dart';
+import 'package:exe101/presentation/features/owner/view/venue_location/venue_location_picker_page.dart';
 import 'package:exe101/presentation/features/splash/binding/splash_binding.dart';
 import 'package:exe101/presentation/features/splash/view/splash_view.dart';
 import 'package:get/get.dart';
@@ -50,6 +51,7 @@ class AppPages {
   static const String revenue = '/owner/revenue';
   static const String venueImages = '/owner/venue-images';
   static const String venueEdit = '/owner/venue-edit';
+  static const String venueLocationPicker = '/owner/venue-location-picker';
   static const String paymentHistory = '/payment-history';
   static const String ownerDiscountManagement = '/owner/discount-management';
   static const String ownerDiscountEditor = '/owner/discount-editor';
@@ -152,6 +154,10 @@ class AppPages {
       name: venueEdit,
       page: () => const VenueEditPage(),
       binding: OwnerBinding(),
+    ),
+    GetPage(
+      name: venueLocationPicker,
+      page: () => const VenueLocationPickerPage(),
     ),
     GetPage(
       name: paymentHistory,

@@ -53,9 +53,17 @@ class VenueModel {
       if (imgList.isNotEmpty && imgList.first is String) {
         resolvedImages = List<String>.from(imgList);
       } else {
-        resolvedImages = imgList
-            .where((e) => e is Map && e["imageUrl"] != null)
-            .map<String>((e) => e["imageUrl"].toString())
+        final imageObjects = imgList
+            .whereType<Map>()
+            .where((image) => image["imageUrl"] != null)
+            .toList()
+          ..sort((a, b) {
+            final aPrimary = a["isPrimary"] == true ? 1 : 0;
+            final bPrimary = b["isPrimary"] == true ? 1 : 0;
+            return bPrimary.compareTo(aPrimary);
+          });
+        resolvedImages = imageObjects
+            .map<String>((image) => image["imageUrl"].toString())
             .toList();
       }
     }
@@ -92,6 +100,27 @@ class VenueModel {
       ownerName: json["ownerName"],
     );
   }
+
+  VenueModel copyWith({List<String>? images}) => VenueModel(
+        id: id,
+        venueName: venueName,
+        address: address,
+        latitude: latitude,
+        longitude: longitude,
+        description: description,
+        openingHours: openingHours,
+        phoneContact: phoneContact,
+        averageRating: averageRating,
+        totalReviews: totalReviews,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
+        images: images ?? this.images,
+        amenities: amenities,
+        fields: fields,
+        isActive: isActive,
+        ownerId: ownerId,
+        ownerName: ownerName,
+      );
 }
 
 class AmenityModel {

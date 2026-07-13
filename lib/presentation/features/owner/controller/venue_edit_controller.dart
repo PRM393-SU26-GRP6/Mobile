@@ -12,6 +12,8 @@ class VenueEditController extends GetxController {
   final descriptionController = TextEditingController();
   final openingHoursController = TextEditingController();
   final phoneController = TextEditingController();
+  final latitude = RxnDouble();
+  final longitude = RxnDouble();
   final isSaving = false.obs;
   final errorMessage = ''.obs;
   late final VenueModel venue;
@@ -29,6 +31,8 @@ class VenueEditController extends GetxController {
     descriptionController.text = venue.description ?? '';
     openingHoursController.text = venue.openingHours ?? '';
     phoneController.text = venue.phoneContact ?? '';
+    latitude.value = venue.latitude;
+    longitude.value = venue.longitude;
   }
 
   String? validateForm() {
@@ -54,8 +58,8 @@ class VenueEditController extends GetxController {
         description: descriptionController.text.trim(),
         openingHours: openingHoursController.text.trim(),
         phoneContact: phoneController.text.trim(),
-        latitude: venue.latitude,
-        longitude: venue.longitude,
+        latitude: latitude.value,
+        longitude: longitude.value,
       );
     } catch (_) {
       errorMessage.value = 'Khong the cap nhat venue. Vui long thu lai.';
@@ -63,6 +67,11 @@ class VenueEditController extends GetxController {
     } finally {
       isSaving.value = false;
     }
+  }
+
+  void setLocation(double newLatitude, double newLongitude) {
+    latitude.value = newLatitude;
+    longitude.value = newLongitude;
   }
 
   @override

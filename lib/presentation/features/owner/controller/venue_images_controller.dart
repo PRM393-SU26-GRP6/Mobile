@@ -3,6 +3,7 @@ import 'package:exe101/domain/models/venue_model.dart';
 import 'package:exe101/domain/repositories/owner_management_repository.dart';
 import 'package:exe101/presentation/features/customer/controller/venue_controller.dart';
 import 'package:exe101/presentation/features/customer/controller/venue_detail_controller.dart';
+import 'package:exe101/presentation/features/owner/controller/owner_home_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -94,6 +95,9 @@ class VenueImagesController extends GetxController {
         if (Get.isRegistered<VenueDetailController>()) {
           Get.find<VenueDetailController>().refreshVenue();
         }
+        if (Get.isRegistered<OwnerHomeController>()) {
+          await Get.find<OwnerHomeController>().refreshAll();
+        }
       } catch (e, stack) {
         debugPrint('[VenueImages] upload error: $e\n$stack');
         Get.snackbar(
@@ -131,6 +135,9 @@ class VenueImagesController extends GetxController {
         imageId: imageId,
       );
       images.removeWhere((e) => e.resolvedImageId == image.resolvedImageId);
+      if (Get.isRegistered<OwnerHomeController>()) {
+        await Get.find<OwnerHomeController>().refreshAll();
+      }
       Get.snackbar('Thành công', 'Đã xoá ảnh',
           snackPosition: SnackPosition.TOP);
     } catch (e) {

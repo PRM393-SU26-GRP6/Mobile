@@ -1,6 +1,7 @@
 import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/presentation/features/owner/controller/venue_creation_controller.dart';
+import 'package:exe101/presentation/features/owner/view/shared/venue_location_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -54,6 +55,14 @@ class VenueCreationPage extends StatelessWidget {
                       hint: 'VD: 123 Đường Nguyễn Trãi, Quận 1, TP.HCM',
                       prefixIcon: Icons.location_on,
                       maxLines: 2,
+                    ),
+                    const SizedBox(height: 16),
+                    Obx(
+                      () => VenueLocationField(
+                        latitude: controller.latitude.value,
+                        longitude: controller.longitude.value,
+                        onTap: () => _pickLocation(controller),
+                      ),
                     ),
                     const SizedBox(height: 16),
                     _buildTextField(
@@ -370,6 +379,21 @@ class VenueCreationPage extends StatelessWidget {
           'venueName': venue.venueName ?? controller.nameController.text,
         },
       );
+    }
+  }
+
+  Future<void> _pickLocation(VenueCreationController controller) async {
+    final result = await Get.toNamed<Map<String, dynamic>>(
+      AppPages.venueLocationPicker,
+      arguments: {
+        'latitude': controller.latitude.value,
+        'longitude': controller.longitude.value,
+      },
+    );
+    final latitude = (result?['latitude'] as num?)?.toDouble();
+    final longitude = (result?['longitude'] as num?)?.toDouble();
+    if (latitude != null && longitude != null) {
+      controller.setLocation(latitude, longitude);
     }
   }
 }

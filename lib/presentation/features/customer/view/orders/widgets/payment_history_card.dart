@@ -35,6 +35,9 @@ class PaymentHistoryCard extends StatelessWidget {
       statusText = payment.paymentStatus.isNotEmpty
           ? payment.paymentStatus
           : 'Không xác định';
+      statusText = payment.paymentStatus.isNotEmpty
+          ? payment.paymentStatus
+          : 'Không xác định';
     }
 
     return Container(

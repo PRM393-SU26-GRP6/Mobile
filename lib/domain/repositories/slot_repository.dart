@@ -1,4 +1,4 @@
-import 'package:exe101/data/remote/slot_api_service.dart';
+import 'package:exe101/data/remote/schedule/slot_api_service.dart';
 
 /// Thin wrapper so controllers do not depend on a concrete remote service.
 class SlotRepository {

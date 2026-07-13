@@ -1,6 +1,5 @@
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/presentation/features/customer/controller/customer_home_controller.dart';
-import 'package:exe101/presentation/features/customer/view/cart/cart_page.dart';
 import 'package:exe101/presentation/features/customer/view/home/home_page.dart';
 import 'package:exe101/presentation/features/customer/view/map/map_page.dart';
 import 'package:exe101/presentation/features/customer/view/messages/messages_page.dart';
@@ -15,7 +14,6 @@ class CustomerHomePage extends StatelessWidget {
   static const _pages = [
     HomePage(),
     MapPage(),
-    CartPage(),
     OrdersPage(),
     MessagesPage(),
     NotificationsPage(),
@@ -74,42 +72,35 @@ class _CustomerBottomNav extends StatelessWidget {
                   index: 0,
                   icon: Icons.home_outlined,
                   activeIcon: Icons.home,
-                  label: 'Trang chu'),
+                  label: 'Trang chủ'),
               _CustomerNavItem(
                   controller: controller,
                   selectedIndex: selectedIndex,
                   index: 1,
                   icon: Icons.map_outlined,
                   activeIcon: Icons.map,
-                  label: 'Ban do'),
+                  label: 'Bản đồ'),
               _CustomerNavItem(
                   controller: controller,
                   selectedIndex: selectedIndex,
                   index: 2,
-                  icon: Icons.shopping_cart_outlined,
-                  activeIcon: Icons.shopping_cart,
-                  label: 'Gio hang'),
+                  icon: Icons.receipt_long_outlined,
+                  activeIcon: Icons.receipt_long,
+                  label: 'Đơn hàng'),
               _CustomerNavItem(
                   controller: controller,
                   selectedIndex: selectedIndex,
                   index: 3,
-                  icon: Icons.receipt_long_outlined,
-                  activeIcon: Icons.receipt_long,
-                  label: 'Don hang'),
+                  icon: Icons.chat_bubble_outline,
+                  activeIcon: Icons.chat_bubble,
+                  label: 'Tin nhắn'),
               _CustomerNavItem(
                   controller: controller,
                   selectedIndex: selectedIndex,
                   index: 4,
-                  icon: Icons.chat_bubble_outline,
-                  activeIcon: Icons.chat_bubble,
-                  label: 'Tin nhan'),
-              _CustomerNavItem(
-                  controller: controller,
-                  selectedIndex: selectedIndex,
-                  index: 5,
                   icon: Icons.notifications_outlined,
                   activeIcon: Icons.notifications,
-                  label: 'Thong bao'),
+                  label: 'Thông báo'),
             ],
           ),
         ),

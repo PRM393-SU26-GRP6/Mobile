@@ -1,5 +1,7 @@
+import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/presentation/features/owner/controller/venue_edit_controller.dart';
+import 'package:exe101/presentation/features/owner/view/shared/venue_location_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -30,6 +32,12 @@ class VenueEditForm extends StatelessWidget {
                 icon: Icons.location_on_outlined,
                 maxLines: 2,
               ),
+              VenueLocationField(
+                latitude: controller.latitude.value,
+                longitude: controller.longitude.value,
+                onTap: () => _pickLocation(controller),
+              ),
+              const SizedBox(height: 16),
               _VenueInput(
                 controller: controller.phoneController,
                 label: 'So dien thoai',
@@ -80,6 +88,21 @@ class VenueEditForm extends StatelessWidget {
             ],
           ),
         ));
+  }
+
+  Future<void> _pickLocation(VenueEditController controller) async {
+    final result = await Get.toNamed<Map<String, dynamic>>(
+      AppPages.venueLocationPicker,
+      arguments: {
+        'latitude': controller.latitude.value,
+        'longitude': controller.longitude.value,
+      },
+    );
+    final latitude = (result?['latitude'] as num?)?.toDouble();
+    final longitude = (result?['longitude'] as num?)?.toDouble();
+    if (latitude != null && longitude != null) {
+      controller.setLocation(latitude, longitude);
+    }
   }
 }
 

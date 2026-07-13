@@ -85,7 +85,7 @@ class OwnerFieldsTab extends StatelessWidget {
                       ),
                     )
                   else if (controller.fields.isEmpty)
-                    SliverFillRemaining(
+                    SliverToBoxAdapter(
                       child: EmptyFieldsWidget(
                         onAddField: () => onCreateField(
                           selectedVenue.id,

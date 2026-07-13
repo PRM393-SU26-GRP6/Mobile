@@ -1,4 +1,3 @@
-import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/presentation/features/owner/controller/venue_edit_controller.dart';
 import 'package:exe101/presentation/features/owner/view/shared/venue_location_field.dart';
@@ -35,7 +34,7 @@ class VenueEditForm extends StatelessWidget {
               VenueLocationField(
                 latitude: controller.latitude.value,
                 longitude: controller.longitude.value,
-                onTap: () => _pickLocation(controller),
+                onTap: () => _pickLocation(context, controller),
               ),
               const SizedBox(height: 16),
               _VenueInput(
@@ -90,18 +89,18 @@ class VenueEditForm extends StatelessWidget {
         ));
   }
 
-  Future<void> _pickLocation(VenueEditController controller) async {
-    final result = await Get.toNamed<Map<String, dynamic>>(
-      AppPages.venueLocationPicker,
-      arguments: {
-        'latitude': controller.latitude.value,
-        'longitude': controller.longitude.value,
-      },
+  Future<void> _pickLocation(
+    BuildContext context,
+    VenueEditController controller,
+  ) async {
+    final result = await pickVenueLocation(
+      context,
+      latitude: controller.latitude.value,
+      longitude: controller.longitude.value,
+      address: controller.addressController.text,
     );
-    final latitude = (result?['latitude'] as num?)?.toDouble();
-    final longitude = (result?['longitude'] as num?)?.toDouble();
-    if (latitude != null && longitude != null) {
-      controller.setLocation(latitude, longitude);
+    if (result != null) {
+      controller.setLocation(result.latitude, result.longitude);
     }
   }
 }

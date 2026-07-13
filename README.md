@@ -29,13 +29,10 @@ flutter pub get
 flutter run
 ```
 
-**Google Maps**
+**OpenStreetMap**
 
-- Enable Maps SDK for Android, Maps SDK for iOS, and Maps JavaScript API in Google Cloud.
-- Android: add `GOOGLE_MAPS_API_KEY=your_key` to `android/local.properties`.
-- Web: replace `YOUR_GOOGLE_MAPS_API_KEY` in `web/index.html` with a browser-restricted key.
-- iOS: define the `GOOGLE_MAPS_API_KEY` build setting in Xcode.
-- Do not commit API keys. Restrict each key by platform and application identifier.
+- Ứng dụng dùng OpenStreetMap qua `flutter_map`; không cần Google Maps API key,
+  billing account, hoặc cấu hình native riêng.
 
 Ghi chú:
 

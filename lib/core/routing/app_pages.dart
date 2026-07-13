@@ -13,6 +13,7 @@ import 'package:exe101/presentation/features/customer/view/orders/payment_qr_pag
 import 'package:exe101/presentation/features/customer/view/orders/select_payment_method_page.dart';
 import 'package:exe101/presentation/features/customer/view/profile/user_profile_page.dart';
 import 'package:exe101/presentation/features/owner/binding/owner_binding.dart';
+import 'package:exe101/presentation/features/owner/binding/venue_location_binding.dart';
 import 'package:exe101/presentation/features/owner/view/discount/discount_management_page.dart';
 import 'package:exe101/presentation/features/owner/view/discount/discount_editor_page.dart';
 import 'package:exe101/presentation/features/owner/view/booking/booking_management_page.dart';
@@ -158,6 +159,7 @@ class AppPages {
     GetPage(
       name: venueLocationPicker,
       page: () => const VenueLocationPickerPage(),
+      binding: VenueLocationBinding(),
     ),
     GetPage(
       name: paymentHistory,

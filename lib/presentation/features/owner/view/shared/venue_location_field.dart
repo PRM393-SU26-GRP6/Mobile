@@ -1,5 +1,42 @@
+import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+class VenueLocationSelection {
+  const VenueLocationSelection({
+    required this.latitude,
+    required this.longitude,
+  });
+
+  final double latitude;
+  final double longitude;
+}
+
+Future<VenueLocationSelection?> pickVenueLocation(
+  BuildContext context, {
+  double? latitude,
+  double? longitude,
+  String? address,
+}) async {
+  final routeResult = await Get.toNamed(
+    AppPages.venueLocationPicker,
+    arguments: {
+      'latitude': latitude,
+      'longitude': longitude,
+      'address': address,
+    },
+  );
+  final result = routeResult is Map ? routeResult : null;
+  final selectedLatitude = (result?['latitude'] as num?)?.toDouble();
+  final selectedLongitude = (result?['longitude'] as num?)?.toDouble();
+  if (selectedLatitude == null || selectedLongitude == null) return null;
+
+  return VenueLocationSelection(
+    latitude: selectedLatitude,
+    longitude: selectedLongitude,
+  );
+}
 
 class VenueLocationField extends StatelessWidget {
   const VenueLocationField({
@@ -41,7 +78,7 @@ class VenueLocationField extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Vị trí trên Google Maps',
+                      'Vị trí trên bản đồ',
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 2),

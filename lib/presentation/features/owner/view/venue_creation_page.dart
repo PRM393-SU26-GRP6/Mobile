@@ -61,7 +61,7 @@ class VenueCreationPage extends StatelessWidget {
                       () => VenueLocationField(
                         latitude: controller.latitude.value,
                         longitude: controller.longitude.value,
-                        onTap: () => _pickLocation(controller),
+                        onTap: () => _pickLocation(context, controller),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -382,18 +382,18 @@ class VenueCreationPage extends StatelessWidget {
     }
   }
 
-  Future<void> _pickLocation(VenueCreationController controller) async {
-    final result = await Get.toNamed<Map<String, dynamic>>(
-      AppPages.venueLocationPicker,
-      arguments: {
-        'latitude': controller.latitude.value,
-        'longitude': controller.longitude.value,
-      },
+  Future<void> _pickLocation(
+    BuildContext context,
+    VenueCreationController controller,
+  ) async {
+    final result = await pickVenueLocation(
+      context,
+      latitude: controller.latitude.value,
+      longitude: controller.longitude.value,
+      address: controller.addressController.text,
     );
-    final latitude = (result?['latitude'] as num?)?.toDouble();
-    final longitude = (result?['longitude'] as num?)?.toDouble();
-    if (latitude != null && longitude != null) {
-      controller.setLocation(latitude, longitude);
+    if (result != null) {
+      controller.setLocation(result.latitude, result.longitude);
     }
   }
 }

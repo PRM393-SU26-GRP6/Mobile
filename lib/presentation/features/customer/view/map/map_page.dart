@@ -1,72 +1,82 @@
 import 'package:exe101/core/theme/app_theme.dart';
+import 'package:exe101/domain/models/venue_model.dart';
 import 'package:exe101/presentation/features/customer/controller/venue_map_controller.dart';
+import 'package:exe101/presentation/features/customer/view/map/widgets/map_venue_marker.dart';
 import 'package:exe101/presentation/features/customer/view/map/widgets/map_venue_preview.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:pointer_interceptor/pointer_interceptor.dart';
+import 'package:latlong2/latlong.dart';
 
-class MapPage extends StatelessWidget {
+class MapPage extends StatefulWidget {
   const MapPage({super.key});
 
   @override
+  State<MapPage> createState() => _MapPageState();
+}
+
+class _MapPageState extends State<MapPage> {
+  final _mapController = MapController();
+
+  VenueMapController get _controller => Get.find<VenueMapController>();
+
+  void _selectVenue(VenueModel venue) {
+    _controller.selectVenue(venue);
+    _mapController.move(_toPoint(venue), 14);
+  }
+
+  LatLng _toPoint(VenueModel venue) {
+    return LatLng(venue.latitude!, venue.longitude!);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final controller = Get.find<VenueMapController>();
+    final controller = _controller;
 
     return Stack(
       children: [
         Obx(
-          () => GoogleMap(
-            initialCameraPosition: const CameraPosition(
-              target: VenueMapController.initialPosition,
-              zoom: 11,
+          () => FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: const LatLng(
+                VenueMapController.defaultLatitude,
+                VenueMapController.defaultLongitude,
+              ),
+              initialZoom: 11,
+              onTap: (_, __) => controller.clearSelection(),
             ),
-            markers: controller.markers,
-            onMapCreated: controller.onMapCreated,
-            onTap: (_) => controller.clearSelection(),
-            compassEnabled: true,
-            mapToolbarEnabled: false,
-            zoomControlsEnabled: false,
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.example.exe101',
+              ),
+              MarkerLayer(
+                markers: controller.mappedVenues
+                    .map(
+                      (venue) => Marker(
+                        point: _toPoint(venue),
+                        width: 46,
+                        height: 46,
+                        child: MapVenueMarker(
+                          isSelected:
+                              controller.selectedVenue.value?.id == venue.id,
+                          onTap: () => _selectVenue(venue),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+              const SimpleAttributionWidget(
+                source: Text('OpenStreetMap contributors'),
+              ),
+            ],
           ),
         ),
         SafeArea(
           child: Align(
             alignment: Alignment.topCenter,
-            child: PointerInterceptor(
-              child: Container(
-                height: 52,
-                margin: const EdgeInsets.all(12),
-                constraints: const BoxConstraints(maxWidth: 520),
-                padding: const EdgeInsets.only(left: 16, right: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.14),
-                      blurRadius: 10,
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.map_outlined, color: AppColors.primary),
-                    const SizedBox(width: 10),
-                    const Expanded(
-                      child: Text(
-                        'Bản đồ sân bóng',
-                        style: TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: 'Tải lại',
-                      onPressed: controller.loadVenues,
-                      icon: const Icon(Icons.refresh),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            child: _MapHeader(onRefresh: controller.loadVenues),
           ),
         ),
         Obx(() {
@@ -94,11 +104,52 @@ class MapPage extends StatelessWidget {
             bottom: 12,
             child: Align(
               alignment: Alignment.bottomCenter,
-              child: PointerInterceptor(child: MapVenuePreview(venue: venue)),
+              child: MapVenuePreview(venue: venue),
             ),
           );
         }),
       ],
+    );
+  }
+}
+
+class _MapHeader extends StatelessWidget {
+  const _MapHeader({required this.onRefresh});
+
+  final VoidCallback onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 52,
+      margin: const EdgeInsets.all(12),
+      constraints: const BoxConstraints(maxWidth: 520),
+      padding: const EdgeInsets.only(left: 16, right: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withValues(alpha: 0.14), blurRadius: 10),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.map_outlined, color: AppColors.primary),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: Text(
+              'Bản đồ sân bóng',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Tải lại',
+            onPressed: onRefresh,
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -111,28 +162,24 @@ class _MapNotice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: PointerInterceptor(
-        child: Container(
-          margin: const EdgeInsets.all(24),
-          constraints: const BoxConstraints(maxWidth: 420),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
-                blurRadius: 10,
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.location_off_outlined, color: AppColors.primary),
-              const SizedBox(width: 12),
-              Expanded(child: Text(message)),
-            ],
-          ),
+      child: Container(
+        margin: const EdgeInsets.all(24),
+        constraints: const BoxConstraints(maxWidth: 420),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12), blurRadius: 10),
+          ],
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.location_off_outlined, color: AppColors.primary),
+            const SizedBox(width: 12),
+            Expanded(child: Text(message)),
+          ],
         ),
       ),
     );

@@ -1,8 +1,10 @@
 import 'package:exe101/core/theme/app_theme.dart';
+import 'package:exe101/presentation/features/owner/controller/venue_location_picker_controller.dart';
+import 'package:exe101/presentation/features/owner/view/venue_location/widgets/venue_location_search.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:pointer_interceptor/pointer_interceptor.dart';
+import 'package:latlong2/latlong.dart';
 
 class VenueLocationPickerPage extends StatefulWidget {
   const VenueLocationPickerPage({super.key});
@@ -13,22 +15,61 @@ class VenueLocationPickerPage extends StatefulWidget {
 }
 
 class _VenueLocationPickerPageState extends State<VenueLocationPickerPage> {
-  static const _fallback = LatLng(10.7769, 106.7009);
-  late LatLng _selected;
+  late final VenueLocationPickerController _controller;
+  final _mapController = MapController();
+  late final Worker _locationWorker;
+  bool _mapReady = false;
+  LatLng? _pendingLocation;
+  bool _initialized = false;
 
   @override
   void initState() {
     super.initState();
-    final args = Get.arguments;
-    final latitude =
-        args is Map ? (args['latitude'] as num?)?.toDouble() : null;
-    final longitude =
-        args is Map ? (args['longitude'] as num?)?.toDouble() : null;
-    _selected = latitude == null ||
-            longitude == null ||
-            (latitude == 0 && longitude == 0)
-        ? _fallback
-        : LatLng(latitude, longitude);
+    _controller = Get.find<VenueLocationPickerController>();
+    _locationWorker = ever<LatLng>(
+      _controller.selectedLocation,
+      _moveToLocation,
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_initialized) return;
+    _initialized = true;
+    _controller.initialize(ModalRoute.of(context)?.settings.arguments);
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _controller.searchInitialAddress(),
+    );
+  }
+
+  void _moveToLocation(LatLng location) {
+    if (!_mapReady) {
+      _pendingLocation = location;
+      return;
+    }
+    _mapController.move(location, 16);
+  }
+
+  void _onMapReady() {
+    _mapReady = true;
+    final pendingLocation = _pendingLocation;
+    if (pendingLocation != null) {
+      _pendingLocation = null;
+      _mapController.move(pendingLocation, 16);
+    }
+  }
+
+  void _search() {
+    FocusScope.of(context).unfocus();
+    _controller.searchAddress();
+  }
+
+  @override
+  void dispose() {
+    _locationWorker.dispose();
+    _mapController.dispose();
+    super.dispose();
   }
 
   @override
@@ -39,30 +80,72 @@ class _VenueLocationPickerPageState extends State<VenueLocationPickerPage> {
         foregroundColor: Colors.white,
         title: const Text('Chọn vị trí venue'),
       ),
-      body: GoogleMap(
-        initialCameraPosition: CameraPosition(target: _selected, zoom: 15),
-        markers: {
-          Marker(markerId: const MarkerId('venue'), position: _selected),
-        },
-        onTap: (position) => setState(() => _selected = position),
-        mapToolbarEnabled: false,
-        zoomControlsEnabled: false,
+      body: Stack(
+        children: [
+          FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: _controller.selectedLocation.value,
+              initialZoom: 15,
+              onMapReady: _onMapReady,
+              onTap: (_, position) => _controller.selectManually(position),
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.example.exe101',
+              ),
+              Obx(
+                () => MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: _controller.selectedLocation.value,
+                      width: 48,
+                      height: 48,
+                      child: const Icon(
+                        Icons.location_on,
+                        color: AppColors.primary,
+                        size: 44,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SimpleAttributionWidget(
+                source: Text('OpenStreetMap contributors'),
+              ),
+            ],
+          ),
+          SafeArea(
+            minimum: const EdgeInsets.all(12),
+            child: Obx(
+              () => VenueLocationSearch(
+                controller: _controller.searchController,
+                isSearching: _controller.isSearching.value,
+                message: _controller.searchMessage.value,
+                isSuccess: _controller.searchSucceeded.value,
+                onSearch: _search,
+              ),
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.all(12),
-        child: PointerInterceptor(
-          child: FilledButton.icon(
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              minimumSize: const Size.fromHeight(50),
-            ),
-            onPressed: () => Get.back(result: {
-              'latitude': _selected.latitude,
-              'longitude': _selected.longitude,
-            }),
-            icon: const Icon(Icons.check),
-            label: const Text('Dùng vị trí này'),
+        child: FilledButton.icon(
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            minimumSize: const Size.fromHeight(50),
           ),
+          onPressed: () {
+            final selected = _controller.selectedLocation.value;
+            Navigator.of(context).pop({
+              'latitude': selected.latitude,
+              'longitude': selected.longitude,
+            });
+          },
+          icon: const Icon(Icons.check),
+          label: const Text('Dùng vị trí này'),
         ),
       ),
     );

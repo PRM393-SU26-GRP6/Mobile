@@ -46,8 +46,8 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   signalr_netcore: ^1.4.4
   web: ^1.1.1
-  google_maps_flutter: ^2.17.1
-  pointer_interceptor: ^0.10.1+2
+  flutter_map: ^8.3.1
+  latlong2: ^0.10.1
 
 dev_dependencies:
   flutter_test:

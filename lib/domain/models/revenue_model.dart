@@ -1,6 +1,4 @@
-/// Doanh thu tổng hợp trả về từ `/api/v1/owner/revenue`.
-/// Backend không định nghĩa schema cố định trong swagger nên model giữ dạng
-/// mềm để controller có thể map thêm trường tuỳ BE.
+/// Tổng quan từ `/owner/stats` kết hợp với các nhóm từ `/owner/revenue`.
 class RevenueResponse {
   final double totalRevenue;
   final double depositRevenue;
@@ -31,14 +29,14 @@ class RevenueResponse {
       );
 }
 
-/// Một điểm doanh thu theo nhóm (ngày/tuần/tháng).
+/// Một điểm doanh thu theo nhóm ngày hoặc tháng.
 class RevenuePoint {
   final String? label;
   final DateTime? date;
   final double revenue;
   final double deposit;
   final double finalPayment;
-  final int bookingCount;
+  final int paymentCount;
 
   const RevenuePoint({
     this.label,
@@ -46,11 +44,12 @@ class RevenuePoint {
     required this.revenue,
     required this.deposit,
     required this.finalPayment,
-    required this.bookingCount,
+    required this.paymentCount,
   });
 
   factory RevenuePoint.fromJson(Map<String, dynamic> json) {
-    final rawDate = json['date'] ?? json['period'] ?? json['label'];
+    final rawDate =
+        json['date'] ?? json['period'] ?? json['label'] ?? json['key'];
     DateTime? parsed;
     if (rawDate is String && rawDate.isNotEmpty) {
       try {
@@ -61,7 +60,9 @@ class RevenuePoint {
     }
 
     return RevenuePoint(
-      label: json['label']?.toString() ?? rawDate?.toString(),
+      label: json['label']?.toString() ??
+          json['key']?.toString() ??
+          rawDate?.toString(),
       date: parsed,
       revenue: (json['revenue'] as num?)?.toDouble() ??
           (json['amount'] as num?)?.toDouble() ??
@@ -73,9 +74,17 @@ class RevenuePoint {
       finalPayment: (json['finalPayment'] as num?)?.toDouble() ??
           (json['finalPaymentRevenue'] as num?)?.toDouble() ??
           0,
-      bookingCount: (json['bookingCount'] as num?)?.toInt() ??
+      paymentCount: (json['payments'] as num?)?.toInt() ??
+          (json['bookingCount'] as num?)?.toInt() ??
           (json['count'] as num?)?.toInt() ??
           0,
     );
+  }
+
+  static int compareChronologically(RevenuePoint a, RevenuePoint b) {
+    final aDate = a.date;
+    final bDate = b.date;
+    if (aDate != null && bDate != null) return aDate.compareTo(bDate);
+    return (a.label ?? '').compareTo(b.label ?? '');
   }
 }

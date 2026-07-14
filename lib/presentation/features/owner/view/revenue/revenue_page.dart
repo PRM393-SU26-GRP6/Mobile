@@ -81,6 +81,15 @@ class _RevenueContent extends StatelessWidget {
           children: [
             RevenueRangeSelector(controller: controller),
             const SizedBox(height: 16),
+            const Text(
+              'Tổng quan toàn thời gian',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 8),
             RevenueSummaryCards(revenue: revenue),
             const SizedBox(height: 16),
             RevenueChartCard(groups: revenue.groups),

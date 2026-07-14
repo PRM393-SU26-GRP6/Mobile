@@ -12,7 +12,7 @@ extension RevenueRangeX on RevenueRange {
       case RevenueRange.last30Days:
         return 'day';
       case RevenueRange.last90Days:
-        return 'week';
+        return 'month';
     }
   }
 
@@ -62,7 +62,7 @@ class RevenueController extends GetxController {
     final range = selectedRange.value;
     try {
       final now = DateTime.now();
-      final from = now.subtract(Duration(days: range.lookbackDays));
+      final from = now.subtract(Duration(days: range.lookbackDays - 1));
       final result = await ownerRepository.getOwnerRevenue(
         from: DateTime(from.year, from.month, from.day),
         to: now,

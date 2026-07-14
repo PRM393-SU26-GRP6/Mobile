@@ -78,7 +78,7 @@ class RevenueDetailList extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          '${point.bookingCount} lượt đặt',
+                          '${point.paymentCount} giao dịch',
                           style: const TextStyle(
                             fontSize: 11,
                             color: AppColors.textSecondary,

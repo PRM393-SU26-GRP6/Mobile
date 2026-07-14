@@ -6,7 +6,6 @@ import 'package:exe101/domain/repositories/review_repository.dart';
 import 'package:exe101/domain/repositories/slot_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:exe101/core/theme/app_theme.dart';
 
 part 'venue_detail_review_actions.dart';
 part 'venue_detail_selection_actions.dart';
@@ -26,7 +25,9 @@ class VenueDetailController extends GetxController {
 
   final selectedField = Rxn<FootballFieldDto>();
   final selectedDate = Rxn<DateTime>();
+  final availableSlotDates = <DateTime>[].obs;
   final selectedSlotIds = <String>[].obs;
+  final lockingSlotIds = <String>[].obs;
 
   final error = ''.obs;
 

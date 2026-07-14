@@ -28,9 +28,11 @@ class VenueSlotGrid extends StatelessWidget {
           return Obx(() => VenueSlotChip(
                 slot: slot,
                 isSelected: controller.selectedSlotIds.contains(slot.slotId),
+                isLoading:
+                    controller.lockingSlotIds.contains(slot.selectionKey),
                 onTap: () {
                   if (slot.isAvailable) {
-                    controller.toggleSlot(slot.slotId);
+                    controller.toggleSlot(slot.selectionKey);
                   }
                 },
               ));

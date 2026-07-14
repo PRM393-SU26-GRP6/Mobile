@@ -75,9 +75,16 @@ class BookingConfirmationController extends ChangeNotifier {
     final response = error.response?.data;
     final serverMessage =
         response is Map ? response['message']?.toString() : '';
+    final normalizedMessage = serverMessage?.toLowerCase() ?? '';
+    final isSlotConflict = normalizedMessage.contains('slot') &&
+        (normalizedMessage.contains('not available') ||
+            normalizedMessage.contains('already booked') ||
+            normalizedMessage.contains('another user'));
+    if (statusCode == 409 || isSlotConflict) {
+      return 'Một hoặc nhiều khung giờ vừa được người khác chọn. '
+          'Vui lòng đóng hộp thoại và chọn lại.';
+    }
     switch (statusCode) {
-      case 409:
-        return 'Khung giờ đã được đặt, vui lòng chọn lại.';
       case 400:
         return serverMessage?.isNotEmpty == true
             ? serverMessage!

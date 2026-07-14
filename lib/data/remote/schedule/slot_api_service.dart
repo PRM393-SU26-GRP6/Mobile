@@ -1,13 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:exe101/core/config/env.dart';
+import 'package:exe101/domain/models/time_slot_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Slot endpoints used outside of the booking/owner flows:
 /// - POST /api/v1/slots/{id}/unlock
 ///
-/// Slot locking happens implicitly inside `POST /bookings`.
-/// Unlock is required when the user backs out of a selection before
-/// the booking is created (timeout, page leave, manual deselect-all).
+/// The selection flow explicitly locks before checkout; `POST /bookings`
+/// accepts locks still owned by the current user. Unlock is required when the
+/// user backs out before creating the booking.
 class SlotApiService {
   final Dio dio;
   static const _storage = FlutterSecureStorage(
@@ -44,8 +45,8 @@ class SlotApiService {
   }
 
   /// POST /api/v1/slots/lock
-  /// Returns true on success, throws Exception on failure (e.g. 409 Conflict if already locked)
-  Future<bool> lockSlot({
+  /// Returns the persisted slot ID (including newly generated virtual slots).
+  Future<SlotLockResult> lockSlot({
     String? slotId,
     required String fieldId,
     required String startTime,
@@ -53,7 +54,7 @@ class SlotApiService {
     required String selectedDate,
   }) async {
     final headers = await _authHeaders();
-    final response = await dio.post(
+    final response = await dio.post<Map<String, dynamic>>(
       '${Env.baseUrl}/api/v1/slots/lock',
       data: {
         if (slotId != null && slotId.isNotEmpty) 'slotId': slotId,
@@ -64,10 +65,16 @@ class SlotApiService {
       },
       options: Options(headers: headers),
     );
-    final code = response.statusCode ?? 0;
-    if (code >= 200 && code < 300) {
-      return true;
+    final data = response.data?['data'];
+    final lockedSlotId = data is Map ? data['slotId']?.toString() ?? '' : '';
+    if (lockedSlotId.isEmpty) {
+      throw const FormatException('Lock response is missing slotId');
     }
-    return false;
+    return SlotLockResult(
+      slotId: lockedSlotId,
+      lockedUntil: data is Map
+          ? DateTime.tryParse(data['lockedUntil']?.toString() ?? '')
+          : null,
+    );
   }
 }

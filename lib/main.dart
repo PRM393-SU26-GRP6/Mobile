@@ -55,7 +55,12 @@ void main() {
   );
 
   Get.put<SlotApiService>(SlotApiService(dio));
-  Get.put<SlotRepository>(SlotRepository(slotApiService: Get.find()));
+  Get.put<SlotRepository>(
+    SlotRepository(
+      slotApiService: Get.find(),
+      slotScheduleApiService: apiService.slotScheduleService,
+    ),
+  );
   Get.put<ReviewApiService>(ReviewApiService(dio));
   Get.put<ReviewRepository>(ReviewRepository(reviewApiService: Get.find()));
 

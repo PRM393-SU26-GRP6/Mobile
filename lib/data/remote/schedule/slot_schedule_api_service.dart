@@ -6,7 +6,7 @@ import 'package:exe101/domain/models/time_slot_model.dart';
 
 /// Slot-schedule endpoints used by the owner slot management flow.
 ///
-/// - GET  /api/v1/slots                  (customer reads slots by field)
+/// - GET  /api/v1/slots                  (owner reads persisted slots by field)
 /// - GET  /api/v1/slots/available        (customer reads available slots by date)
 /// - POST /api/v1/owner/fields/{id}/slots/bulk
 /// - GET  /api/v1/owner/fields/{id}/schedule
@@ -23,19 +23,22 @@ class SlotScheduleApiService extends BaseApiService {
     required String date,
   }) async {
     final headers = await authHeaders();
-    final response = await dio.get<Map<String, dynamic>>(
+    final response = await dio.get<dynamic>(
       '${Env.baseUrl}/api/v1/slots/available',
       queryParameters: {'fieldId': fieldId, 'date': date},
       options: Options(headers: headers),
     );
 
-    if (response.data != null && response.data!['data'] != null) {
-      final list = response.data!['data'];
-      if (list is List) {
-        return list.map((json) => TimeSlotDto.fromJson(json)).toList();
-      }
-    }
-    return [];
+    return BaseApiService.extractList(response.data)
+        .whereType<Map>()
+        .map(
+          (json) => TimeSlotDto.fromAvailableSlotJson(
+            Map<String, dynamic>.from(json),
+            fieldId: fieldId,
+            selectedDate: date,
+          ),
+        )
+        .toList();
   }
 
   Future<List<TimeSlotDto>> getSlotsByField(String fieldId) async {

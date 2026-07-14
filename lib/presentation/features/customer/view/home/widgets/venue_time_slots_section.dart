@@ -64,7 +64,7 @@ class VenueTimeSlotsSection extends StatelessWidget {
                 () => controller.selectedSlotIds.isEmpty
                     ? const SizedBox.shrink()
                     : TextButton(
-                        onPressed: controller.selectedSlotIds.clear,
+                        onPressed: controller.clearSelectedSlots,
                         child: const Text('Bỏ chọn'),
                       ),
               ),
@@ -84,7 +84,7 @@ class VenueTimeSlotsSection extends StatelessWidget {
               return const _HintText('Vui lòng chọn ngày để xem giờ');
             }
             if (controller.slotsForSelectedDate.isEmpty) {
-              return const _HintText('Ngày này chưa có khung giờ');
+              return const _HintText('Ngày này không còn khung giờ trống');
             }
             return VenueSlotGrid(controller: controller);
           }),

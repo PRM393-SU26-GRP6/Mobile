@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 class VenueSlotChip extends StatelessWidget {
   final TimeSlotDto slot;
   final bool isSelected;
+  final bool isLoading;
   final VoidCallback onTap;
 
   const VenueSlotChip({
     super.key,
     required this.slot,
     required this.isSelected,
+    this.isLoading = false,
     required this.onTap,
   });
 
@@ -19,7 +21,7 @@ class VenueSlotChip extends StatelessWidget {
     final available = slot.isAvailable;
 
     return GestureDetector(
-      onTap: available ? onTap : null,
+      onTap: available && !isLoading ? onTap : null,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
@@ -39,18 +41,24 @@ class VenueSlotChip extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text(
-              slot.timeRange,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: isSelected
-                    ? Colors.white
-                    : available
-                        ? AppColors.textPrimary
-                        : Colors.grey.shade600,
+            if (isLoading)
+              const SizedBox.square(
+                dimension: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            else
+              Text(
+                slot.timeRange,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: isSelected
+                      ? Colors.white
+                      : available
+                          ? AppColors.textPrimary
+                          : Colors.grey.shade600,
+                ),
               ),
-            ),
             const SizedBox(height: 2),
             Text(
               '${slot.price.toStringAsFixed(0)}đ',

@@ -16,6 +16,11 @@ class SlotActionsController extends GetxController {
     required this.ownerRepository,
   });
 
+  final isDeleting = false.obs;
+  final deletingSlotIds = <String>[].obs;
+
+  int get deletingCount => deletingSlotIds.length;
+
   Future<bool> toggleSlotStatus(String slotId, bool isActive) async {
     try {
       final status = isActive ? 'Available' : 'Locked';
@@ -61,6 +66,8 @@ class SlotActionsController extends GetxController {
 
   /// Xoá 1 slot.
   Future<bool> deleteSlot(String slotId) async {
+    if (isDeleting.value || slotId.isEmpty) return false;
+    _beginDeleting([slotId]);
     try {
       await ownerRepository.deleteOwnerSlot(slotId);
       Get.snackbar('Thành công', 'Đã xoá slot',
@@ -70,33 +77,54 @@ class SlotActionsController extends GetxController {
       Get.snackbar('Lỗi', 'Không thể xoá slot. Có thể slot đang được đặt.',
           snackPosition: SnackPosition.TOP);
       return false;
+    } finally {
+      _finishDeleting();
     }
   }
 
   Future<int> deleteSlots(Iterable<String> slotIds) async {
-    var deletedCount = 0;
-    for (final slotId in slotIds) {
-      try {
-        await ownerRepository.deleteOwnerSlot(slotId);
-        deletedCount++;
-      } catch (_) {
-        // Continue deleting other selected slots; summary snackbar is shown below.
-      }
-    }
+    if (isDeleting.value) return 0;
+    final ids = slotIds.where((id) => id.isNotEmpty).toSet().toList();
+    if (ids.isEmpty) return 0;
 
-    if (deletedCount > 0) {
-      Get.snackbar(
-        'Thành công',
-        'Đã xoá $deletedCount slot',
-        snackPosition: SnackPosition.TOP,
-      );
-    } else {
-      Get.snackbar(
-        'Lỗi',
-        'Không thể xoá các slot đã chọn',
-        snackPosition: SnackPosition.TOP,
-      );
+    _beginDeleting(ids);
+    var deletedCount = 0;
+    try {
+      for (final slotId in ids) {
+        try {
+          await ownerRepository.deleteOwnerSlot(slotId);
+          deletedCount++;
+        } catch (_) {
+          // Continue deleting other selected slots; summary is shown below.
+        }
+      }
+
+      if (deletedCount > 0) {
+        Get.snackbar(
+          'Thành công',
+          'Đã xoá $deletedCount khung giờ',
+          snackPosition: SnackPosition.TOP,
+        );
+      } else {
+        Get.snackbar(
+          'Lỗi',
+          'Không thể xoá các khung giờ đã chọn',
+          snackPosition: SnackPosition.TOP,
+        );
+      }
+      return deletedCount;
+    } finally {
+      _finishDeleting();
     }
-    return deletedCount;
+  }
+
+  void _beginDeleting(Iterable<String> slotIds) {
+    deletingSlotIds.assignAll(slotIds);
+    isDeleting.value = true;
+  }
+
+  void _finishDeleting() {
+    isDeleting.value = false;
+    deletingSlotIds.clear();
   }
 }

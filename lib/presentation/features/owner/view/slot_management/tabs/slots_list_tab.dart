@@ -5,6 +5,7 @@ import 'package:exe101/presentation/features/owner/controller/slot_management_co
 import 'package:exe101/presentation/features/owner/controller/slot_selection_controller.dart';
 import 'package:exe101/presentation/features/owner/view/slot_management/widgets/empty_slots_state.dart';
 import 'package:exe101/presentation/features/owner/view/slot_management/widgets/slot_card.dart';
+import 'package:exe101/presentation/features/owner/view/slot_management/widgets/slot_deletion_overlay.dart';
 import 'package:exe101/presentation/features/owner/view/slot_management/widgets/slot_filter_bar.dart';
 import 'package:exe101/presentation/features/owner/view/slot_management/widgets/slot_selection_toolbar.dart';
 import 'package:flutter/material.dart';
@@ -36,45 +37,61 @@ class SlotsListTab extends StatelessWidget {
         return EmptySlotsState(onCreateTap: onSwitchToCreate);
       }
       final filteredSlots = filterController.apply(controller.slots);
-      return RefreshIndicator(
-        onRefresh: () => controller.loadSlots(),
-        color: AppColors.primary,
-        child: ListView(
-          padding: const EdgeInsets.only(bottom: 16),
+      final isDeleting = actionsController.isDeleting.value;
+      return PopScope(
+        canPop: !isDeleting,
+        child: Stack(
           children: [
-            SlotFilterBar(controller: filterController),
-            if (selectionController.isSelecting)
-              SlotSelectionToolbar(
-                selectedCount: selectionController.selectedCount,
-                onSelectAll: () => selectionController.selectAll(
-                  filteredSlots.map((slot) => slot.slotId),
+            AbsorbPointer(
+              absorbing: isDeleting,
+              child: RefreshIndicator(
+                onRefresh: () => controller.loadSlots(),
+                color: AppColors.primary,
+                child: ListView(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  children: [
+                    SlotFilterBar(controller: filterController),
+                    if (selectionController.isSelecting)
+                      SlotSelectionToolbar(
+                        selectedCount: selectionController.selectedCount,
+                        onSelectAll: () => selectionController.selectAll(
+                          filteredSlots.map((slot) => slot.slotId),
+                        ),
+                        onDelete: () => _confirmDeleteSelected(
+                          context,
+                          selectionController,
+                          actionsController,
+                        ),
+                        onClear: selectionController.clear,
+                      ),
+                    if (filteredSlots.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.all(32),
+                        child: Center(
+                          child: Text('Không tìm thấy khung giờ phù hợp'),
+                        ),
+                      ),
+                    ...filteredSlots.map((slot) {
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                        child: Obx(
+                          () => SlotCard(
+                            slot: slot,
+                            selectionMode: selectionController.isSelecting,
+                            isSelected:
+                                selectionController.isSelected(slot.slotId),
+                            onSelectedChanged: (_) =>
+                                selectionController.toggle(slot.slotId),
+                          ),
+                        ),
+                      );
+                    }),
+                  ],
                 ),
-                onDelete: () => _confirmDeleteSelected(
-                  context,
-                  selectionController,
-                  actionsController,
-                ),
-                onClear: selectionController.clear,
               ),
-            if (filteredSlots.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(32),
-                child: Center(child: Text('Không tìm thấy slot phù hợp')),
-              ),
-            ...filteredSlots.map((slot) {
-              return Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                child: Obx(
-                  () => SlotCard(
-                    slot: slot,
-                    selectionMode: selectionController.isSelecting,
-                    isSelected: selectionController.isSelected(slot.slotId),
-                    onSelectedChanged: (_) =>
-                        selectionController.toggle(slot.slotId),
-                  ),
-                ),
-              );
-            }),
+            ),
+            if (isDeleting)
+              SlotDeletionOverlay(slotCount: actionsController.deletingCount),
           ],
         ),
       );
@@ -90,8 +107,11 @@ class SlotsListTab extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Xóa slots đã chọn?'),
-        content: Text('Bạn đang chọn ${selectedIds.length} slot.'),
+        title: const Text('Xóa các khung giờ đã chọn?'),
+        content: Text(
+          'Bạn sắp xóa ${selectedIds.length} khung giờ. '
+          'Thao tác này không thể hoàn tác.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),

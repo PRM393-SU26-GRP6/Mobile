@@ -1,5 +1,5 @@
 abstract final class AppStrings {
-  static const appName = 'PitchBook';
+  static const appName = 'PITCHED-BOOK';
 
   static const common = _CommonStrings();
   static const auth = _AuthStrings();
@@ -28,7 +28,7 @@ class _AuthStrings {
 
   final String login = 'Đăng nhập';
   final String register = 'Đăng ký';
-  final String loginWelcome = 'Chào mừng bạn quay lại PitchBook.';
+  final String loginWelcome = 'Chào mừng bạn quay lại PITCHED-BOOK.';
   final String quickBooking = 'Đặt sân bóng nhanh chóng';
   final String noAccount = 'Chưa có tài khoản? Đăng ký';
 }

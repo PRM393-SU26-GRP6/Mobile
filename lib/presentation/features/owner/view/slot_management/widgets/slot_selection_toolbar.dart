@@ -29,7 +29,7 @@ class SlotSelectionToolbar extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              'Đã chọn $selectedCount slot',
+              'Đã chọn $selectedCount khung giờ',
               style: const TextStyle(
                 fontWeight: FontWeight.w700,
                 color: AppColors.primary,
@@ -44,7 +44,7 @@ class SlotSelectionToolbar extends StatelessWidget {
             onPressed: onDelete,
             icon: const Icon(Icons.delete_outline),
             color: Colors.red,
-            tooltip: 'Xóa slot đã chọn',
+            tooltip: 'Xóa khung giờ đã chọn',
           ),
           IconButton(
             onPressed: onClear,

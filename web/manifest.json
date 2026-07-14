@@ -1,11 +1,11 @@
 {
-    "name": "exe101",
-    "short_name": "exe101",
+    "name": "PITCHED-BOOK",
+    "short_name": "PITCHED-BOOK",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "PITCHED-BOOK football venue booking platform.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

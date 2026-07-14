@@ -1,3 +1,4 @@
+import 'package:exe101/core/constant/app_constant.dart';
 import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      title: AppConstant.appName,
       // Theme (use light green theme matching design)
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.lightTheme,

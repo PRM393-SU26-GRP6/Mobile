@@ -55,7 +55,7 @@ class VenueSlotChip extends StatelessWidget {
             Text(
               '${slot.price.toStringAsFixed(0)}đ',
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 12,
                 color: isSelected
                     ? Colors.white.withValues(alpha: 0.8)
                     : available
@@ -67,7 +67,7 @@ class VenueSlotChip extends StatelessWidget {
               Text(
                 'Đã đặt',
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: 12,
                   color: Colors.grey.shade600,
                 ),
               ),

@@ -94,7 +94,7 @@ class VenueStatItem extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 12,
               color: Colors.white.withValues(alpha: 0.7),
             ),
           ),

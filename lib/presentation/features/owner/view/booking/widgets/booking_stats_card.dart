@@ -122,7 +122,7 @@ class BookingStatsCard extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 12,
                 color: isHighlight
                     ? AppColors.textSecondary
                     : Colors.white.withValues(alpha: 0.8),

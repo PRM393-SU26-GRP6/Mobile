@@ -8,6 +8,7 @@ class VenueController extends GetxController {
   final ApiService apiService;
   final venues = <VenueModel>[].obs;
   final allAmenities = <AmenityModel>[].obs;
+  final amenitiesError = ''.obs;
   final isLoading = false.obs;
   final error = ''.obs;
   final searchQuery = ''.obs;
@@ -29,11 +30,14 @@ class VenueController extends GetxController {
 
   Future<void> loadAmenities() async {
     try {
+      amenitiesError.value = '';
       final service = _service;
       if (service != null) {
         allAmenities.assignAll(await service.getAllAmenities());
       }
-    } catch (_) {}
+    } catch (_) {
+      amenitiesError.value = 'Không thể tải bộ lọc tiện ích';
+    }
   }
 
   void toggleAmenityFilter(String amenityId) {

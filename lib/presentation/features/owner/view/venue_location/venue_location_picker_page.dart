@@ -1,3 +1,4 @@
+import 'package:exe101/core/config/map_config.dart';
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/presentation/features/owner/controller/venue_location_picker_controller.dart';
 import 'package:exe101/presentation/features/owner/view/venue_location/widgets/venue_location_search.dart';
@@ -92,8 +93,8 @@ class _VenueLocationPickerPageState extends State<VenueLocationPickerPage> {
             ),
             children: [
               TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.example.exe101',
+                urlTemplate: MapConfig.tileUrl,
+                userAgentPackageName: MapConfig.userAgentPackageName,
               ),
               Obx(
                 () => MarkerLayer(

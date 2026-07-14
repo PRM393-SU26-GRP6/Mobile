@@ -1,8 +1,5 @@
-import 'package:dio/dio.dart';
 import 'package:exe101/core/theme/app_theme.dart';
-import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/domain/models/notification_model.dart';
-import 'package:exe101/domain/repositories/user_repository.dart';
 import 'package:exe101/presentation/features/customer/controller/notification_controller.dart';
 import 'package:exe101/presentation/features/customer/view/notifications/widgets/mark_all_read_dialog.dart';
 import 'package:exe101/presentation/features/customer/view/notifications/widgets/notification_filter_chip.dart';
@@ -20,7 +17,7 @@ class NotificationsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = _getController();
+    final controller = Get.find<NotificationController>();
 
     return Scaffold(
       backgroundColor: AppColors.secondary,
@@ -38,23 +35,6 @@ class NotificationsPage extends StatelessWidget {
     );
   }
 
-  NotificationController _getController() {
-    if (Get.isRegistered<NotificationController>()) {
-      return Get.find<NotificationController>();
-    }
-
-    if (!Get.isRegistered<UserRepository>()) {
-      final apiService = Get.isRegistered<ApiServiceImpl>()
-          ? Get.find<ApiServiceImpl>()
-          : ApiServiceImpl(Dio());
-      Get.put<UserRepository>(UserRepository(apiService: apiService));
-    }
-
-    return Get.put(NotificationController(
-      userRepository: Get.find<UserRepository>(),
-    ));
-  }
-
   Widget _buildHeader(NotificationController controller) {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 12),
@@ -62,6 +42,7 @@ class NotificationsPage extends StatelessWidget {
         children: [
           if (showBackButton) ...[
             IconButton(
+              tooltip: 'Quay lại',
               onPressed: Get.back,
               icon: const Icon(
                 Icons.arrow_back,

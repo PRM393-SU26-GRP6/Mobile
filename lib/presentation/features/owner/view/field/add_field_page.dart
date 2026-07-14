@@ -30,6 +30,7 @@ class AddFieldPage extends StatelessWidget {
         ),
         centerTitle: true,
         leading: IconButton(
+          tooltip: 'Quay lại',
           icon: const Icon(Icons.arrow_back),
           onPressed: () => showExitConfirmationDialog(context, controller),
         ),

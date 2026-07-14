@@ -89,7 +89,7 @@ class SlotLockState extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           slot.isAvailable ? 'Mở' : 'Khóa',
-          style: TextStyle(fontSize: 11, color: color),
+          style: TextStyle(fontSize: 12, color: color),
         ),
       ],
     );
@@ -113,7 +113,7 @@ class _StatusChip extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: FontWeight.w600,
           color: color,
         ),

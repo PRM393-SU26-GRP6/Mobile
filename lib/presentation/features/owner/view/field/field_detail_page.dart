@@ -40,6 +40,7 @@ class FieldDetailPage extends StatelessWidget {
                     ),
                   )
                 : IconButton(
+                    tooltip: 'Làm mới',
                     icon: const Icon(Icons.refresh),
                     onPressed: controller.reload,
                   ),

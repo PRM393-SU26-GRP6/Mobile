@@ -64,7 +64,7 @@ class VenueDateChip extends StatelessWidget {
             Text(
               'T${date.month}',
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 12,
                 color: isSelected
                     ? Colors.white.withValues(alpha: 0.9)
                     : AppColors.textSecondary,

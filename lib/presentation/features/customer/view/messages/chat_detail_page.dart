@@ -1,9 +1,8 @@
 import 'dart:async';
 
 import 'package:exe101/core/theme/app_theme.dart';
-import 'package:exe101/data/remote/api_service.dart';
-import 'package:exe101/data/remote/signalr_service.dart';
 import 'package:exe101/domain/models/chat_model.dart';
+import 'package:exe101/presentation/features/customer/controller/chat_actions_controller.dart';
 import 'package:exe101/presentation/features/customer/view/messages/widgets/chat_conversation_header.dart';
 import 'package:exe101/presentation/features/customer/view/messages/widgets/chat_input_area.dart';
 import 'package:exe101/presentation/features/customer/view/messages/widgets/chat_message_list.dart';
@@ -67,12 +66,10 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   }
 
   void _initSignalR() {
-    final signalRService = Get.find<SignalRService>();
-    signalRService.initChatConnection().then((_) {
-      signalRService.joinChatRoom(widget.chatRoom.roomId);
-    });
+    final controller = Get.find<ChatActionsController>();
+    controller.connectRoom(widget.chatRoom.roomId);
 
-    _chatSubscription = signalRService.onChatMessageReceived.listen((msgData) {
+    _chatSubscription = controller.messagesReceived.listen((msgData) {
       if (!mounted) return;
       if (msgData['roomId'] == widget.chatRoom.roomId) {
         _loadInitialMessages();
@@ -82,24 +79,25 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
 
   Future<void> _loadCurrentUser() async {
     try {
-      final apiService = Get.find<ApiServiceImpl>();
-      final userId = await apiService.getUserId();
-      final userRole = await apiService.getUserRole();
+      final controller = Get.find<ChatActionsController>();
+      final userId = await controller.getCurrentUserId();
+      final userRole = await controller.getCurrentUserRole();
       if (mounted && userId != null) {
         setState(() {
           _currentUserId = userId;
           _currentUserRole = userRole;
         });
       }
-    } catch (_) {}
+    } catch (_) {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _loadInitialMessages() async {
     try {
-      final apiService = Get.find<ApiServiceImpl>();
       await _loadCurrentUser();
 
-      final messages = await apiService.getChatMessages(
+      final messages = await Get.find<ChatActionsController>().getMessages(
         roomId: widget.chatRoom.roomId,
         pageNumber: 1,
         pageSize: _pageSize,
@@ -134,8 +132,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       final beforeHeight = _scrollController.hasClients
           ? _scrollController.position.maxScrollExtent
           : 0.0;
-      final apiService = Get.find<ApiServiceImpl>();
-      final older = await apiService.getChatMessages(
+      final older = await Get.find<ChatActionsController>().getMessages(
         roomId: widget.chatRoom.roomId,
         pageNumber: nextPage,
         pageSize: _pageSize,
@@ -181,8 +178,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     });
 
     try {
-      final apiService = Get.find<ApiServiceImpl>();
-      await apiService.sendMessage(
+      await Get.find<ChatActionsController>().sendMessage(
         roomId: widget.chatRoom.roomId,
         messageText: text,
       );
@@ -209,8 +205,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   @override
   void dispose() {
     _chatSubscription?.cancel();
-    final signalRService = Get.find<SignalRService>();
-    signalRService.leaveChatRoom(widget.chatRoom.roomId);
+    Get.find<ChatActionsController>().leaveRoom(widget.chatRoom.roomId);
     _scrollController.dispose();
     _messageController.dispose();
     super.dispose();
@@ -229,7 +224,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
             const SizedBox(height: 2),
             Text(
               '${widget.chatRoom.contextLabel} - Bạn là $_myRole',
-              style: const TextStyle(fontSize: 11, color: Colors.white70),
+              style: const TextStyle(fontSize: 12, color: Colors.white70),
             ),
           ],
         ),

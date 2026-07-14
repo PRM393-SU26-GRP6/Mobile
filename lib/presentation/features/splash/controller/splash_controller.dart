@@ -34,7 +34,10 @@ class SplashController extends GetxController {
           }
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // A missing/corrupt local session is equivalent to being signed out.
+      // The fallback navigation below deliberately returns to the login page.
+    }
 
     // No token or error -> navigate to login
     _navigateTo(AppPages.login);

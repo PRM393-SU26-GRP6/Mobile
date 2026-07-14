@@ -19,6 +19,7 @@ class DiscountManagementPage extends StatelessWidget {
         backgroundColor: Colors.white,
         actions: [
           IconButton(
+            tooltip: 'Thêm mã giảm giá',
             icon: const Icon(Icons.add_circle, color: AppColors.primary),
             onPressed: () {
               Get.toNamed(AppPages.ownerDiscountEditor);

@@ -5,6 +5,9 @@ import 'package:exe101/domain/repositories/review_repository.dart';
 import 'package:exe101/domain/models/discount_model.dart';
 import 'package:get/get.dart';
 
+part 'booking_discount_actions.dart';
+part 'booking_review_actions.dart';
+
 class BookingController extends GetxController {
   final ApiService apiService;
   final ReviewRepository reviewRepository;
@@ -128,100 +131,6 @@ class BookingController extends GetxController {
     searchQuery.value = value;
   }
 
-  /// Load danh sách review của user hiện tại để map với bookingId
-  Future<void> loadMyReviews() async {
-    if (isLoadingReviews.value) return;
-    try {
-      isLoadingReviews.value = true;
-      reviewsError.value = '';
-      final list = await (apiService as ApiServiceImpl).getMyReviews();
-      myReviews.clear();
-      for (final r in list) {
-        final bid = r.bookingId;
-        if (bid != null && bid.isNotEmpty) {
-          myReviews[bid] = r;
-        }
-      }
-    } catch (e) {
-      reviewsError.value = 'Không thể tải đánh giá của bạn';
-    } finally {
-      isLoadingReviews.value = false;
-    }
-  }
-
-  ReviewModel? reviewForBooking(String bookingId) => myReviews[bookingId];
-
-  bool hasReviewFor(String bookingId) => myReviews.containsKey(bookingId);
-
-  /// Lightweight lookup using `GET /bookings/{id}/review`.
-  /// Populates `myReviews[bookingId]` when the booking has a review so
-  /// downstream UI can read it via `reviewForBooking`. Returns the DTO
-  /// so callers can decide whether to navigate into a review form.
-  Future<BookingReviewDto?> loadBookingReview(String bookingId) async {
-    try {
-      final dto = await reviewRepository.getBookingReview(bookingId);
-      if (dto != null) {
-        myReviews[bookingId] = ReviewModel.fromBookingReview(
-          dto,
-          bookingId: bookingId,
-        );
-      }
-      return dto;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  /// Cập nhật cache local sau khi user tạo/sửa review (không cần gọi lại API list)
-  void upsertReview(ReviewModel review) {
-    final bid = review.bookingId;
-    if (bid != null && bid.isNotEmpty) {
-      myReviews[bid] = review;
-    }
-  }
-
-  void removeReviewForBooking(String bookingId) {
-    myReviews.remove(bookingId);
-  }
-
-  Future<void> deleteReview(String reviewId) async {
-    await (apiService as ApiServiceImpl).deleteReview(reviewId);
-  }
-
-  Future<ReviewModel> createReview({
-    required String venueId,
-    required String bookingId,
-    required int rating,
-    required String comment,
-  }) async {
-    final result = await (apiService as ApiServiceImpl).createReview(
-      venueId: venueId,
-      bookingId: bookingId,
-      rating: rating,
-      comment: comment,
-    );
-    if (result.bookingId != null && result.bookingId!.isNotEmpty) {
-      myReviews[result.bookingId!] = result;
-    }
-    return result;
-  }
-
-  Future<ReviewModel> updateReview({
-    required String reviewId,
-    required int rating,
-    required String comment,
-  }) async {
-    final result = await (apiService as ApiServiceImpl).updateReview(
-      reviewId: reviewId,
-      rating: rating,
-      comment: comment,
-    );
-    if (result.bookingId != null && result.bookingId!.isNotEmpty) {
-      myReviews[result.bookingId!] = result;
-    }
-    return result;
-  }
-
   Future<BookingDto?> createBooking({
     required List<String> slotIds,
     required String discountCode,
@@ -237,46 +146,5 @@ class BookingController extends GetxController {
     } catch (e) {
       rethrow;
     }
-  }
-
-  Future<void> validateDiscount({
-    required String code,
-    required String? fieldId,
-    required List<String> slotIds,
-    required double totalAmount,
-  }) async {
-    try {
-      final req = ValidateDiscountRequestDto(
-        code: code,
-        fieldId: fieldId,
-        slotIds: slotIds,
-        totalAmount: totalAmount,
-      );
-      final res = await (apiService as ApiServiceImpl).validateDiscount(req);
-      if (res != null) {
-        isDiscountValid.value = res.isValid;
-        discountMessage.value = res.message ?? '';
-        if (res.isValid) {
-          discountCode.value = code;
-          discountAmount.value = res.discountAmount;
-          finalPrice.value = res.finalAmount;
-        } else {
-          discountCode.value = '';
-          discountAmount.value = 0.0;
-          finalPrice.value = totalAmount;
-        }
-      }
-    } catch (e) {
-      isDiscountValid.value = false;
-      discountMessage.value = 'Lỗi kiểm tra mã';
-    }
-  }
-
-  void clearDiscount(double originalTotal) {
-    discountCode.value = '';
-    discountAmount.value = 0.0;
-    finalPrice.value = originalTotal;
-    isDiscountValid.value = false;
-    discountMessage.value = '';
   }
 }

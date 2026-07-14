@@ -1,16 +1,20 @@
 import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/data/remote/schedule/owner_resource_api_service.dart';
 import 'package:exe101/domain/models/booking_model.dart';
+import 'package:exe101/domain/models/review_model.dart';
+import 'package:exe101/domain/repositories/review_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class BookingManagementController extends GetxController {
   final ApiServiceImpl apiService;
   final OwnerResourceApiService ownerResourceService;
+  final ReviewRepository reviewRepository;
 
   BookingManagementController({
     required this.apiService,
     required this.ownerResourceService,
+    required this.reviewRepository,
   });
 
   final bookings = <BookingDto>[].obs;
@@ -113,6 +117,20 @@ class BookingManagementController extends GetxController {
           snackPosition: SnackPosition.TOP);
       return null;
     }
+  }
+
+  Future<ReviewModel?> fetchBookingReview(BookingDto booking) async {
+    final review = await reviewRepository.getBookingReview(booking.id);
+    if (review == null) return null;
+    final item = booking.items?.firstOrNull;
+    return ReviewModel.fromBookingReview(
+      review,
+      bookingId: booking.id,
+      userId: booking.customerId ?? booking.userId,
+      userName: booking.customerName,
+      venueId: item?.venueId ?? '',
+      venueName: item?.venueName,
+    );
   }
 
   int get pendingCount => pendingBookings.length;

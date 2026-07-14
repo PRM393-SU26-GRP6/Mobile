@@ -90,7 +90,7 @@ class VenueFieldCard extends StatelessWidget {
                         child: Text(
                           field.fieldTypeLabel,
                           style: const TextStyle(
-                            fontSize: 11,
+                            fontSize: 12,
                             color: AppColors.accent,
                           ),
                         ),
@@ -102,7 +102,7 @@ class VenueFieldCard extends StatelessWidget {
                         Text(
                           rating!.averageRating.toStringAsFixed(1),
                           style: const TextStyle(
-                            fontSize: 11,
+                            fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
                           ),
@@ -111,7 +111,7 @@ class VenueFieldCard extends StatelessWidget {
                         Text(
                           '(${rating!.totalReviews})',
                           style: const TextStyle(
-                            fontSize: 11,
+                            fontSize: 12,
                             color: AppColors.textSecondary,
                           ),
                         ),

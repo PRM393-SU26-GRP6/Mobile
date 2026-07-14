@@ -50,7 +50,7 @@ class ChatMessageBubble extends StatelessWidget {
               Text(
                 senderRoleLabel!,
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: isMe ? Colors.white70 : AppColors.primary,
                 ),
@@ -71,7 +71,7 @@ class ChatMessageBubble extends StatelessWidget {
                 Text(
                   formatTimeHM(message.sentAt),
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 12,
                     color: isMe ? Colors.white70 : Colors.grey.shade600,
                   ),
                 ),

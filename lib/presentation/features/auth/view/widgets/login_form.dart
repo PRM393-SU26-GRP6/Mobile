@@ -1,126 +1,75 @@
+import 'package:exe101/core/theme/app_theme.dart';
+import 'package:exe101/presentation/features/auth/controller/auth_controller.dart';
+import 'package:exe101/presentation/features/auth/view/widgets/auth_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-class LoginForm extends StatelessWidget {
-  final TextEditingController emailController;
-  final TextEditingController passwordController;
-  final Function(String, String) onSubmit;
-  final bool isLoading;
+class LoginForm extends StatefulWidget {
+  final AuthController controller;
 
-  const LoginForm({
-    super.key,
-    required this.emailController,
-    required this.passwordController,
-    required this.onSubmit,
-    this.isLoading = false,
-  });
+  const LoginForm({super.key, required this.controller});
+
+  @override
+  State<LoginForm> createState() => _LoginFormState();
+}
+
+class _LoginFormState extends State<LoginForm> {
+  bool _obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildTextField(
-          controller: emailController,
+        AuthTextField(
+          controller: widget.controller.emailController,
           label: 'Email',
-          hintText: 'Nhập email của bạn',
-          prefixIcon: Icons.email_outlined,
+          hint: 'Nhập email của bạn',
+          icon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
-          textInputAction: TextInputAction.next,
         ),
         const SizedBox(height: 16),
-        _buildTextField(
-          controller: passwordController,
+        AuthTextField(
+          controller: widget.controller.passwordController,
           label: 'Mật khẩu',
-          hintText: 'Nhập mật khẩu',
-          prefixIcon: Icons.lock_outline,
-          obscureText: true,
-          textInputAction: TextInputAction.done,
-          onSubmitted: (_) =>
-              onSubmit(emailController.text, passwordController.text),
+          hint: 'Nhập mật khẩu',
+          icon: Icons.lock_outline,
+          obscureText: _obscurePassword,
+          onToggleVisibility: () {
+            setState(() => _obscurePassword = !_obscurePassword);
+          },
         ),
         const SizedBox(height: 24),
-        SizedBox(
-          width: double.infinity,
-          height: 52,
-          child: ElevatedButton(
-            onPressed: isLoading
-                ? null
-                : () => onSubmit(emailController.text, passwordController.text),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue.shade600,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+        Obx(
+          () => SizedBox(
+            height: 52,
+            child: ElevatedButton(
+              onPressed: widget.controller.isLoading.value
+                  ? null
+                  : widget.controller.login,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
-              elevation: 0,
-            ),
-            child: isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              child: widget.controller.isLoading.value
+                  ? const SizedBox.square(
+                      dimension: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text(
+                      'Đăng nhập',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  )
-                : const Text(
-                    'Đăng nhập',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required String hintText,
-    required IconData prefixIcon,
-    bool obscureText = false,
-    TextInputType keyboardType = TextInputType.text,
-    TextInputAction textInputAction = TextInputAction.next,
-    Function(String)? onSubmitted,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          obscureText: obscureText,
-          keyboardType: keyboardType,
-          textInputAction: textInputAction,
-          onSubmitted: onSubmitted,
-          enabled: !isLoading,
-          decoration: InputDecoration(
-            hintText: hintText,
-            hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-            prefixIcon: Icon(prefixIcon, color: Colors.grey.shade500),
-            filled: true,
-            fillColor: Colors.grey.shade50,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
             ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.blue.shade600, width: 2),
-            ),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
         ),
       ],

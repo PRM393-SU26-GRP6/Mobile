@@ -1,4 +1,5 @@
 import 'package:exe101/core/theme/app_theme.dart';
+import 'package:exe101/core/constant/app_strings.dart';
 import 'package:exe101/presentation/features/customer/controller/customer_home_controller.dart';
 import 'package:exe101/presentation/features/customer/view/home/home_page.dart';
 import 'package:exe101/presentation/features/customer/view/map/map_page.dart';
@@ -72,35 +73,35 @@ class _CustomerBottomNav extends StatelessWidget {
                   index: 0,
                   icon: Icons.home_outlined,
                   activeIcon: Icons.home,
-                  label: 'Trang chủ'),
+                  label: AppStrings.navigation.home),
               _CustomerNavItem(
                   controller: controller,
                   selectedIndex: selectedIndex,
                   index: 1,
                   icon: Icons.map_outlined,
                   activeIcon: Icons.map,
-                  label: 'Bản đồ'),
+                  label: AppStrings.navigation.map),
               _CustomerNavItem(
                   controller: controller,
                   selectedIndex: selectedIndex,
                   index: 2,
                   icon: Icons.receipt_long_outlined,
                   activeIcon: Icons.receipt_long,
-                  label: 'Đơn hàng'),
+                  label: AppStrings.navigation.bookings),
               _CustomerNavItem(
                   controller: controller,
                   selectedIndex: selectedIndex,
                   index: 3,
                   icon: Icons.chat_bubble_outline,
                   activeIcon: Icons.chat_bubble,
-                  label: 'Tin nhắn'),
+                  label: AppStrings.navigation.messages),
               _CustomerNavItem(
                   controller: controller,
                   selectedIndex: selectedIndex,
                   index: 4,
                   icon: Icons.notifications_outlined,
                   activeIcon: Icons.notifications,
-                  label: 'Thông báo'),
+                  label: AppStrings.navigation.notifications),
             ],
           ),
         ),
@@ -146,7 +147,7 @@ class _CustomerNavItem extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                fontSize: 10,
+                fontSize: 12,
                 color: isActive ? AppColors.accent : AppColors.textSecondary,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
               ),

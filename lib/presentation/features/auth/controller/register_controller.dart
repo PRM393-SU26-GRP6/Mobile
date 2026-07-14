@@ -1,7 +1,7 @@
+import 'package:exe101/core/exception/api_error_handler.dart';
 import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/domain/models/login_response_model.dart';
 import 'package:exe101/domain/repositories/user_repository.dart';
-import 'package:exe101/main.dart';
 import 'package:exe101/presentation/features/auth/controller/auth_flow_resolver.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

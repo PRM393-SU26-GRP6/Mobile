@@ -3,6 +3,7 @@ import 'package:exe101/domain/models/time_slot_model.dart';
 import 'package:exe101/presentation/features/owner/controller/slot_actions_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/slot_management_controller.dart';
 import 'package:exe101/presentation/features/owner/view/shared/owner_dialogs.dart';
+import 'package:exe101/presentation/features/owner/view/slot_management/widgets/slot_option_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -37,7 +38,7 @@ Future<void> showSlotOptionsSheet(
                 children: [
                   Expanded(
                     child: Text(
-                      'Slot ${slot.timeRange}',
+                      'Khung giờ ${slot.timeRange}',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -58,9 +59,9 @@ Future<void> showSlotOptionsSheet(
             ),
             const SizedBox(height: 8),
             const Divider(height: 1),
-            _SheetTile(
+            SlotOptionTile(
               icon: slot.isAvailable ? Icons.lock : Icons.lock_open,
-              label: slot.isAvailable ? 'Khoá slot' : 'Mở khoá slot',
+              label: slot.isAvailable ? 'Khóa khung giờ' : 'Mở khung giờ',
               color: slot.isAvailable ? AppColors.textSecondary : Colors.green,
               onTap: () async {
                 Get.back();
@@ -74,17 +75,17 @@ Future<void> showSlotOptionsSheet(
                 }
               },
             ),
-            _SheetTile(
+            SlotOptionTile(
               icon: Icons.delete_outline,
-              label: 'Xoá slot',
+              label: 'Xóa khung giờ',
               color: Colors.red,
               destructive: true,
               onTap: () async {
                 Get.back();
                 final ok = await showConfirmDialog(
-                  title: 'Xoá slot',
+                  title: 'Xóa khung giờ',
                   message:
-                      'Bạn có chắc muốn xoá slot ${slot.timeRange} ngày ${slot.selectedDate}?',
+                      'Bạn có chắc muốn xóa khung giờ ${slot.timeRange} ngày ${slot.selectedDate}?',
                   confirmText: 'Xoá',
                   confirmColor: Colors.red,
                 );
@@ -102,51 +103,4 @@ Future<void> showSlotOptionsSheet(
       ),
     ),
   );
-}
-
-class _SheetTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-  final bool destructive;
-
-  const _SheetTile({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-    this.destructive = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        child: Row(
-          children: [
-            Icon(icon, color: color, size: 22),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: destructive ? Colors.red : AppColors.textPrimary,
-                  fontWeight: destructive ? FontWeight.w600 : FontWeight.w500,
-                ),
-              ),
-            ),
-            Icon(
-              Icons.chevron_right,
-              color: AppColors.textSecondary.withValues(alpha: 0.6),
-              size: 20,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

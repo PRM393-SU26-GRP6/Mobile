@@ -27,6 +27,7 @@ class VenueImagesPage extends StatelessWidget {
         centerTitle: true,
         actions: [
           IconButton(
+            tooltip: 'Làm mới',
             icon: const Icon(Icons.refresh),
             onPressed: controller.loadImages,
           ),

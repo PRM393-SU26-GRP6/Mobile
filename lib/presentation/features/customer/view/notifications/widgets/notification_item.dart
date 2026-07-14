@@ -98,7 +98,7 @@ class NotificationItem extends StatelessWidget {
                         child: Text(
                           getNotificationLabel(notification.type),
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 12,
                             fontWeight: FontWeight.w500,
                             color: getNotificationColor(notification.type),
                           ),

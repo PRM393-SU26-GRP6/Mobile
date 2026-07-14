@@ -2,6 +2,11 @@ import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/data/remote/schedule/owner_resource_api_service.dart';
 import 'package:exe101/data/remote/owner/owner_stats_api_service.dart';
 import 'package:exe101/domain/repositories/owner_management_repository.dart';
+import 'package:exe101/domain/repositories/user_repository.dart';
+import 'package:exe101/domain/repositories/chat_repository.dart';
+import 'package:exe101/domain/repositories/review_repository.dart';
+import 'package:exe101/presentation/features/customer/controller/chat_actions_controller.dart';
+import 'package:exe101/presentation/features/customer/controller/notification_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/add_field_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/booking_management_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/field_detail_controller.dart';
@@ -23,6 +28,23 @@ class OwnerBinding extends Bindings {
     final apiService = Get.find<ApiServiceImpl>();
     final statsService = Get.find<OwnerStatsApiService>();
     final resourceService = Get.find<OwnerResourceApiService>();
+
+    if (!Get.isRegistered<UserRepository>()) {
+      Get.lazyPut<UserRepository>(
+        () => UserRepository(apiService: apiService),
+        fenix: true,
+      );
+    }
+    if (!Get.isRegistered<ChatRepository>()) {
+      Get.lazyPut<ChatRepository>(
+        () => ChatRepository(
+          authApiService: apiService.authService,
+          chatApiService: apiService.chatService,
+          venueApiService: apiService.venueService,
+        ),
+        fenix: true,
+      );
+    }
 
     if (!Get.isRegistered<OwnerManagementRepository>()) {
       Get.put<OwnerManagementRepository>(
@@ -47,6 +69,7 @@ class OwnerBinding extends Bindings {
       () => BookingManagementController(
         apiService: apiService,
         ownerResourceService: resourceService,
+        reviewRepository: Get.find<ReviewRepository>(),
       ),
     );
     Get.lazyPut<FieldDetailController>(
@@ -80,6 +103,17 @@ class OwnerBinding extends Bindings {
     );
     Get.lazyPut<DiscountManagementController>(
       () => DiscountManagementController(apiService: apiService),
+    );
+    Get.lazyPut<NotificationController>(
+      () => NotificationController(userRepository: Get.find()),
+      fenix: true,
+    );
+    Get.lazyPut<ChatActionsController>(
+      () => ChatActionsController(
+        chatRepository: Get.find(),
+        signalRService: Get.find(),
+      ),
+      fenix: true,
     );
   }
 }

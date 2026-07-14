@@ -1,3 +1,4 @@
+import 'package:exe101/core/config/map_config.dart';
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/domain/models/venue_model.dart';
 import 'package:exe101/presentation/features/customer/controller/venue_map_controller.dart';
@@ -48,8 +49,8 @@ class _MapPageState extends State<MapPage> {
             ),
             children: [
               TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.example.exe101',
+                urlTemplate: MapConfig.tileUrl,
+                userAgentPackageName: MapConfig.userAgentPackageName,
               ),
               MarkerLayer(
                 markers: controller.mappedVenues

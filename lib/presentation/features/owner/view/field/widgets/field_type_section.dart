@@ -111,7 +111,7 @@ class FieldTypeSection extends StatelessWidget {
             Text(
               players,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 12,
                 color: isSelected
                     ? Colors.white.withValues(alpha: 0.8)
                     : AppColors.textSecondary,

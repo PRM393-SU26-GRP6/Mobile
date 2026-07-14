@@ -4,7 +4,6 @@ import 'package:exe101/core/config/env.dart';
 import 'package:exe101/domain/models/booking_model.dart';
 import 'package:exe101/domain/models/time_slot_model.dart';
 import 'package:exe101/domain/models/venue_image_model.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -97,23 +96,16 @@ class OwnerResourceApiService {
   /// Trả về list [VenueImageDto] đã parse, hoặc empty list nếu lỗi.
   Future<List<VenueImageDto>> getVenueImages(String venueId) async {
     final url = '${Env.baseUrl}/api/v1/Venues/$venueId/images';
-    debugPrint('[OwnerResourceApi] getVenueImages: GET $url');
     try {
       final headers = await _authHeaders();
-      debugPrint('[OwnerResourceApi] headers: $headers');
       final response = await dio.get(
         url,
         options: Options(headers: headers),
       );
 
-      debugPrint(
-          '[OwnerResourceApi] response.statusCode: ${response.statusCode}');
-      debugPrint('[OwnerResourceApi] response.data: ${response.data}');
-
       if (response.data == null) return const [];
       return _parseImageList(response.data, venueId);
-    } catch (e, stack) {
-      debugPrint('[OwnerResourceApi] getVenueImages error: $e\n$stack');
+    } catch (_) {
       return const [];
     }
   }
@@ -193,8 +185,6 @@ class OwnerResourceApiService {
       );
     }
 
-    debugPrint(
-        '[OwnerResourceApi] uploadVenueImages: POST /api/v1/owner/venues/$venueId/images');
     final response = await dio.post(
       '${Env.baseUrl}/api/v1/owner/venues/$venueId/images',
       data: formData,
@@ -204,10 +194,6 @@ class OwnerResourceApiService {
         receiveTimeout: const Duration(minutes: 2),
       ),
     );
-
-    debugPrint(
-        '[OwnerResourceApi] upload response.statusCode: ${response.statusCode}');
-    debugPrint('[OwnerResourceApi] upload response.data: ${response.data}');
 
     if (response.statusCode != null && response.statusCode! >= 400) {
       throw DioException(

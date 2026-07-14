@@ -1,8 +1,8 @@
 import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/core/theme/app_theme.dart';
-import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/domain/models/payment_model.dart';
 import 'package:exe101/presentation/features/customer/controller/booking_controller.dart';
+import 'package:exe101/presentation/features/customer/controller/payment_actions_controller.dart';
 import 'package:exe101/presentation/features/customer/view/orders/widgets/cash_payment_confirm_dialog.dart';
 import 'package:exe101/presentation/features/customer/view/orders/widgets/payment_continue_bar.dart';
 import 'package:exe101/presentation/features/customer/view/orders/widgets/payment_method_card.dart';
@@ -230,14 +230,14 @@ class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
     );
 
     try {
-      final apiService = Get.find<ApiServiceImpl>();
+      final paymentController = Get.find<PaymentActionsController>();
       if (isDeposit) {
-        await apiService.createDepositPayment(
+        await paymentController.createDeposit(
           bookingId,
           paymentMethod: _selectedMethod.value,
         );
       } else {
-        await apiService.createFinalPayment(
+        await paymentController.createFinal(
           bookingId,
           paymentMethod: _selectedMethod.value,
         );

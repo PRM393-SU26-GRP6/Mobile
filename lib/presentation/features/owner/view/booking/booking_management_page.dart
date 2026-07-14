@@ -49,6 +49,7 @@ class BookingManagementPage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () => showOwnerLogoutDialog(context),
+            tooltip: 'Đăng xuất',
           ),
         ],
       ),

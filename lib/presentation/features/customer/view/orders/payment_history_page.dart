@@ -18,6 +18,7 @@ class PaymentHistoryPage extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
+          tooltip: 'Quay lại',
           icon: const Icon(Icons.arrow_back_ios,
               color: AppColors.textPrimary, size: 20),
           onPressed: () => Get.back(),

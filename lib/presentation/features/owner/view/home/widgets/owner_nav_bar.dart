@@ -1,4 +1,5 @@
 import 'package:exe101/core/theme/app_theme.dart';
+import 'package:exe101/core/constant/app_strings.dart';
 import 'package:flutter/material.dart';
 
 class OwnerNavBar extends StatelessWidget {
@@ -53,7 +54,7 @@ class OwnerNavBar extends StatelessWidget {
               Expanded(
                 child: _NavButton(
                   icon: Icons.calendar_today,
-                  label: 'Đặt sân',
+                  label: AppStrings.navigation.bookings,
                   isSelected: selectedIndex == 1,
                   badge: pendingCount,
                   onTap: onBookingsTap,
@@ -62,7 +63,7 @@ class OwnerNavBar extends StatelessWidget {
               Expanded(
                 child: _NavButton(
                   icon: Icons.bar_chart,
-                  label: 'Doanh thu',
+                  label: AppStrings.navigation.revenue,
                   isSelected: selectedIndex == 2,
                   onTap: onRevenueTap,
                 ),
@@ -70,7 +71,7 @@ class OwnerNavBar extends StatelessWidget {
               Expanded(
                 child: _NavButton(
                   icon: Icons.chat_bubble_outline,
-                  label: 'Tin nhắn',
+                  label: AppStrings.navigation.messages,
                   isSelected: selectedIndex == 3,
                   onTap: onMessagesTap,
                 ),
@@ -78,7 +79,7 @@ class OwnerNavBar extends StatelessWidget {
               Expanded(
                 child: _NavButton(
                   icon: Icons.notifications_outlined,
-                  label: 'Thông báo',
+                  label: AppStrings.navigation.notifications,
                   isSelected: selectedIndex == 4,
                   badge: notificationCount,
                   onTap: onNotificationsTap,
@@ -139,7 +140,7 @@ class _NavButton extends StatelessWidget {
                       child: Text(
                         badge > 9 ? '9+' : '$badge',
                         style: const TextStyle(
-                          fontSize: 10,
+                          fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
@@ -154,7 +155,7 @@ class _NavButton extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 10,
+                fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 color: isSelected ? AppColors.primary : AppColors.textSecondary,
               ),

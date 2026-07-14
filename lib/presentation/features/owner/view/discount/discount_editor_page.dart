@@ -137,6 +137,7 @@ class _DiscountEditorPageState extends State<DiscountEditorPage> {
         title: Text(isEdit ? 'Sửa Khuyến Mãi' : 'Tạo Khuyến Mãi'),
         actions: [
           IconButton(
+            tooltip: 'Lưu mã giảm giá',
             icon: const Icon(Icons.check),
             onPressed: _onSave,
           )

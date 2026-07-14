@@ -1,8 +1,9 @@
 import 'package:exe101/core/routing/app_pages.dart';
+import 'package:exe101/core/constant/app_strings.dart';
+import 'package:exe101/core/theme/app_dimensions.dart';
 import 'package:exe101/core/theme/app_theme.dart';
-import 'package:exe101/data/remote/api_service.dart';
+import 'package:exe101/core/widgets/responsive_content.dart';
 import 'package:exe101/domain/models/venue_model.dart';
-import 'package:exe101/domain/repositories/user_repository.dart';
 import 'package:exe101/presentation/features/customer/controller/notification_controller.dart';
 import 'package:exe101/presentation/features/customer/view/messages/messages_page.dart';
 import 'package:exe101/presentation/features/customer/view/notifications/notifications_page.dart';
@@ -31,27 +32,30 @@ class _OwnerHomePageState extends State<OwnerHomePage> {
   Widget build(BuildContext context) {
     final ownerController = Get.find<OwnerHomeController>();
     final bookingController = Get.find<BookingManagementController>();
-    final notificationController = _getNotificationController();
+    final notificationController = Get.find<NotificationController>();
 
     return Scaffold(
       backgroundColor: AppColors.secondary,
       appBar: _selectedIndex <= 2 ? _buildAppBar() : null,
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: [
-          OwnerFieldsTab(
-            controller: ownerController,
-            onCreateVenue: _openCreateVenue,
-            onCreateField: _openCreateField,
-            onOpenField: _openFieldDetail,
-            onEditField: _showEditFieldDialog,
-            onEditVenue: _openVenueEdit,
-          ),
-          const BookingManagementPage(embedded: true),
-          const RevenuePage(embedded: true),
-          const MessagesPage(),
-          const NotificationsPage(),
-        ],
+      body: ResponsiveContent(
+        maxWidth: AppContentWidth.dashboard,
+        child: IndexedStack(
+          index: _selectedIndex,
+          children: [
+            OwnerFieldsTab(
+              controller: ownerController,
+              onCreateVenue: _openCreateVenue,
+              onCreateField: _openCreateField,
+              onOpenField: _openFieldDetail,
+              onEditField: _showEditFieldDialog,
+              onEditVenue: _openVenueEdit,
+            ),
+            const BookingManagementPage(embedded: true),
+            const RevenuePage(embedded: true),
+            const MessagesPage(),
+            const NotificationsPage(),
+          ],
+        ),
       ),
       bottomNavigationBar: Obx(
         () => OwnerNavBar(
@@ -81,14 +85,17 @@ class _OwnerHomePageState extends State<OwnerHomePage> {
       actions: [
         if (_selectedIndex == 0)
           IconButton(
+            tooltip: 'Quản lý mã giảm giá',
             icon: const Icon(Icons.discount),
             onPressed: () => Get.toNamed(AppPages.ownerDiscountManagement),
           ),
         IconButton(
+          tooltip: AppStrings.common.refresh,
           icon: const Icon(Icons.refresh),
           onPressed: _refreshCurrentTab,
         ),
         IconButton(
+          tooltip: AppStrings.common.logout,
           icon: const Icon(Icons.logout),
           onPressed: () => showOwnerLogoutDialog(context),
         ),
@@ -99,11 +106,11 @@ class _OwnerHomePageState extends State<OwnerHomePage> {
   String _titleForTab() {
     switch (_selectedIndex) {
       case 1:
-        return 'Duyệt Đặt Sân';
+        return AppStrings.booking.approve;
       case 2:
-        return 'Doanh thu';
+        return AppStrings.navigation.revenue;
       default:
-        return 'Quản Lý Sân';
+        return AppStrings.venue.manageVenues;
     }
   }
 
@@ -120,20 +127,6 @@ class _OwnerHomePageState extends State<OwnerHomePage> {
     } else if (_selectedIndex == 2) {
       Get.find<RevenueController>().refresh();
     }
-  }
-
-  NotificationController _getNotificationController() {
-    if (Get.isRegistered<NotificationController>()) {
-      return Get.find<NotificationController>();
-    }
-    if (!Get.isRegistered<UserRepository>()) {
-      Get.put<UserRepository>(
-        UserRepository(apiService: Get.find<ApiServiceImpl>()),
-      );
-    }
-    return Get.put(
-      NotificationController(userRepository: Get.find<UserRepository>()),
-    );
   }
 
   void _openCreateField(String venueId, String venueName) {

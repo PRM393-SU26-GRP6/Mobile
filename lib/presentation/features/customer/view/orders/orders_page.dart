@@ -64,6 +64,7 @@ class _OrdersPageState extends State<OrdersPage> {
               Positioned(
                 right: 8,
                 child: IconButton(
+                  tooltip: 'Lịch sử thanh toán',
                   icon: const Icon(Icons.history, color: AppColors.primary),
                   onPressed: () {
                     Get.toNamed(AppPages.paymentHistory);

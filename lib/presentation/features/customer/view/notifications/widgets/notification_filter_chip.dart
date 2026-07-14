@@ -50,7 +50,7 @@ class NotificationFilterChip extends StatelessWidget {
                 child: Text(
                   '●',
                   style: TextStyle(
-                    fontSize: 8,
+                    fontSize: 12,
                     color: isSelected ? AppColors.primary : Colors.white,
                   ),
                 ),

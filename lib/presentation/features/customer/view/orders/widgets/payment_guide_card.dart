@@ -74,7 +74,7 @@ class _GuideStep extends StatelessWidget {
               child: Text(
                 number,
                 style: const TextStyle(
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: FontWeight.w800,
                   color: AppColors.primary,
                 ),

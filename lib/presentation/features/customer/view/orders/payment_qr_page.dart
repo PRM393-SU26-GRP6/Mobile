@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:exe101/core/theme/app_theme.dart';
-import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/domain/models/payment_model.dart';
+import 'package:exe101/presentation/features/customer/controller/payment_actions_controller.dart';
 import 'package:exe101/presentation/features/customer/shared/customer_constants.dart';
 import 'package:exe101/presentation/features/customer/view/orders/payment_flow_resolver.dart';
 import 'package:exe101/presentation/features/customer/view/orders/widgets/payment_qr_content.dart';
@@ -53,17 +53,17 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
 
   Future<void> _createPayment() async {
     try {
-      final apiService = Get.find<ApiServiceImpl>();
+      final paymentController = Get.find<PaymentActionsController>();
 
       if (isSePay) {
-        final payment = await _findReusableCurrentPayment(apiService);
+        final payment = await _findReusableCurrentPayment(paymentController);
         if (payment != null) {
           await _showPayment(payment);
           return;
         }
       }
 
-      final payment = await _createPaymentByType(apiService);
+      final payment = await _createPaymentByType(paymentController);
 
       if (payment.id.isEmpty) {
         setState(() {
@@ -118,23 +118,25 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
     }
   }
 
-  Future<PaymentModel> _createPaymentByType(ApiServiceImpl apiService) {
+  Future<PaymentModel> _createPaymentByType(
+    PaymentActionsController paymentController,
+  ) {
     if (isDeposit) {
-      return apiService.createDepositPayment(
+      return paymentController.createDeposit(
         bookingId,
         paymentMethod: paymentMethod.value,
       );
     }
-    return apiService.createFinalPayment(
+    return paymentController.createFinal(
       bookingId,
       paymentMethod: paymentMethod.value,
     );
   }
 
   Future<PaymentModel?> _findReusableCurrentPayment(
-    ApiServiceImpl apiService,
+    PaymentActionsController paymentController,
   ) async {
-    final payments = await apiService.getPaymentsByBooking(bookingId);
+    final payments = await paymentController.getByBooking(bookingId);
     return PaymentFlowResolver.findReusablePayment(
       payments,
       paymentType: paymentType,
@@ -142,12 +144,12 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
   }
 
   Future<void> _showPayment(PaymentModel payment) async {
-    final apiService = Get.find<ApiServiceImpl>();
+    final paymentController = Get.find<PaymentActionsController>();
 
     _payment = payment;
 
     if (isSePay) {
-      final qrInfo = await apiService.getSePayQRInfo(payment.id);
+      final qrInfo = await paymentController.getQrInfo(payment.id);
       if (!mounted) return;
       setState(() {
         _sePayQRInfo = qrInfo;
@@ -168,8 +170,9 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
 
   Future<void> _reuseExistingPayment() async {
     try {
-      final apiService = Get.find<ApiServiceImpl>();
-      final payment = await _findReusableCurrentPayment(apiService);
+      final payment = await _findReusableCurrentPayment(
+        Get.find<PaymentActionsController>(),
+      );
 
       if (payment == null) {
         if (!mounted) return;
@@ -202,14 +205,17 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
       }
 
       try {
-        final apiService = Get.find<ApiServiceImpl>();
-        final updatedPayment = await apiService.getPaymentById(_payment!.id);
+        final updatedPayment =
+            await Get.find<PaymentActionsController>().getById(_payment!.id);
 
         if (updatedPayment != null && updatedPayment.isSuccess && mounted) {
           timer.cancel();
           await showPaymentSuccessDialog();
         }
-      } catch (_) {}
+      } catch (_) {
+        // Polling is best-effort. A transient failure is retried on the next
+        // interval while the primary payment state remains visible.
+      }
     });
   }
 
@@ -266,8 +272,8 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
     if (_payment == null) return;
 
     try {
-      final apiService = Get.find<ApiServiceImpl>();
-      final updatedPayment = await apiService.getPaymentById(_payment!.id);
+      final updatedPayment =
+          await Get.find<PaymentActionsController>().getById(_payment!.id);
 
       if (updatedPayment != null && updatedPayment.isSuccess) {
         _pollingTimer?.cancel();

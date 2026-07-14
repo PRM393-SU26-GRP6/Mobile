@@ -37,7 +37,7 @@ class BookingPaymentButtons extends StatelessWidget {
       buttons.add(
         Expanded(
           child: _PaymentActionButton(
-            label: 'Thanh toán còn lại',
+            label: 'Thanh toán phần còn lại',
             icon: Icons.payments_outlined,
             onTap: onRemainingTap,
             backgroundColor: AppColors.primary,

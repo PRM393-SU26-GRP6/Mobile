@@ -4,9 +4,13 @@ import 'package:exe101/presentation/features/auth/view/otp_verification_page.dar
 import 'package:exe101/presentation/features/auth/view/register_page.dart';
 import 'package:exe101/presentation/features/auth/view/role_selection_page.dart';
 import 'package:exe101/presentation/features/customer/binding/customer_binding.dart';
+import 'package:exe101/presentation/features/customer/binding/chat_binding.dart';
 import 'package:exe101/presentation/features/customer/binding/notification_binding.dart';
+import 'package:exe101/presentation/features/customer/binding/payment_binding.dart';
+import 'package:exe101/domain/models/chat_model.dart';
 import 'package:exe101/presentation/features/customer/view/customer_home_page.dart';
 import 'package:exe101/presentation/features/customer/view/home/venue_detail_page.dart';
+import 'package:exe101/presentation/features/customer/view/messages/chat_detail_page.dart';
 import 'package:exe101/presentation/features/customer/view/notifications/notifications_page.dart';
 import 'package:exe101/presentation/features/customer/view/orders/payment_history_page.dart';
 import 'package:exe101/presentation/features/customer/view/orders/payment_qr_page.dart';
@@ -56,6 +60,7 @@ class AppPages {
   static const String paymentHistory = '/payment-history';
   static const String ownerDiscountManagement = '/owner/discount-management';
   static const String ownerDiscountEditor = '/owner/discount-editor';
+  static const String chatDetail = '/chat-detail';
 
   // GetX pages configuration
   static final List<GetPage> pages = [
@@ -126,10 +131,12 @@ class AppPages {
     GetPage(
       name: paymentQR,
       page: () => const PaymentQRPage(),
+      binding: PaymentBinding(),
     ),
     GetPage(
       name: selectPaymentMethod,
       page: () => const SelectPaymentMethodPage(),
+      binding: PaymentBinding(),
     ),
     GetPage(
       name: userProfile,
@@ -175,6 +182,11 @@ class AppPages {
       name: ownerDiscountEditor,
       page: () => const DiscountEditorPage(),
       binding: OwnerBinding(),
+    ),
+    GetPage(
+      name: chatDetail,
+      page: () => ChatDetailPage(chatRoom: Get.arguments as ChatRoomModel),
+      binding: ChatBinding(),
     ),
   ];
 

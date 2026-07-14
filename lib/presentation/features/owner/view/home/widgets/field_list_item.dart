@@ -102,7 +102,7 @@ class _FieldSummary extends StatelessWidget {
         Chip(
           label: Text(typeLabel),
           labelStyle: const TextStyle(
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: FontWeight.w600,
             color: AppColors.primary,
           ),
@@ -147,7 +147,7 @@ class _FieldActions extends StatelessWidget {
           child: Text(
             isActive ? 'Hoạt động' : 'Tắt',
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: FontWeight.w500,
               color: isActive ? Colors.green.shade700 : Colors.red.shade700,
             ),

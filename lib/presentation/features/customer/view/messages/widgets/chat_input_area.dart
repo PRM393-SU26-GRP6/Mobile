@@ -58,6 +58,7 @@ class ChatInputArea extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: IconButton(
+                tooltip: 'Gửi tin nhắn',
                 onPressed: isSending ? null : onSend,
                 icon: isSending
                     ? const SizedBox(

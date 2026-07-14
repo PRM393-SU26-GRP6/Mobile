@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
+import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/core/theme/app_theme.dart';
-import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/domain/models/chat_model.dart';
-import 'package:exe101/presentation/features/customer/view/messages/chat_detail_page.dart';
+import 'package:exe101/presentation/features/customer/controller/chat_actions_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -34,16 +34,18 @@ class _MessagesPageState extends State<MessagesPage> {
 
   Future<void> _loadCurrentUser() async {
     try {
-      final apiService = Get.find<ApiServiceImpl>();
-      final userId = await apiService.getUserId();
-      final userRole = await apiService.getUserRole();
+      final controller = Get.find<ChatActionsController>();
+      final userId = await controller.getCurrentUserId();
+      final userRole = await controller.getCurrentUserRole();
       if (mounted && userId != null) {
         setState(() {
           _currentUserId = userId;
           _currentUserRole = userRole;
         });
       }
-    } catch (_) {}
+    } catch (_) {
+      if (mounted) setState(() => _error = 'Không thể đọc phiên người dùng.');
+    }
   }
 
   Future<void> _loadChatRooms() async {
@@ -53,8 +55,7 @@ class _MessagesPageState extends State<MessagesPage> {
     });
 
     try {
-      final apiService = Get.find<ApiServiceImpl>();
-      final rooms = await apiService.getChatRooms();
+      final rooms = await Get.find<ChatActionsController>().getRooms();
 
       if (mounted) {
         setState(() {
@@ -119,6 +120,7 @@ class _MessagesPageState extends State<MessagesPage> {
           children: [
             if (widget.showBackButton)
               IconButton(
+                tooltip: 'Quay lại',
                 onPressed: Get.back,
                 icon: const Icon(
                   Icons.arrow_back,
@@ -271,10 +273,7 @@ class _MessagesPageState extends State<MessagesPage> {
         ],
       ),
       onTap: () {
-        Get.to(
-          () => ChatDetailPage(chatRoom: room),
-          transition: Transition.rightToLeft,
-        );
+        Get.toNamed(AppPages.chatDetail, arguments: room);
       },
     );
   }

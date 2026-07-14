@@ -1,159 +1,117 @@
+import 'package:exe101/core/theme/app_theme.dart';
+import 'package:exe101/presentation/features/auth/controller/register_controller.dart';
+import 'package:exe101/presentation/features/auth/view/widgets/auth_text_field.dart';
+import 'package:exe101/presentation/features/auth/view/widgets/password_requirements.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-class RegisterForm extends StatelessWidget {
-  final TextEditingController fullNameController;
-  final TextEditingController emailController;
-  final TextEditingController phoneController;
-  final TextEditingController passwordController;
-  final TextEditingController confirmPasswordController;
-  final Function(String, String) onSubmit;
-  final bool isLoading;
+class RegisterForm extends StatefulWidget {
+  final RegisterController controller;
 
-  const RegisterForm({
-    super.key,
-    required this.fullNameController,
-    required this.emailController,
-    required this.phoneController,
-    required this.passwordController,
-    required this.confirmPasswordController,
-    required this.onSubmit,
-    this.isLoading = false,
-  });
+  const RegisterForm({super.key, required this.controller});
+
+  @override
+  State<RegisterForm> createState() => _RegisterFormState();
+}
+
+class _RegisterFormState extends State<RegisterForm> {
+  bool _obscurePassword = true;
+  bool _obscureConfirmation = true;
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildTextField(
-          controller: fullNameController,
+        AuthTextField(
+          controller: widget.controller.fullNameController,
           label: 'Họ và tên',
-          hintText: 'Nhập họ và tên',
-          prefixIcon: Icons.person_outline,
-          textInputAction: TextInputAction.next,
+          hint: 'Nhập họ và tên',
+          icon: Icons.person_outline,
         ),
-        const SizedBox(height: 16),
-        _buildTextField(
-          controller: emailController,
+        const SizedBox(height: 14),
+        AuthTextField(
+          controller: widget.controller.emailController,
           label: 'Email',
-          hintText: 'Nhập email của bạn',
-          prefixIcon: Icons.email_outlined,
+          hint: 'Nhập email',
+          icon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
-          textInputAction: TextInputAction.next,
         ),
-        const SizedBox(height: 16),
-        _buildTextField(
-          controller: phoneController,
+        const SizedBox(height: 14),
+        AuthTextField(
+          controller: widget.controller.phoneController,
           label: 'Số điện thoại',
-          hintText: 'Nhập số điện thoại',
-          prefixIcon: Icons.phone_outlined,
+          hint: 'Nhập số điện thoại',
+          icon: Icons.phone_outlined,
           keyboardType: TextInputType.phone,
-          textInputAction: TextInputAction.next,
         ),
-        const SizedBox(height: 16),
-        _buildTextField(
-          controller: passwordController,
-          label: 'Mật khẩu',
-          hintText: 'Nhập mật khẩu',
-          prefixIcon: Icons.lock_outline,
-          obscureText: true,
-          textInputAction: TextInputAction.next,
+        const SizedBox(height: 14),
+        Obx(
+          () => AuthTextField(
+            controller: widget.controller.passwordController,
+            label: 'Mật khẩu',
+            hint: 'Nhập mật khẩu',
+            icon: Icons.lock_outline,
+            obscureText: _obscurePassword,
+            errorText: widget.controller.passwordError.value,
+            onToggleVisibility: () {
+              setState(() => _obscurePassword = !_obscurePassword);
+            },
+          ),
         ),
-        const SizedBox(height: 16),
-        _buildTextField(
-          controller: confirmPasswordController,
-          label: 'Xác nhận mật khẩu',
-          hintText: 'Nhập lại mật khẩu',
-          prefixIcon: Icons.lock_outline,
-          obscureText: true,
-          textInputAction: TextInputAction.done,
-          onSubmitted: (_) =>
-              onSubmit(emailController.text, passwordController.text),
+        const SizedBox(height: 14),
+        Obx(
+          () => AuthTextField(
+            controller: widget.controller.confirmPasswordController,
+            label: 'Xác nhận mật khẩu',
+            hint: 'Nhập lại mật khẩu',
+            icon: Icons.lock_outline,
+            obscureText: _obscureConfirmation,
+            errorText: widget.controller.confirmPasswordError.value,
+            onToggleVisibility: () {
+              setState(() => _obscureConfirmation = !_obscureConfirmation);
+            },
+          ),
         ),
+        const SizedBox(height: 14),
+        const PasswordRequirements(),
         const SizedBox(height: 24),
-        SizedBox(
-          width: double.infinity,
-          height: 52,
-          child: ElevatedButton(
-            onPressed: isLoading
-                ? null
-                : () => onSubmit(emailController.text, passwordController.text),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue.shade600,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+        Obx(
+          () => SizedBox(
+            height: 52,
+            child: ElevatedButton(
+              onPressed: widget.controller.isLoading.value
+                  ? null
+                  : widget.controller.submitRegister,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
-              elevation: 0,
-            ),
-            child: isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              child: widget.controller.isLoading.value
+                  ? const SizedBox.square(
+                      dimension: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text(
+                      'Đăng ký',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  )
-                : const Text(
-                    'Đăng ký',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
+            ),
           ),
         ),
-      ],
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required String hintText,
-    required IconData prefixIcon,
-    bool obscureText = false,
-    TextInputType keyboardType = TextInputType.text,
-    TextInputAction textInputAction = TextInputAction.next,
-    Function(String)? onSubmitted,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          obscureText: obscureText,
-          keyboardType: keyboardType,
-          textInputAction: textInputAction,
-          onSubmitted: onSubmitted,
-          enabled: !isLoading,
-          decoration: InputDecoration(
-            hintText: hintText,
-            hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-            prefixIcon: Icon(prefixIcon, color: Colors.grey.shade500),
-            filled: true,
-            fillColor: Colors.grey.shade50,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.blue.shade600, width: 2),
-            ),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          ),
+        const SizedBox(height: 12),
+        TextButton(
+          onPressed: Get.back,
+          child: const Text('Đã có tài khoản? Đăng nhập'),
         ),
       ],
     );

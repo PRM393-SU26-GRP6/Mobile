@@ -47,7 +47,7 @@ class _BarChartPainter extends CustomPainter {
       ..color = AppColors.inputBorder
       ..strokeWidth = 1;
     final textStyle = const TextStyle(
-      fontSize: 10,
+      fontSize: 12,
       color: AppColors.textSecondary,
     );
 

@@ -1,5 +1,4 @@
 import 'package:exe101/core/theme/app_theme.dart';
-import 'package:exe101/domain/repositories/user_repository.dart';
 import 'package:exe101/presentation/features/auth/controller/otp_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,9 +9,6 @@ class OtpVerificationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<OtpController>()) {
-      Get.put(OtpController(userRepository: Get.find<UserRepository>()));
-    }
     final controller = Get.find<OtpController>();
     controller.applyRouteArguments(Get.arguments);
 
@@ -53,6 +49,7 @@ class OtpVerificationPage extends StatelessWidget {
     return Align(
       alignment: Alignment.centerLeft,
       child: IconButton(
+        tooltip: 'Quay lại',
         icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
         onPressed: () => Get.back(),
       ),

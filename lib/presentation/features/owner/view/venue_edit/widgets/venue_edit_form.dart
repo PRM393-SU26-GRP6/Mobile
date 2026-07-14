@@ -22,12 +22,12 @@ class VenueEditForm extends StatelessWidget {
             children: [
               _VenueInput(
                 controller: controller.nameController,
-                label: 'Ten venue',
+                label: 'Tên venue',
                 icon: Icons.stadium_outlined,
               ),
               _VenueInput(
                 controller: controller.addressController,
-                label: 'Dia chi',
+                label: 'Địa chỉ',
                 icon: Icons.location_on_outlined,
                 maxLines: 2,
               ),
@@ -39,18 +39,18 @@ class VenueEditForm extends StatelessWidget {
               const SizedBox(height: 16),
               _VenueInput(
                 controller: controller.phoneController,
-                label: 'So dien thoai',
+                label: 'Số điện thoại',
                 icon: Icons.phone_outlined,
                 keyboardType: TextInputType.phone,
               ),
               _VenueInput(
                 controller: controller.openingHoursController,
-                label: 'Gio mo cua',
+                label: 'Giờ mở cửa',
                 icon: Icons.schedule_outlined,
               ),
               _VenueInput(
                 controller: controller.descriptionController,
-                label: 'Mo ta',
+                label: 'Mô tả',
                 icon: Icons.description_outlined,
                 maxLines: 4,
               ),
@@ -77,7 +77,7 @@ class VenueEditForm extends StatelessWidget {
                           ),
                         )
                       : const Icon(Icons.save_outlined),
-                  label: const Text('Luu thay doi'),
+                  label: const Text('Lưu thay đổi'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,

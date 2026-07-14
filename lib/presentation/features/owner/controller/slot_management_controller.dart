@@ -49,7 +49,7 @@ class SlotManagementController extends GetxController {
         await _loadData();
       }
     } catch (_) {
-      errorMessage.value = 'Loi khi tai thong tin san';
+      errorMessage.value = 'Lỗi khi tải thông tin sân';
     }
   }
 
@@ -60,7 +60,7 @@ class SlotManagementController extends GetxController {
     try {
       slots.assignAll(await apiService.getSlotsByField(_fieldId!));
     } catch (_) {
-      errorMessage.value = 'Loi khi tai danh sach slot';
+      errorMessage.value = 'Lỗi khi tải danh sách slot';
     } finally {
       isLoading.value = false;
     }
@@ -69,7 +69,7 @@ class SlotManagementController extends GetxController {
   Future<void> createSlots() async {
     if (_fieldId == null) return;
     if (fromDate.value == null || toDate.value == null) {
-      Get.snackbar('Loi', 'Vui long chon ngay bat dau va ket thuc',
+      Get.snackbar('Lỗi', 'Vui lòng chọn ngày bắt đầu và kết thúc',
           snackPosition: SnackPosition.TOP);
       return;
     }
@@ -88,14 +88,14 @@ class SlotManagementController extends GetxController {
           price: slotPrice.value,
         ),
       );
-      Get.snackbar('Thanh cong', 'Da tao slots thanh cong',
+      Get.snackbar('Thành công', 'Đã tạo slots thành công',
           snackPosition: SnackPosition.TOP);
       await loadSlots();
       fromDate.value = null;
       toDate.value = null;
     } catch (_) {
-      errorMessage.value = 'Khong the tao slots';
-      Get.snackbar('Loi', errorMessage.value, snackPosition: SnackPosition.TOP);
+      errorMessage.value = 'Không thể tạo slots';
+      Get.snackbar('Lỗi', errorMessage.value, snackPosition: SnackPosition.TOP);
     } finally {
       isCreatingSlots.value = false;
     }

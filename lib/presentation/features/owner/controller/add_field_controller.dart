@@ -18,14 +18,14 @@ class AddFieldController extends GetxController {
   final errorMessage = ''.obs;
   final createdFields = <FieldModel>[].obs;
   final List<Map<String, String>> amenityOptions = const [
-    {'id': 'parking', 'name': 'Bai do xe'},
-    {'id': 'wifi', 'name': 'Wifi mien phi'},
-    {'id': 'toilet', 'name': 'Nha ve sinh'},
-    {'id': 'changing_room', 'name': 'Phong thay do'},
-    {'id': 'canteen', 'name': 'Cang tin'},
-    {'id': 'lighting', 'name': 'Den chieu sang'},
-    {'id': 'grass', 'name': 'Co nhan tao'},
-    {'id': 'air_conditioner', 'name': 'Dieu hoa'},
+    {'id': 'parking', 'name': 'Bãi đỗ xe'},
+    {'id': 'wifi', 'name': 'WiFi miễn phí'},
+    {'id': 'toilet', 'name': 'Nhà vệ sinh'},
+    {'id': 'changing_room', 'name': 'Phòng thay đồ'},
+    {'id': 'canteen', 'name': 'Căng tin'},
+    {'id': 'lighting', 'name': 'Đèn chiếu sáng'},
+    {'id': 'grass', 'name': 'Cỏ nhân tạo'},
+    {'id': 'air_conditioner', 'name': 'Điều hòa'},
   ];
 
   @override
@@ -56,10 +56,10 @@ class AddFieldController extends GetxController {
 
   String? validateForm() {
     if (nameController.text.trim().isEmpty) {
-      return 'Vui long nhap ten san';
+      return 'Vui lòng nhập tên sân';
     }
     if (venueId.value.isEmpty) {
-      return 'Khong tim thay thong tin san bong';
+      return 'Không tìm thấy thông tin sân bóng';
     }
     return null;
   }
@@ -91,11 +91,11 @@ class AddFieldController extends GetxController {
         return field;
       }
 
-      errorMessage.value = 'Du lieu tra ve khong hop le';
+      errorMessage.value = 'Dữ liệu trả về không hợp lệ';
       return null;
     } catch (e, stackTrace) {
       debugPrint('Error creating field: $e\n$stackTrace');
-      errorMessage.value = 'Loi: ${e.toString()}';
+      errorMessage.value = 'Lỗi: ${e.toString()}';
       return null;
     } finally {
       isLoading.value = false;

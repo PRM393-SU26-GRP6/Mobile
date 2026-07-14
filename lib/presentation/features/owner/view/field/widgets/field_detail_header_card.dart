@@ -38,7 +38,7 @@ class FieldDetailHeaderCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  field.fieldName ?? 'San khong ten',
+                  field.fieldName ?? 'Sân không tên',
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -59,7 +59,7 @@ class FieldDetailHeaderCard extends StatelessWidget {
                           ? Icons.check_circle_outline
                           : Icons.pause_circle_outline,
                       label:
-                          field.isActive == true ? 'Dang hoat dong' : 'Tam tat',
+                          field.isActive == true ? 'Đang hoạt động' : 'Tạm tắt',
                     ),
                   ],
                 ),
@@ -99,12 +99,12 @@ class FieldDetailStatusCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Trang thai hoat dong',
+                  'Trạng thái hoạt động',
                   style:
                       TextStyle(fontSize: 13, color: AppColors.textSecondary),
                 ),
                 Text(
-                  isActive ? 'Dang hoat dong' : 'Tam tat',
+                  isActive ? 'Đang hoạt động' : 'Tạm tắt',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

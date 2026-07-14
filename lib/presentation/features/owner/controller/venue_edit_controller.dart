@@ -36,8 +36,8 @@ class VenueEditController extends GetxController {
   }
 
   String? validateForm() {
-    if (nameController.text.trim().isEmpty) return 'Vui long nhap ten venue.';
-    if (addressController.text.trim().isEmpty) return 'Vui long nhap dia chi.';
+    if (nameController.text.trim().isEmpty) return 'Vui lòng nhập tên venue.';
+    if (addressController.text.trim().isEmpty) return 'Vui lòng nhập địa chỉ.';
     return null;
   }
 
@@ -62,7 +62,7 @@ class VenueEditController extends GetxController {
         longitude: longitude.value,
       );
     } catch (_) {
-      errorMessage.value = 'Khong the cap nhat venue. Vui long thu lai.';
+      errorMessage.value = 'Không thể cập nhật venue. Vui lòng thử lại.';
       return null;
     } finally {
       isSaving.value = false;

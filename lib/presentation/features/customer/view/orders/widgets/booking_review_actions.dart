@@ -20,13 +20,13 @@ class BookingReviewActions extends StatelessWidget {
       children: [
         _ReviewActionButton(
           icon: Icons.rate_review_outlined,
-          label: 'Sua feedback',
+          label: 'Sửa feedback',
           color: AppColors.accent,
           onTap: onEditTap,
         ),
         _ReviewActionButton(
           icon: Icons.delete_outline,
-          label: 'Xoa feedback',
+          label: 'Xóa feedback',
           color: Colors.red.shade600,
           onTap: onDeleteTap,
         ),

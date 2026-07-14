@@ -33,9 +33,9 @@ void main() {
     expect((image.image as NetworkImage).url, qrInfo.qrUrl);
     expect(find.byKey(const Key('sepay-network-qr')), findsOneWidget);
     expect(find.byType(QrImageView), findsNothing);
-    expect(find.text('NgÃ¢n hÃ ng'), findsNothing);
-    expect(find.text('Sá»‘ tÃ i khoáº£n'), findsNothing);
-    expect(find.text('Chá»§ tÃ i khoáº£n'), findsNothing);
+    expect(find.text('Ngân hàng'), findsNothing);
+    expect(find.text('Số tài khoản'), findsNothing);
+    expect(find.text('Chủ tài khoản'), findsNothing);
     expect(find.text('84519828888'), findsNothing);
   });
 }

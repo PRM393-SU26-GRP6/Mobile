@@ -36,7 +36,7 @@ class FieldDetailErrorState extends StatelessWidget {
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('Thu lai'),
+              child: const Text('Thử lại'),
             ),
           ],
         ),

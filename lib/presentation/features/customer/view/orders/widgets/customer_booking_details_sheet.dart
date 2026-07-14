@@ -87,7 +87,7 @@ class _BookingDetailsContent extends StatelessWidget {
             children: [
               const Expanded(
                 child: Text(
-                  'Chi tiet don dat san',
+                  'Chi tiết đơn đặt sân',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
@@ -99,21 +99,21 @@ class _BookingDetailsContent extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 18),
-          DetailRow('Ma don', _shortId(booking.id)),
-          DetailRow('San', firstItem?.venueName ?? 'San bong'),
-          DetailRow('Mat san', firstItem?.fieldName ?? 'San'),
-          DetailRow('Thoi gian', _timeRange(booking)),
-          DetailRow('So khung', '${booking.items?.length ?? 0}'),
-          DetailRow('Tong tien', _money(booking.totalPrice)),
-          DetailRow('Tien coc', _money(booking.depositAmount)),
-          DetailRow('Da thanh toan coc', _money(booking.paidDepositAmount)),
+          DetailRow('Mã đơn', _shortId(booking.id)),
+          DetailRow('Sân', firstItem?.venueName ?? 'Sân bóng'),
+          DetailRow('Mặt sân', firstItem?.fieldName ?? 'Sân'),
+          DetailRow('Thời gian', _timeRange(booking)),
+          DetailRow('Số khung', '${booking.items?.length ?? 0}'),
+          DetailRow('Tổng tiền', _money(booking.totalPrice)),
+          DetailRow('Tiền cọc', _money(booking.depositAmount)),
+          DetailRow('Đã thanh toán cọc', _money(booking.paidDepositAmount)),
           if ((booking.note ?? '').trim().isNotEmpty)
-            DetailRow('Ghi chu', booking.note!.trim()),
+            DetailRow('Ghi chú', booking.note!.trim()),
           const SizedBox(height: 16),
           const Divider(height: 1, color: AppColors.inputBorder),
           const SizedBox(height: 14),
           const Text(
-            'Thanh toan',
+            'Thanh toán',
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w800,
@@ -137,7 +137,7 @@ class _BookingDetailsContent extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text('Dong'),
+              child: const Text('Đóng'),
             ),
           ),
         ],
@@ -150,7 +150,7 @@ class _BookingDetailsContent extends StatelessWidget {
     if (payments.isEmpty) {
       return const [
         Text(
-          'Chua co giao dich thanh toan.',
+          'Chưa có giao dịch thanh toán.',
           style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
         ),
       ];

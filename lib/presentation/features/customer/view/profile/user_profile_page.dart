@@ -122,7 +122,7 @@ class UserProfilePage extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            user?.roles?.firstOrNull ?? 'Customer',
+            _roleLabel(user?.roles?.firstOrNull),
             style: const TextStyle(
               fontSize: 14,
               color: AppColors.textSecondary,
@@ -131,6 +131,16 @@ class UserProfilePage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _roleLabel(String? role) {
+    switch (role?.trim().toLowerCase()) {
+      case 'owner':
+        return 'Chủ sân';
+      case 'customer':
+      default:
+        return 'Khách hàng';
+    }
   }
 
   Widget _buildAvatarSection() {

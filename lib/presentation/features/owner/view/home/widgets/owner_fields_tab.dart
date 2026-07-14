@@ -64,7 +64,7 @@ class OwnerFieldsTab extends StatelessWidget {
                       child: OutlinedButton.icon(
                         onPressed: () => onEditVenue(selectedVenue),
                         icon: const Icon(Icons.edit_outlined),
-                        label: const Text('Cap nhat venue'),
+                        label: const Text('Cập nhật venue'),
                       ),
                     ),
                   ),

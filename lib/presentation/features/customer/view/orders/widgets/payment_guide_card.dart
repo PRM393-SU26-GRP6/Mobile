@@ -28,7 +28,7 @@ class PaymentGuideCard extends StatelessWidget {
               Icon(Icons.info_outline, size: 20, color: AppColors.primary),
               SizedBox(width: 8),
               Text(
-                'Huong dan thanh toan',
+                'Hướng dẫn thanh toán',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
@@ -38,12 +38,12 @@ class PaymentGuideCard extends StatelessWidget {
             ],
           ),
           SizedBox(height: 10),
-          _GuideStep('1', 'Mo ung dung ngan hang hoac vi dien tu'),
+          _GuideStep('1', 'Mở ứng dụng ngân hàng hoặc ví điện tử'),
           _GuideStep(
-              '2', 'Quet ma QR hoac chuyen khoan theo thong tin hien thi'),
-          _GuideStep('3', 'Thanh toan dung so tien va noi dung chuyen khoan'),
+              '2', 'Quét mã QR hoặc chuyển khoản theo thông tin hiển thị'),
+          _GuideStep('3', 'Thanh toán đúng số tiền và nội dung chuyển khoản'),
           _GuideStep(
-              '4', 'He thong se tu dong xac nhan sau khi nhan thanh toan'),
+              '4', 'Hệ thống sẽ tự động xác nhận sau khi nhận thanh toán'),
         ],
       ),
     );

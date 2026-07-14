@@ -61,7 +61,7 @@ class ReviewModel {
   String get displayComment {
     final text = comment?.trim();
     if (text == null || text.isEmpty) {
-      return 'Khong co noi dung danh gia.';
+      return 'Không có nội dung đánh giá.';
     }
     return text;
   }

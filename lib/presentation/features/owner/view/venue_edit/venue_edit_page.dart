@@ -15,7 +15,7 @@ class VenueEditPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        title: const Text('Cap nhat venue'),
+        title: const Text('Cập nhật venue'),
         centerTitle: true,
       ),
       body: SafeArea(

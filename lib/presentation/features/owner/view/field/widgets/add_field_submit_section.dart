@@ -55,7 +55,7 @@ class AddFieldSubmitSection extends StatelessWidget {
                             Icon(Icons.add, color: Colors.white),
                             SizedBox(width: 8),
                             Text(
-                              'Them san nay',
+                              'Thêm sân này',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -78,8 +78,8 @@ class AddFieldSubmitSection extends StatelessWidget {
     if (field == null) return;
 
     Get.snackbar(
-      'Thanh cong',
-      'Da them san "${field.fieldName}"',
+      'Thành công',
+      'Đã thêm sân "${field.fieldName}"',
       backgroundColor: AppColors.primary.withValues(alpha: 0.1),
       colorText: AppColors.primary,
       snackPosition: SnackPosition.TOP,

@@ -20,7 +20,7 @@ class PaymentQrStatusButton extends StatelessWidget {
           ),
         ),
         child: const Text(
-          'Kiem tra trang thai',
+          'Kiểm tra trạng thái',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,

@@ -86,14 +86,14 @@ class SlotActionsController extends GetxController {
 
     if (deletedCount > 0) {
       Get.snackbar(
-        'ThÃ nh cÃ´ng',
-        'ÄÃ£ xoÃ¡ $deletedCount slot',
+        'Thành công',
+        'Đã xoá $deletedCount slot',
         snackPosition: SnackPosition.TOP,
       );
     } else {
       Get.snackbar(
-        'Lá»—i',
-        'KhÃ´ng thá»ƒ xoÃ¡ cÃ¡c slot Ä‘Ã£ chá»n',
+        'Lỗi',
+        'Không thể xoá các slot đã chọn',
         snackPosition: SnackPosition.TOP,
       );
     }

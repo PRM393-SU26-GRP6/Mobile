@@ -12,7 +12,7 @@ class NetworkQrImage extends StatelessWidget {
       key: const Key('sepay-network-qr'),
       fit: BoxFit.contain,
       errorBuilder: (context, error, stackTrace) => const Center(
-        child: Text('Khong the tai ma QR'),
+        child: Text('Không thể tải mã QR'),
       ),
     );
   }

@@ -13,13 +13,13 @@ void main() {
     );
 
     test('identifies the current user as customer or owner', () {
-      expect(room.getCurrentUserRoleLabel('customer-1'), 'Customer');
-      expect(room.getCurrentUserRoleLabel('owner-1'), 'Owner');
+      expect(room.getCurrentUserRoleLabel('customer-1'), 'Khách hàng');
+      expect(room.getCurrentUserRoleLabel('owner-1'), 'Chủ sân');
     });
 
     test('identifies the chat partner as customer or owner', () {
-      expect(room.getPartnerRoleLabel('customer-1'), 'Owner');
-      expect(room.getPartnerRoleLabel('owner-1'), 'Customer');
+      expect(room.getPartnerRoleLabel('customer-1'), 'Chủ sân');
+      expect(room.getPartnerRoleLabel('owner-1'), 'Khách hàng');
     });
 
     test('prefers the authenticated role when room ids are reversed', () {
@@ -37,14 +37,14 @@ void main() {
           'owner-1',
           'Owner',
         ),
-        'Owner',
+        'Chủ sân',
       );
       expect(
         reversedRoom.getPartnerRoleLabelForAuthRole(
           'owner-1',
           'Owner',
         ),
-        'Customer',
+        'Khách hàng',
       );
     });
 

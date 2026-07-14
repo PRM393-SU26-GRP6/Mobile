@@ -44,7 +44,7 @@ class FieldSlotManagementCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Quan ly Slots',
+                    'Quản lý slots',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -52,7 +52,7 @@ class FieldSlotManagementCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Tao lich san va gia theo tung slot',
+                    'Tạo lịch sân và giá theo từng slot',
                     style: TextStyle(fontSize: 13, color: Colors.white70),
                   ),
                 ],

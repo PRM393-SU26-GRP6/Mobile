@@ -276,14 +276,14 @@ class _PaymentQRPageState extends State<PaymentQRPage> {
       }
 
       Get.snackbar(
-        'Dang cho thanh toan',
-        'He thong chua nhan duoc giao dich. Vui long thu lai sau.',
+        'Đang chờ thanh toán',
+        'Hệ thống chưa nhận được giao dịch. Vui lòng thử lại sau.',
         snackPosition: SnackPosition.TOP,
       );
     } catch (_) {
       Get.snackbar(
-        'Loi',
-        'Khong the kiem tra trang thai thanh toan.',
+        'Lỗi',
+        'Không thể kiểm tra trạng thái thanh toán.',
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,

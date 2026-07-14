@@ -41,7 +41,7 @@ class SePayQrCard extends StatelessWidget {
       child: Column(
         children: [
           const Text(
-            'Quet ma QR de thanh toan',
+            'Quét mã QR để thanh toán',
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w800,
@@ -62,7 +62,7 @@ class SePayQrCard extends StatelessWidget {
               height: 370,
               child: _hasNetworkQrImage
                   ? NetworkQrImage(url: qrInfo!.qrUrl)
-                  : const Center(child: Text('Khong the tai ma QR')),
+                  : const Center(child: Text('Không thể tải mã QR')),
             ),
           ),
           const SizedBox(height: 14),
@@ -83,7 +83,7 @@ class SePayQrCard extends StatelessWidget {
                 SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'He thong tu dong xac nhan sau khi nhan duoc thanh toan',
+                    'Hệ thống tự động xác nhận sau khi nhận được thanh toán',
                     style: TextStyle(
                       fontSize: 12,
                       height: 1.3,

@@ -88,7 +88,7 @@ class SlotLockState extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          slot.isAvailable ? 'Mo' : 'Khoa',
+          slot.isAvailable ? 'Mở' : 'Khóa',
           style: TextStyle(fontSize: 11, color: color),
         ),
       ],

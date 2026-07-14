@@ -167,7 +167,7 @@ class _OrdersPageState extends State<OrdersPage> {
         TextField(
           onChanged: _controller.updateSearchQuery,
           decoration: InputDecoration(
-            hintText: 'Tim theo san, mat san, ma don...',
+            hintText: 'Tìm theo sân, mặt sân, mã đơn...',
             prefixIcon: const Icon(Icons.search),
             filled: true,
             fillColor: Colors.white,
@@ -186,11 +186,11 @@ class _OrdersPageState extends State<OrdersPage> {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: const [
-              _FilterChip(label: 'Tat ca', value: ''),
-              _FilterChip(label: 'Cho duyet', value: 'Pending'),
-              _FilterChip(label: 'Da xac nhan', value: 'Accepted'),
-              _FilterChip(label: 'Da coc', value: 'Deposited'),
-              _FilterChip(label: 'Hoan thanh', value: 'Completed'),
+              _FilterChip(label: 'Tất cả', value: ''),
+              _FilterChip(label: 'Chờ duyệt', value: 'Pending'),
+              _FilterChip(label: 'Đã xác nhận', value: 'Accepted'),
+              _FilterChip(label: 'Đã cọc', value: 'Deposited'),
+              _FilterChip(label: 'Hoàn thành', value: 'Completed'),
             ],
           ),
         ),
@@ -199,7 +199,7 @@ class _OrdersPageState extends State<OrdersPage> {
           Icon(Icons.search_off, size: 52, color: Colors.grey.shade300),
           const SizedBox(height: 12),
           Text(
-            'Khong tim thay don phu hop',
+            'Không tìm thấy đơn phù hợp',
             style: TextStyle(fontSize: 15, color: Colors.grey.shade500),
           ),
         ],

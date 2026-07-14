@@ -24,7 +24,7 @@ class AddFieldPage extends StatelessWidget {
         elevation: 0,
         title: Obx(
           () => Text(
-            'Them san - ${controller.venueName.value}',
+            'Thêm sân - ${controller.venueName.value}',
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),
@@ -57,7 +57,7 @@ class AddFieldPage extends StatelessWidget {
                     const SizedBox(height: 24),
                     _SlotPricingNotice(),
                     const SizedBox(height: 24),
-                    _SectionTitle('Tien nghi'),
+                    _SectionTitle('Tiện nghi'),
                     const SizedBox(height: 12),
                     AddFieldAmenitiesSection(controller: controller),
                     const SizedBox(height: 32),
@@ -122,7 +122,7 @@ class _SlotPricingNotice extends StatelessWidget {
           SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Gia tien duoc cau hinh theo tung slot sau khi tao san.',
+              'Giá tiền được cấu hình theo từng slot sau khi tạo sân.',
               style: TextStyle(
                 fontSize: 13,
                 color: AppColors.textPrimary,

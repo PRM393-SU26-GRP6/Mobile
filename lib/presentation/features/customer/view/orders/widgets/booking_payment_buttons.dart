@@ -23,7 +23,7 @@ class BookingPaymentButtons extends StatelessWidget {
       buttons.add(
         Expanded(
           child: _PaymentActionButton(
-            label: 'Thanh toan coc',
+            label: 'Thanh toán cọc',
             icon: Icons.qr_code_2,
             onTap: onDepositTap,
             backgroundColor: const Color(0xFF0D6EFD),
@@ -37,7 +37,7 @@ class BookingPaymentButtons extends StatelessWidget {
       buttons.add(
         Expanded(
           child: _PaymentActionButton(
-            label: 'Thanh toan con lai',
+            label: 'Thanh toán còn lại',
             icon: Icons.payments_outlined,
             onTap: onRemainingTap,
             backgroundColor: AppColors.primary,

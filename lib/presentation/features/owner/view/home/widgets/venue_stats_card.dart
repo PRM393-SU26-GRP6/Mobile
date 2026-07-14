@@ -44,23 +44,23 @@ class VenueStatsCard extends StatelessWidget {
             children: [
               VenueStatItem(
                 icon: Icons.sports_soccer,
-                label: 'San con',
+                label: 'Sân con',
                 value: '${venue.fields?.length ?? 0}',
               ),
               VenueStatItem(
                 icon: Icons.star,
-                label: 'Danh gia',
+                label: 'Đánh giá',
                 value: venue.averageRating?.toStringAsFixed(1) ?? '-',
               ),
               VenueStatItem(
                 icon: Icons.reviews_outlined,
-                label: 'Luot review',
+                label: 'Lượt review',
                 value: '${venue.totalReviews ?? 0}',
               ),
               VenueStatItem(
                 icon: Icons.check_circle,
-                label: 'Trang thai',
-                value: venue.isActive == true ? 'Mo' : 'Dong',
+                label: 'Trạng thái',
+                value: venue.isActive == true ? 'Mở' : 'Đóng',
               ),
             ],
           ),

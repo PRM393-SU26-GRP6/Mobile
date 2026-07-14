@@ -16,7 +16,7 @@ class FieldDescriptionCard extends StatelessWidget {
 
     return _InfoCard(
       icon: Icons.description_outlined,
-      title: 'Mo ta',
+      title: 'Mô tả',
       child: Text(
         description,
         style: const TextStyle(
@@ -43,7 +43,7 @@ class FieldAmenitiesCard extends StatelessWidget {
 
     return _InfoCard(
       icon: Icons.list_alt,
-      title: 'Tien ich',
+      title: 'Tiện ích',
       child: Wrap(
         spacing: 8,
         runSpacing: 8,
@@ -63,9 +63,9 @@ class FieldImagesSummaryCard extends StatelessWidget {
     final images = field.images ?? const <String>[];
     return _InfoCard(
       icon: Icons.image_outlined,
-      title: 'Hinh anh',
+      title: 'Hình ảnh',
       child: Text(
-        images.isEmpty ? 'Chua co hinh anh san' : '${images.length} hinh anh',
+        images.isEmpty ? 'Chưa có hình ảnh sân' : '${images.length} hình ảnh',
         style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
       ),
     );

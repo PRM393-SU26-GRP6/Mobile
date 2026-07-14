@@ -21,7 +21,7 @@ class CreateSlotsTab extends StatelessWidget {
         children: [
           const SlotInfoCard(
             message:
-                'Tạo slots hàng loạt giúp bạn nhanh chóng thiết lập lịch đặt sân cho nhiều ngày.',
+                'Tạo khung giờ hàng loạt giúp bạn nhanh chóng thiết lập lịch đặt sân cho nhiều ngày.',
             backgroundColor: Color(0xFFFCE4EC),
             borderColor: Color(0xFFF8BBD0),
             iconColor: AppColors.primary,

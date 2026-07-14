@@ -90,17 +90,17 @@ class SlotsListTab extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Xoa slots da chon?'),
-        content: Text('Ban dang chon ${selectedIds.length} slot.'),
+        title: const Text('Xóa slots đã chọn?'),
+        content: Text('Bạn đang chọn ${selectedIds.length} slot.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Huy'),
+            child: const Text('Hủy'),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Xoa'),
+            child: const Text('Xóa'),
           ),
         ],
       ),

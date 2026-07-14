@@ -99,7 +99,7 @@ class _BookingDetailsBody extends StatelessWidget {
               _DetailRow(label: 'Ghi chú', value: booking.note!),
             const SizedBox(height: 8),
             const Text(
-              'Feedback khach hang',
+              'Feedback khách hàng',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
@@ -213,7 +213,7 @@ class _OwnerBookingReviewSection extends StatelessWidget {
           return const Padding(
             padding: EdgeInsets.only(top: 8),
             child: Text(
-              'Khong the tai feedback cho don nay.',
+              'Không thể tải feedback cho đơn này.',
               style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
             ),
           );
@@ -222,7 +222,7 @@ class _OwnerBookingReviewSection extends StatelessWidget {
           return const Padding(
             padding: EdgeInsets.only(top: 8),
             child: Text(
-              'Chua co feedback cho don nay.',
+              'Chưa có feedback cho đơn này.',
               style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
             ),
           );

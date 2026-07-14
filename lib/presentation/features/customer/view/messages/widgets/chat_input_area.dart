@@ -39,7 +39,7 @@ class ChatInputArea extends StatelessWidget {
                 child: TextField(
                   controller: controller,
                   decoration: const InputDecoration(
-                    hintText: 'Nhap tin nhan...',
+                    hintText: 'Nhập tin nhắn...',
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 20,

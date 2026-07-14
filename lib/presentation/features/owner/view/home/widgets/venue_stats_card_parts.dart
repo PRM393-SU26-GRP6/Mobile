@@ -30,7 +30,7 @@ class VenueText extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          venue.venueName ?? 'San cua toi',
+          venue.venueName ?? 'Sân của tôi',
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -48,7 +48,7 @@ class VenueText extends StatelessWidget {
             const SizedBox(width: 4),
             Expanded(
               child: Text(
-                venue.address ?? 'Chua co dia chi',
+                venue.address ?? 'Chưa có địa chỉ',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.white.withValues(alpha: 0.8),
@@ -125,7 +125,7 @@ class VenueImagesActionButton extends StatelessWidget {
               Icon(Icons.image_outlined, color: Colors.white, size: 16),
               SizedBox(width: 4),
               Text(
-                'Anh',
+                'Ảnh',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,

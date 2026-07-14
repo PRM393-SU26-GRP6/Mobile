@@ -37,7 +37,7 @@ class CreatedFieldsBar extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Da them ${controller.createdFields.length} san',
+                    'Đã thêm ${controller.createdFields.length} sân',
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -58,14 +58,14 @@ class CreatedFieldsBar extends StatelessWidget {
                 onPressed: () {
                   controller.resetForm();
                   Get.snackbar(
-                    'Thanh cong',
-                    'Form da reset, ban co the them san tiep',
+                    'Thành công',
+                    'Form đã reset, bạn có thể thêm sân tiếp',
                     backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                     colorText: AppColors.primary,
                   );
                 },
                 icon: const Icon(Icons.add),
-                label: const Text('Them san khac'),
+                label: const Text('Thêm sân khác'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.primary,
                   side: const BorderSide(color: AppColors.primary),

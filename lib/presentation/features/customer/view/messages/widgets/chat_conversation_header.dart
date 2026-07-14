@@ -26,7 +26,7 @@ class ChatConversationHeader extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Cuoc tro chuyen chung voi $partnerRole',
+              'Cuộc trò chuyện chung với $partnerRole',
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,

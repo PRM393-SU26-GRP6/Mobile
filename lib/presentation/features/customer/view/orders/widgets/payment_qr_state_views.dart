@@ -14,7 +14,7 @@ class PaymentQrLoadingView extends StatelessWidget {
           CircularProgressIndicator(color: AppColors.primary),
           SizedBox(height: 16),
           Text(
-            'Dang tao thanh toan...',
+            'Đang tạo thanh toán...',
             style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
           ),
         ],
@@ -57,7 +57,7 @@ class PaymentQrErrorView extends StatelessWidget {
               children: [
                 OutlinedButton(
                   onPressed: () => Get.back(),
-                  child: const Text('Quay lai'),
+                  child: const Text('Quay lại'),
                 ),
                 const SizedBox(width: 12),
                 ElevatedButton(
@@ -65,7 +65,7 @@ class PaymentQrErrorView extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                   ),
-                  child: const Text('Thu lai'),
+                  child: const Text('Thử lại'),
                 ),
               ],
             ),

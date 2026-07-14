@@ -143,11 +143,11 @@ class ErrorContent extends StatelessWidget {
           Icon(Icons.error_outline, size: 44, color: Colors.grey.shade400),
           const SizedBox(height: 10),
           const Text(
-            'Khong the tai chi tiet don.',
+            'Không thể tải chi tiết đơn.',
             style: TextStyle(color: AppColors.textSecondary),
           ),
           const SizedBox(height: 12),
-          TextButton(onPressed: onClose, child: const Text('Dong')),
+          TextButton(onPressed: onClose, child: const Text('Đóng')),
         ],
       ),
     );

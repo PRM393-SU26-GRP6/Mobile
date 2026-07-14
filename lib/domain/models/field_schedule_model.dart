@@ -72,13 +72,13 @@ class FieldScheduleDto {
   ];
 
   static const List<String> backendDayNames = [
-    'Thu 2',
-    'Thu 3',
-    'Thu 4',
-    'Thu 5',
-    'Thu 6',
-    'Thu 7',
-    'Chu nhat',
+    'Thứ 2',
+    'Thứ 3',
+    'Thứ 4',
+    'Thứ 5',
+    'Thứ 6',
+    'Thứ 7',
+    'Chủ nhật',
   ];
 
   String get dayName {

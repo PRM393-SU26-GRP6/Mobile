@@ -101,7 +101,7 @@ class _OwnerHomePageState extends State<OwnerHomePage> {
       case 1:
         return 'Duyệt Đặt Sân';
       case 2:
-        return 'Doanh Thu';
+        return 'Doanh thu';
       default:
         return 'Quản Lý Sân';
     }

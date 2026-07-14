@@ -19,7 +19,7 @@ String formatPriceVN(double price) {
 }
 
 String fieldTypeLabel(String? type) =>
-    FieldModel.fieldTypeLabels[type] ?? type ?? 'San';
+    FieldModel.fieldTypeLabels[type] ?? type ?? 'Sân';
 
 Color bookingStatusColor(String? status) {
   switch (status?.toLowerCase()) {

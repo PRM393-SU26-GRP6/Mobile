@@ -52,15 +52,15 @@ class ChatRoomModel {
   }
 
   String getCurrentUserRoleLabel(String? currentUserId) {
-    if (currentUserId == customerId) return 'Customer';
-    if (currentUserId == hostId) return 'Owner';
-    return 'Thanh vien';
+    if (currentUserId == customerId) return 'Khách hàng';
+    if (currentUserId == hostId) return 'Chủ sân';
+    return 'Thành viên';
   }
 
   String getPartnerRoleLabel(String? currentUserId) {
-    if (currentUserId == customerId) return 'Owner';
-    if (currentUserId == hostId) return 'Customer';
-    return 'Thanh vien';
+    if (currentUserId == customerId) return 'Chủ sân';
+    if (currentUserId == hostId) return 'Khách hàng';
+    return 'Thành viên';
   }
 
   String getCurrentUserRoleLabelForAuthRole(
@@ -68,7 +68,8 @@ class ChatRoomModel {
     String? currentUserRole,
   ) {
     final authRole = _normalizeRole(currentUserRole);
-    if (authRole != null) return authRole;
+    if (authRole == 'Owner') return 'Chủ sân';
+    if (authRole == 'Customer') return 'Khách hàng';
     return getCurrentUserRoleLabel(currentUserId);
   }
 
@@ -77,8 +78,8 @@ class ChatRoomModel {
     String? currentUserRole,
   ) {
     final authRole = _normalizeRole(currentUserRole);
-    if (authRole == 'Owner') return 'Customer';
-    if (authRole == 'Customer') return 'Owner';
+    if (authRole == 'Owner') return 'Khách hàng';
+    if (authRole == 'Customer') return 'Chủ sân';
     return getPartnerRoleLabel(currentUserId);
   }
 

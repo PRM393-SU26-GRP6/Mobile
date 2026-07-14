@@ -15,8 +15,8 @@ void main() {
 
     await tester.pumpWidget(const GetMaterialApp(home: SlotManagementPage()));
 
-    expect(find.text('Tao slots'), findsOneWidget);
-    expect(find.text('Danh sach'), findsOneWidget);
-    expect(find.text('Lich san'), findsNothing);
+    expect(find.text('Tạo slots'), findsOneWidget);
+    expect(find.text('Danh sách'), findsOneWidget);
+    expect(find.text('Lịch sân'), findsNothing);
   });
 }

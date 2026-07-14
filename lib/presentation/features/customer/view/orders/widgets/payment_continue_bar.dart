@@ -38,7 +38,7 @@ class PaymentContinueBar extends StatelessWidget {
             ),
           ),
           child: const Text(
-            'Tiep tuc',
+            'Tiếp tục',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),

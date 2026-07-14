@@ -73,7 +73,7 @@ class SlotCard extends StatelessWidget {
                   size: 20,
                 ),
                 onPressed: () => showSlotOptionsSheet(context, slot),
-                tooltip: 'Tuy chon',
+                tooltip: 'Tùy chọn',
               ),
           ],
         ),
@@ -89,10 +89,10 @@ class SlotCard extends StatelessWidget {
   }
 
   String _statusLabel() {
-    if (slot.isBooked) return 'Da dat';
-    if (slot.isLocked) return 'Khoa';
-    if (slot.isPending) return 'Cho xac nhan';
-    return 'Trong';
+    if (slot.isBooked) return 'Đã đặt';
+    if (slot.isLocked) return 'Khóa';
+    if (slot.isPending) return 'Chờ xác nhận';
+    return 'Trống';
   }
 
   IconData _statusIcon() {

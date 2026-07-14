@@ -16,9 +16,9 @@ void main() {
       ),
     );
 
-    expect(find.text('Sua feedback'), findsOneWidget);
-    expect(find.text('Xoa feedback'), findsOneWidget);
-    expect(find.text('Sua'), findsNothing);
-    expect(find.text('Xoa'), findsNothing);
+    expect(find.text('Sửa feedback'), findsOneWidget);
+    expect(find.text('Xóa feedback'), findsOneWidget);
+    expect(find.text('Sửa'), findsNothing);
+    expect(find.text('Xóa'), findsNothing);
   });
 }

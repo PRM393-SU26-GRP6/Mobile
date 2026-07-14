@@ -17,7 +17,7 @@ class FieldListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fieldTypeLabel =
-        FieldModel.fieldTypeLabels[field.fieldType] ?? field.fieldType ?? 'San';
+        FieldModel.fieldTypeLabels[field.fieldType] ?? field.fieldType ?? 'Sân';
 
     return GestureDetector(
       onTap: onTap,
@@ -42,7 +42,7 @@ class FieldListItem extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: _FieldSummary(
-                name: field.fieldName ?? 'San khong ten',
+                name: field.fieldName ?? 'Sân không tên',
                 typeLabel: fieldTypeLabel,
                 description: field.description,
               ),
@@ -145,7 +145,7 @@ class _FieldActions extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
           ),
           child: Text(
-            isActive ? 'Hoat dong' : 'Tat',
+            isActive ? 'Hoạt động' : 'Tắt',
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w500,

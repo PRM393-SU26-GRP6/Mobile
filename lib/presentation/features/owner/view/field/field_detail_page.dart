@@ -21,7 +21,7 @@ class FieldDetailPage extends StatelessWidget {
         foregroundColor: Colors.white,
         elevation: 0,
         title: const Text(
-          'Chi tiet san',
+          'Chi tiết sân',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -62,7 +62,7 @@ class FieldDetailPage extends StatelessWidget {
 
         final field = controller.field.value;
         if (field == null) {
-          return const Center(child: Text('Khong co thong tin san'));
+          return const Center(child: Text('Không có thông tin sân'));
         }
 
         return SingleChildScrollView(

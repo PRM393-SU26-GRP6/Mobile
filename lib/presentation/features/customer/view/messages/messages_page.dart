@@ -243,7 +243,7 @@ class _MessagesPageState extends State<MessagesPage> {
           _currentUserId,
           _currentUserRole,
         )}'
-        ' - ${room.lastMessagePreview ?? 'Chua co tin nhan'}',
+        ' - ${room.lastMessagePreview ?? 'Chưa có tin nhắn'}',
         style: TextStyle(
           color: Colors.grey.shade600,
           fontSize: 14,

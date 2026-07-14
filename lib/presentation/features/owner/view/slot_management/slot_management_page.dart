@@ -48,7 +48,7 @@ class _SlotManagementPageState extends State<SlotManagementPage>
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
-        title: const Text('Quan ly slots'),
+        title: const Text('Quản lý slots'),
         centerTitle: true,
       ),
       body: Obx(() {
@@ -76,8 +76,8 @@ class _SlotManagementPageState extends State<SlotManagementPage>
                 indicatorSize: TabBarIndicatorSize.label,
                 dividerColor: Colors.transparent,
                 tabs: const [
-                  Tab(text: 'Tao slots'),
-                  Tab(text: 'Danh sach'),
+                  Tab(text: 'Tạo slots'),
+                  Tab(text: 'Danh sách'),
                 ],
               ),
             ),

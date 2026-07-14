@@ -20,7 +20,7 @@ class SelectPaymentMethodPage extends StatefulWidget {
 
 class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
   final String bookingId = Get.arguments['bookingId'] ?? '';
-  final String venueName = Get.arguments['venueName'] ?? 'San bong';
+  final String venueName = Get.arguments['venueName'] ?? 'Sân bóng';
   final double totalPrice = Get.arguments['totalPrice'] ?? 0;
   final double paymentAmount = Get.arguments['paymentAmount'] ?? 0.0;
   final String paymentType = Get.arguments['paymentType'] ?? 'deposit';
@@ -28,8 +28,8 @@ class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
   bool get isDeposit => paymentType == 'deposit';
 
   String get paymentAmountLabel {
-    if (isDeposit) return 'So tien coc';
-    return 'Thanh toan con lai';
+    if (isDeposit) return 'Số tiền cọc';
+    return 'Thanh toán còn lại';
   }
 
   PaymentMethod _selectedMethod = PaymentMethod.sePay;
@@ -38,28 +38,28 @@ class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
     PaymentMethodOption(
       method: PaymentMethod.sePay,
       name: 'SePay QR',
-      description: 'Quet ma QR de thanh toan',
+      description: 'Quét mã QR để thanh toán',
       icon: Icons.qr_code_2,
       color: Color(0xFF6C63FF),
     ),
     PaymentMethodOption(
       method: PaymentMethod.moMo,
       name: 'MoMo',
-      description: 'Chua ho tro tren BE',
+      description: 'Chưa hỗ trợ trên BE',
       icon: Icons.account_balance_wallet,
       color: Color(0xFFA50064),
     ),
     PaymentMethodOption(
       method: PaymentMethod.vnPay,
       name: 'VNPay',
-      description: 'Chua ho tro tren BE',
+      description: 'Chưa hỗ trợ trên BE',
       icon: Icons.payment,
       color: Color(0xFF0066B3),
     ),
     PaymentMethodOption(
       method: PaymentMethod.cash,
-      name: 'Tien mat',
-      description: 'Thanh toan truc tiep tai san',
+      name: 'Tiền mặt',
+      description: 'Thanh toán trực tiếp tại sân',
       icon: Icons.payments,
       color: Color(0xFF16A34A),
     ),
@@ -74,7 +74,7 @@ class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
         foregroundColor: Colors.white,
         elevation: 0,
         title: const Text(
-          'Chon phuong thuc thanh toan',
+          'Chọn phương thức thanh toán',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -114,9 +114,9 @@ class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
       ),
       child: Column(
         children: [
-          _priceRow('San', venueName),
+          _priceRow('Sân', venueName),
           const SizedBox(height: 8),
-          _priceRow('Tong tien', '${totalPrice.toStringAsFixed(0)}d',
+          _priceRow('Tổng tiền', '${totalPrice.toStringAsFixed(0)}d',
               strikeValue: true),
           const SizedBox(height: 4),
           _priceRow(
@@ -183,7 +183,7 @@ class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
         padding: const EdgeInsets.all(16),
         children: [
           const Text(
-            'Phuong thuc thanh toan',
+            'Phương thức thanh toán',
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
@@ -246,8 +246,8 @@ class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
       Get.back();
       _returnToOrders();
       Get.snackbar(
-        'Thanh cong',
-        'Da tao thanh toan thanh cong.',
+        'Thành công',
+        'Đã tạo thanh toán thành công.',
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.green,
         colorText: Colors.white,
@@ -255,8 +255,8 @@ class _SelectPaymentMethodPageState extends State<SelectPaymentMethodPage> {
     } catch (_) {
       Get.back();
       Get.snackbar(
-        'Loi',
-        'Khong the xu ly thanh toan. Vui long thu lai.',
+        'Lỗi',
+        'Không thể xử lý thanh toán. Vui lòng thử lại.',
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,

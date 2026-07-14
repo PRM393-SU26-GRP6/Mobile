@@ -104,11 +104,11 @@ class _CustomerReviewSectionState extends State<CustomerReviewSection> {
                   const Spacer(),
                   TextButton(
                     onPressed: () => _edit(review),
-                    child: const Text('Sua feedback'),
+                    child: const Text('Sửa feedback'),
                   ),
                   TextButton(
                     onPressed: () => _delete(review),
-                    child: const Text('Xoa feedback'),
+                    child: const Text('Xóa feedback'),
                   ),
                 ],
               ),

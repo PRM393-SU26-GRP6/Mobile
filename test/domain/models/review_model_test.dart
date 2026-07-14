@@ -42,7 +42,7 @@ void main() {
         comment: '   ',
       );
 
-      expect(review.displayComment, 'Khong co noi dung danh gia.');
+      expect(review.displayComment, 'Không có nội dung đánh giá.');
     });
   });
 }

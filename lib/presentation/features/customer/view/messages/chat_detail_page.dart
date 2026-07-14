@@ -191,8 +191,8 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       await _loadInitialMessages();
     } catch (_) {
       Get.snackbar(
-        'Loi',
-        'Khong the gui tin nhan. Vui long thu lai.',
+        'Lỗi',
+        'Không thể gửi tin nhắn. Vui lòng thử lại.',
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -228,7 +228,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
             Text(_chatPartnerName),
             const SizedBox(height: 2),
             Text(
-              '${widget.chatRoom.contextLabel} - Ban la $_myRole',
+              '${widget.chatRoom.contextLabel} - Bạn là $_myRole',
               style: const TextStyle(fontSize: 11, color: Colors.white70),
             ),
           ],

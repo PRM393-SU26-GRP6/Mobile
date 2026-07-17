@@ -46,6 +46,9 @@ class NotificationApiService extends BaseApiService {
     if (response.data == null) return 0;
     if (response.data is Map<String, dynamic>) {
       final data = response.data as Map<String, dynamic>;
+      if (data.containsKey('unreadCount')) {
+        return data['unreadCount'] as int? ?? 0;
+      }
       if (data.containsKey('count')) {
         return data['count'] as int? ?? 0;
       }

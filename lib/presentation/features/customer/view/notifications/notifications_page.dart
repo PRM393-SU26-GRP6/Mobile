@@ -95,37 +95,65 @@ class NotificationsPage extends StatelessWidget {
   Widget _buildFilterBar(NotificationController controller) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
-      child: Obx(() {
-        return Row(
-          children: [
-            NotificationFilterChip(
-              label: 'Tất cả',
-              isSelected: !controller.showUnreadOnly.value,
-              onTap: () {
-                if (controller.showUnreadOnly.value) {
-                  controller.toggleUnreadOnly();
-                }
-              },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            onChanged: (val) => controller.searchQuery.value = val,
+            decoration: InputDecoration(
+              hintText: 'Tìm kiếm thông báo...',
+              prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(vertical: 12),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.primary),
+              ),
             ),
-            const SizedBox(width: 8),
-            NotificationFilterChip(
-              label: 'Chưa đọc',
-              isSelected: controller.showUnreadOnly.value,
-              onTap: () {
-                if (!controller.showUnreadOnly.value) {
-                  controller.toggleUnreadOnly();
-                }
-              },
-              showBadge: controller.unreadCount.value > 0,
-            ),
-          ],
-        );
-      }),
+          ),
+          const SizedBox(height: 12),
+          Obx(() {
+            return Row(
+              children: [
+                NotificationFilterChip(
+                  label: 'Tất cả',
+                  isSelected: !controller.showUnreadOnly.value,
+                  onTap: () {
+                    if (controller.showUnreadOnly.value) {
+                      controller.toggleUnreadOnly();
+                    }
+                  },
+                ),
+                const SizedBox(width: 8),
+                NotificationFilterChip(
+                  label: 'Chưa đọc',
+                  isSelected: controller.showUnreadOnly.value,
+                  onTap: () {
+                    if (!controller.showUnreadOnly.value) {
+                      controller.toggleUnreadOnly();
+                    }
+                  },
+                  showBadge: controller.unreadCount.value > 0,
+                ),
+              ],
+            );
+          }),
+        ],
+      ),
     );
   }
 
   Widget _buildContent(NotificationController controller) {
-    if (controller.isLoading.value && controller.notifications.isEmpty) {
+    if (controller.isLoading.value && controller.filteredNotifications.isEmpty) {
       return const Center(
         child: CircularProgressIndicator(
           color: AppColors.primary,
@@ -133,11 +161,11 @@ class NotificationsPage extends StatelessWidget {
       );
     }
 
-    if (controller.error.value.isNotEmpty && controller.notifications.isEmpty) {
+    if (controller.error.value.isNotEmpty && controller.filteredNotifications.isEmpty) {
       return _buildErrorState(controller);
     }
 
-    if (controller.notifications.isEmpty) {
+    if (controller.filteredNotifications.isEmpty) {
       return _buildEmptyState(controller.showUnreadOnly.value);
     }
 
@@ -154,16 +182,16 @@ class NotificationsPage extends StatelessWidget {
         },
         child: ListView.builder(
           padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-          itemCount: controller.notifications.length +
+          itemCount: controller.filteredNotifications.length +
               (controller.hasMore.value ? 1 : 0),
           itemBuilder: (context, index) {
-            if (index < controller.notifications.length) {
+            if (index < controller.filteredNotifications.length) {
               return NotificationItem(
-                notification: controller.notifications[index],
+                notification: controller.filteredNotifications[index],
                 onTap: () => _handleNotificationTap(
-                    controller, controller.notifications[index]),
+                    controller, controller.filteredNotifications[index]),
                 onMarkRead: () => controller.markAsRead(
-                    controller.notifications[index].notificationId!),
+                    controller.filteredNotifications[index].notificationId!),
                 getTimeAgo: controller.getTimeAgo,
               );
             }

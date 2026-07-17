@@ -29,7 +29,10 @@ class CustomerBinding extends Bindings {
     }
 
     if (!Get.isRegistered<UserRepository>()) {
-      Get.put<UserRepository>(UserRepository(apiService: apiService));
+      Get.lazyPut<UserRepository>(
+        () => UserRepository(apiService: apiService),
+        fenix: true,
+      );
     }
     if (!Get.isRegistered<AuthController>()) {
       Get.lazyPut<AuthController>(

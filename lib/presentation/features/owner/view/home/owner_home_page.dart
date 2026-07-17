@@ -83,12 +83,12 @@ class _OwnerHomePageState extends State<OwnerHomePage> {
       ),
       centerTitle: true,
       actions: [
-        if (_selectedIndex == 0)
-          IconButton(
-            tooltip: 'Quản lý mã giảm giá',
-            icon: const Icon(Icons.discount),
-            onPressed: () => Get.toNamed(AppPages.ownerDiscountManagement),
-          ),
+
+        IconButton(
+          tooltip: 'Tài khoản',
+          icon: const Icon(Icons.person),
+          onPressed: () => Get.toNamed(AppPages.userProfile),
+        ),
         IconButton(
           tooltip: AppStrings.common.refresh,
           icon: const Icon(Icons.refresh),

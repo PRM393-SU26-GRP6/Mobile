@@ -16,7 +16,12 @@ class DiscountManagementPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Quản lý Khuyến mãi'),
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Get.back(),
+        ),
         actions: [
           IconButton(
             tooltip: 'Thêm mã giảm giá',
@@ -62,11 +67,41 @@ class DiscountManagementPage extends StatelessWidget {
         return RefreshIndicator(
           onRefresh: controller.loadDiscounts,
           color: AppColors.primary,
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: controller.discounts.length,
-            itemBuilder: (context, index) {
-              final discount = controller.discounts[index];
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildFilterChip(
+                        label: 'Tất cả',
+                        filter: DiscountFilter.all,
+                        controller: controller,
+                      ),
+                      const SizedBox(width: 8),
+                      _buildFilterChip(
+                        label: 'Đang hoạt động',
+                        filter: DiscountFilter.active,
+                        controller: controller,
+                      ),
+                      const SizedBox(width: 8),
+                      _buildFilterChip(
+                        label: 'Đã tắt',
+                        filter: DiscountFilter.inactive,
+                        controller: controller,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: controller.filteredDiscounts.length,
+                  itemBuilder: (context, index) {
+                    final discount = controller.filteredDiscounts[index];
               return Card(
                 elevation: 0,
                 margin: const EdgeInsets.only(bottom: 12),
@@ -76,10 +111,7 @@ class DiscountManagementPage extends StatelessWidget {
                 ),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12),
-                  onTap: () {
-                    Get.toNamed(AppPages.ownerDiscountEditor,
-                        arguments: discount);
-                  },
+                  onTap: null, // Removed so user doesn't accidentally navigate
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -140,42 +172,59 @@ class DiscountManagementPage extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: GestureDetector(
-                            onTap: () {
-                              Get.dialog(
-                                AlertDialog(
-                                  title: const Text('Xác nhận xóa'),
-                                  content: const Text(
-                                      'Bạn có chắc chắn muốn xóa mã này?'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Get.back(),
-                                      child: const Text('Hủy'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        Get.back();
-                                        controller.deleteDiscount(
-                                            discount.discountId);
-                                      },
-                                      child: const Text('Xóa',
-                                          style: TextStyle(color: Colors.red)),
-                                    ),
-                                  ],
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                Get.toNamed(AppPages.ownerDiscountEditor,
+                                    arguments: discount);
+                              },
+                              child: const Text(
+                                'Cập nhật',
+                                style: TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
                                 ),
-                              );
-                            },
-                            child: const Text(
-                              'Xóa',
-                              style: TextStyle(
-                                color: Colors.red,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
                               ),
                             ),
-                          ),
+                            const SizedBox(width: 24),
+                            GestureDetector(
+                              onTap: () {
+                                Get.dialog(
+                                  AlertDialog(
+                                    title: const Text('Xác nhận xóa'),
+                                    content: const Text(
+                                        'Bạn có chắc chắn muốn xóa mã này?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Get.back(),
+                                        child: const Text('Hủy'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Get.back();
+                                          controller.deleteDiscount(
+                                              discount.discountId);
+                                        },
+                                        child: const Text('Xóa',
+                                            style: TextStyle(color: Colors.red)),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                'Xóa',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -184,8 +233,33 @@ class DiscountManagementPage extends StatelessWidget {
               );
             },
           ),
-        );
-      }),
+        ),
+      ],
+    ),
+  );
+}),
+    );
+  }
+
+  Widget _buildFilterChip({
+    required String label,
+    required DiscountFilter filter,
+    required DiscountManagementController controller,
+  }) {
+    final isSelected = controller.currentFilter.value == filter;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (_) => controller.setFilter(filter),
+      selectedColor: AppColors.primary.withValues(alpha: 0.1),
+      labelStyle: TextStyle(
+        color: isSelected ? AppColors.primary : AppColors.textSecondary,
+        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+      ),
+      side: BorderSide(
+        color: isSelected ? AppColors.primary : Colors.grey.shade300,
+      ),
     );
   }
 }
+

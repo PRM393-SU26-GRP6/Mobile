@@ -1,3 +1,4 @@
+import 'package:exe101/core/routing/app_pages.dart';
 import 'package:exe101/core/theme/app_theme.dart';
 import 'package:exe101/domain/models/venue_model.dart';
 import 'package:exe101/presentation/features/owner/controller/owner_home_controller.dart';
@@ -62,11 +63,34 @@ class OwnerFieldsTab extends StatelessWidget {
                   ),
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: OutlinedButton.icon(
-                        onPressed: () => onEditVenue(selectedVenue),
-                        icon: const Icon(Icons.edit_outlined),
-                        label: const Text('Cập nhật cụm sân'),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () => onEditVenue(selectedVenue),
+                              icon: const Icon(Icons.edit_outlined, size: 20),
+                              label: const Text('Cập nhật cụm sân'),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () => Get.toNamed(
+                                  AppPages.ownerDiscountManagement),
+                              icon: const Icon(Icons.discount_outlined,
+                                  size: 20),
+                              label: const Text('Mã giảm giá'),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

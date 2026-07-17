@@ -17,13 +17,11 @@ class VenueImagesPage extends StatelessWidget {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
-        title: Obx(() {
-          return Text(
-            'Ảnh - ${controller.venue.venueName ?? 'Sân'}',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            overflow: TextOverflow.ellipsis,
-          );
-        }),
+        title: Text(
+          'Ảnh - ${controller.venue.venueName ?? 'Sân'}',
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          overflow: TextOverflow.ellipsis,
+        ),
         centerTitle: true,
         actions: [
           IconButton(

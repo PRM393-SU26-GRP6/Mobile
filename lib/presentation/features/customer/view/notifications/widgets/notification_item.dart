@@ -126,12 +126,16 @@ class NotificationItem extends StatelessWidget {
                                 Icon(Icons.done_all,
                                     size: 14, color: AppColors.primary),
                                 SizedBox(width: 4),
-                                Text(
-                                  'Đã đọc',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.primary,
+                                Flexible(
+                                  child: Text(
+                                    'Đánh dấu',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.primary,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ],

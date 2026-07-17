@@ -2,12 +2,28 @@ import 'package:exe101/data/remote/api_service.dart';
 import 'package:exe101/domain/models/discount_model.dart';
 import 'package:get/get.dart';
 
+enum DiscountFilter { all, active, inactive }
+
 class DiscountManagementController extends GetxController {
   final ApiService apiService;
 
   final discounts = <DiscountDto>[].obs;
   final isLoading = false.obs;
   final error = ''.obs;
+  final currentFilter = DiscountFilter.all.obs;
+
+  List<DiscountDto> get filteredDiscounts {
+    if (currentFilter.value == DiscountFilter.all) return discounts;
+    return discounts
+        .where((d) => currentFilter.value == DiscountFilter.active
+            ? d.isActive
+            : !d.isActive)
+        .toList();
+  }
+
+  void setFilter(DiscountFilter filter) {
+    currentFilter.value = filter;
+  }
 
   DiscountManagementController({required this.apiService});
 

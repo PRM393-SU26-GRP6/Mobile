@@ -14,6 +14,17 @@ class NotificationController extends GetxController {
   final error = ''.obs;
   final unreadCount = 0.obs;
   final showUnreadOnly = false.obs;
+  final searchQuery = ''.obs;
+
+  List<NotificationModel> get filteredNotifications {
+    final query = searchQuery.value.toLowerCase().trim();
+    if (query.isEmpty) return notifications;
+    return notifications.where((n) {
+      final titleMatch = n.title?.toLowerCase().contains(query) ?? false;
+      final messageMatch = n.message?.toLowerCase().contains(query) ?? false;
+      return titleMatch || messageMatch;
+    }).toList();
+  }
 
   int _currentPage = 1;
   static const int _pageSize = 20;

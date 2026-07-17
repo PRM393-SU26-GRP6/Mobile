@@ -7,6 +7,7 @@ import 'package:exe101/domain/repositories/chat_repository.dart';
 import 'package:exe101/domain/repositories/review_repository.dart';
 import 'package:exe101/presentation/features/customer/controller/chat_actions_controller.dart';
 import 'package:exe101/presentation/features/customer/controller/notification_controller.dart';
+import 'package:exe101/presentation/features/auth/controller/auth_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/add_field_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/booking_management_controller.dart';
 import 'package:exe101/presentation/features/owner/controller/field_detail_controller.dart';
@@ -32,6 +33,12 @@ class OwnerBinding extends Bindings {
     if (!Get.isRegistered<UserRepository>()) {
       Get.lazyPut<UserRepository>(
         () => UserRepository(apiService: apiService),
+        fenix: true,
+      );
+    }
+    if (!Get.isRegistered<AuthController>()) {
+      Get.lazyPut<AuthController>(
+        () => AuthController(userRepository: Get.find()),
         fenix: true,
       );
     }

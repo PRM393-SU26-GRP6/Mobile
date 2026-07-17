@@ -30,15 +30,13 @@ class SlotRepository {
     required String fieldId,
     required String date,
   }) async {
-    final results = await Future.wait([
-      getAvailableSlots(fieldId: fieldId, date: date),
-      getSlotsByField(fieldId),
-    ]);
-    return filterBookableSlots(
-      availableSlots: results[0],
-      persistedSlots: results[1],
-      selectedDate: date,
-    );
+    final slots = await getAvailableSlots(fieldId: fieldId, date: date);
+    return slots
+        .where(
+          (slot) =>
+              slot.slotId.isNotEmpty && slot.isAvailable && slot.price > 0,
+        )
+        .toList();
   }
 
   Future<bool> unlockSlot(String slotId) {
@@ -46,40 +44,8 @@ class SlotRepository {
   }
 
   Future<SlotLockResult> lockSlot({
-    String? slotId,
-    required String fieldId,
-    required String startTime,
-    required String endTime,
-    required String selectedDate,
+    required String slotId,
   }) {
-    return slotApiService.lockSlot(
-      slotId: slotId,
-      fieldId: fieldId,
-      startTime: startTime,
-      endTime: endTime,
-      selectedDate: selectedDate,
-    );
+    return slotApiService.lockSlot(slotId: slotId);
   }
-}
-
-List<TimeSlotDto> filterBookableSlots({
-  required List<TimeSlotDto> availableSlots,
-  required List<TimeSlotDto> persistedSlots,
-  required String selectedDate,
-}) {
-  final blockedKeys = persistedSlots
-      .where((slot) => slot.selectedDate == selectedDate && !slot.isAvailable)
-      .map((slot) => _timeKey(slot.startTime, slot.endTime))
-      .toSet();
-
-  return availableSlots.where((slot) {
-    final timeKey = _timeKey(slot.startTime, slot.endTime);
-    return slot.isAvailable && !blockedKeys.contains(timeKey);
-  }).toList();
-}
-
-String _timeKey(String startTime, String endTime) {
-  String normalize(String value) =>
-      value.length >= 5 ? value.substring(0, 5) : value;
-  return '${normalize(startTime)}|${normalize(endTime)}';
 }

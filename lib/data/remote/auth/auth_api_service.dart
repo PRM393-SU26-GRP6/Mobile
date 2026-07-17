@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
@@ -17,7 +18,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 ///
 /// Side-effects:
 /// - `login` / `verifyOtp` persist tokens and user role/id into secure storage.
-/// - `logout` calls the endpoint best-effort then clears local storage.
+/// - `logout` clears local storage first, then notifies the server best-effort.
 /// - `refreshToken` rotates access + refresh tokens in storage.
 class AuthApiService extends BaseApiService {
   static const _storage = FlutterSecureStorage(
@@ -125,18 +126,29 @@ class AuthApiService extends BaseApiService {
   }
 
   Future<void> logout() async {
-    try {
-      final headers = await authHeaders();
-      if (headers.isNotEmpty) {
-        await dio.post<Map<String, dynamic>>(
-          '${Env.baseUrl}/api/v1/auth/logout',
-          options: Options(headers: headers),
-        );
-      }
-    } catch (_) {
-      // best-effort: ignore remote failure and still clear local state
-    }
+    final headers = await authHeaders();
+
+    // Local logout is the source of truth for the device and must not wait on
+    // an unavailable API. Keep the captured token only for the best-effort
+    // server notification below.
     await _clearAuth();
+
+    if (headers.isEmpty) return;
+    unawaited(_notifyRemoteLogout(headers));
+  }
+
+  Future<void> _notifyRemoteLogout(Map<String, String> headers) async {
+    try {
+      await dio
+          .post<Map<String, dynamic>>(
+            '${Env.baseUrl}/api/v1/auth/logout',
+            options: Options(headers: headers),
+          )
+          .timeout(const Duration(seconds: 5));
+    } catch (_) {
+      // The device session is already cleared. Remote token revocation is a
+      // best-effort notification and must never block navigation to Login.
+    }
   }
 
   Future<bool> refreshToken() async {

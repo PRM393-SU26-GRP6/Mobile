@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('TimeSlotDto.fromAvailableSlotJson', () {
-    test('adapts virtual SlotForDateDto without a persisted slot id', () {
+    test('does not create a selectable key without a persisted slot id', () {
       final slot = TimeSlotDto.fromAvailableSlotJson(
         {
           'slotId': null,
@@ -21,12 +21,13 @@ void main() {
       expect(slot.slotId, isEmpty);
       expect(slot.timeRange, '09:00 - 10:00');
       expect(slot.isAvailable, isTrue);
-      expect(slot.selectionKey, 'field-1|2026-07-15|09:00|10:00');
+      expect(slot.selectionKey, isEmpty);
     });
 
-    test('uses the real id after the virtual slot is locked', () {
-      final virtualSlot = TimeSlotDto.fromAvailableSlotJson(
+    test('uses the persisted slot id as the selection key', () {
+      final slot = TimeSlotDto.fromAvailableSlotJson(
         {
+          'slotId': 'real-slot-id',
           'startTimeOfDay': '09:00',
           'endTimeOfDay': '10:00',
           'price': 120000,
@@ -35,10 +36,8 @@ void main() {
         selectedDate: '2026-07-15',
       );
 
-      final lockedSlot = virtualSlot.copyWith(slotId: 'real-slot-id');
-
-      expect(lockedSlot.slotId, 'real-slot-id');
-      expect(lockedSlot.selectionKey, 'real-slot-id');
+      expect(slot.slotId, 'real-slot-id');
+      expect(slot.selectionKey, 'real-slot-id');
     });
   });
 }

@@ -81,10 +81,9 @@ class TimeSlotDto {
 
   String get timeRange => '$startTime - $endTime';
 
-  /// Stable UI identity for schedule-generated slots that do not have a
-  /// database ID until `/slots/lock` creates them.
-  String get selectionKey =>
-      slotId.isNotEmpty ? slotId : '$fieldId|$selectedDate|$startTime|$endTime';
+  /// Customer-bookable slots are persisted and therefore always use slotId
+  /// as their UI identity and lock contract.
+  String get selectionKey => slotId;
 
   bool get isBooked =>
       slotStatus != null && (slotStatus == 'Booked' || slotStatus == 'booked');

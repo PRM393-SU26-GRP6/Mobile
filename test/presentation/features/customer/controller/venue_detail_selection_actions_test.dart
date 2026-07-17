@@ -32,7 +32,7 @@ void main() {
     controller.onClose();
   });
 
-  test('replaces a virtual slot key with the persisted id returned by lock',
+  test('does not lock an available response without a persisted slot id',
       () async {
     final repository = _FakeSlotRepository(availableByDate: const {});
     final controller = _controller(repository);
@@ -42,8 +42,9 @@ void main() {
 
     await controller.toggleSlot(virtualSlot.selectionKey);
 
-    expect(controller.selectedSlotIds, ['locked-slot']);
-    expect(controller.timeSlots.single.slotId, 'locked-slot');
+    expect(controller.selectedSlotIds, isEmpty);
+    expect(controller.timeSlots.single.slotId, isEmpty);
+    expect(repository.lockRequests, isEmpty);
 
     controller.selectedSlotIds.clear();
     controller.onClose();
@@ -92,6 +93,7 @@ class _FakeSlotRepository implements SlotRepository {
   final Map<String, List<TimeSlotDto>> availableByDate;
   final List<(String, String)> availableRequests = [];
   final List<(String, String)> bookableRequests = [];
+  final List<String> lockRequests = [];
 
   @override
   Future<List<TimeSlotDto>> getSlotsByField(String fieldId) async {
@@ -118,12 +120,9 @@ class _FakeSlotRepository implements SlotRepository {
 
   @override
   Future<SlotLockResult> lockSlot({
-    String? slotId,
-    required String fieldId,
-    required String startTime,
-    required String endTime,
-    required String selectedDate,
+    required String slotId,
   }) async {
+    lockRequests.add(slotId);
     return const SlotLockResult(slotId: 'locked-slot');
   }
 

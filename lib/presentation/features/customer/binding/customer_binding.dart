@@ -16,6 +16,7 @@ import 'package:exe101/presentation/features/customer/controller/notification_co
 import 'package:exe101/presentation/features/customer/controller/booking_details_controller.dart';
 import 'package:exe101/presentation/features/customer/controller/chat_actions_controller.dart';
 import 'package:exe101/presentation/features/customer/controller/payment_actions_controller.dart';
+import 'package:exe101/presentation/features/auth/controller/auth_controller.dart';
 import 'package:get/get.dart';
 
 class CustomerBinding extends Bindings {
@@ -29,6 +30,12 @@ class CustomerBinding extends Bindings {
 
     if (!Get.isRegistered<UserRepository>()) {
       Get.put<UserRepository>(UserRepository(apiService: apiService));
+    }
+    if (!Get.isRegistered<AuthController>()) {
+      Get.lazyPut<AuthController>(
+        () => AuthController(userRepository: Get.find()),
+        fenix: true,
+      );
     }
     if (!Get.isRegistered<BookingRepository>()) {
       Get.lazyPut<BookingRepository>(

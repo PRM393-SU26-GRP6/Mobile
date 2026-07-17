@@ -25,7 +25,14 @@ class SessionStateResetter {
 
   static Future<void> clearUserBoundState() async {
     if (Get.isRegistered<SignalRService>()) {
-      await Get.find<SignalRService>().stopConnections();
+      try {
+        await Get.find<SignalRService>()
+            .stopConnections()
+            .timeout(const Duration(seconds: 3));
+      } catch (_) {
+        // Session cleanup must continue even if a hub is reconnecting or the
+        // network does not acknowledge shutdown.
+      }
     }
 
     await _delete<BookingController>();
@@ -52,7 +59,12 @@ class SessionStateResetter {
 
   static Future<void> _delete<T>() async {
     if (Get.isRegistered<T>()) {
-      await Get.delete<T>(force: true);
+      try {
+        await Get.delete<T>(force: true);
+      } catch (_) {
+        // One controller must not prevent the rest of the session from being
+        // cleared or block navigation back to Login.
+      }
     }
   }
 }

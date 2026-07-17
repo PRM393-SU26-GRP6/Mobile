@@ -59,22 +59,14 @@ extension VenueDetailSelectionActions on VenueDetailController {
     }
 
     final field = selectedField.value;
-    if (field == null || !slot.isAvailable) return;
+    if (field == null || !slot.isAvailable || slot.slotId.isEmpty) return;
     if (lockingSlotIds.contains(selectionKey)) return;
 
     lockingSlotIds.add(selectionKey);
     try {
       final result = await slotRepository.lockSlot(
         slotId: slot.slotId,
-        fieldId: field.id,
-        startTime: slot.startTime,
-        endTime: slot.endTime,
-        selectedDate: slot.selectedDate,
       );
-      final index = timeSlots.indexWhere(
-        (item) => item.selectionKey == selectionKey,
-      );
-      if (index >= 0) timeSlots[index] = slot.copyWith(slotId: result.slotId);
       selectedSlotIds.add(result.slotId);
     } catch (_) {
       Get.snackbar(
@@ -94,7 +86,7 @@ extension VenueDetailSelectionActions on VenueDetailController {
   List<DateTime> _nextBookingDates() {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    return List.generate(14, (offset) => today.add(Duration(days: offset)));
+    return List.generate(21, (offset) => today.add(Duration(days: offset)));
   }
 
   List<TimeSlotDto> get slotsForSelectedDate {

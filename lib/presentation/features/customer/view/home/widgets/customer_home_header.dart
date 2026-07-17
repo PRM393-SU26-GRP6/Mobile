@@ -39,10 +39,22 @@ class CustomerHomeHeader extends StatelessWidget {
             onPressed: () => Get.toNamed(AppPages.userProfile),
             icon: const Icon(Icons.person_outline, color: Colors.white),
           ),
-          IconButton(
-            tooltip: 'Đăng xuất',
-            onPressed: () => _confirmLogout(context),
-            icon: const Icon(Icons.logout, color: Colors.white),
+          Obx(
+            () => IconButton(
+              tooltip: 'Đăng xuất',
+              onPressed: authController.isLoggingOut.value
+                  ? null
+                  : () => _confirmLogout(context),
+              icon: authController.isLoggingOut.value
+                  ? const SizedBox.square(
+                      dimension: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.logout, color: Colors.white),
+            ),
           ),
         ],
       ),

@@ -63,6 +63,7 @@ class OtpController extends GetxController {
   }
 
   Future<void> verifyOtp() async {
+    FocusManager.instance.primaryFocus?.unfocus();
     if (otpController.text.length < otpLength) {
       Get.snackbar('Lỗi', 'Vui lòng nhập đầy đủ mã OTP');
       return;
@@ -94,7 +95,7 @@ class OtpController extends GetxController {
     } catch (e) {
       Get.snackbar('Lỗi', ApiErrorHandler.getMessage(e));
     } finally {
-      isLoading.value = false;
+      if (!isClosed) isLoading.value = false;
     }
   }
 
@@ -110,7 +111,7 @@ class OtpController extends GetxController {
     } catch (e) {
       Get.snackbar('Lỗi', ApiErrorHandler.getMessage(e));
     } finally {
-      isLoading.value = false;
+      if (!isClosed) isLoading.value = false;
     }
   }
 

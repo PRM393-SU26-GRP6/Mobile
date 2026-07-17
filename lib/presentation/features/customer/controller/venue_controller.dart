@@ -26,6 +26,8 @@ class VenueController extends GetxController {
     super.onInit();
     loadAmenities();
     loadVenues();
+    debounce(searchQuery, (_) => loadVenues(),
+        time: const Duration(milliseconds: 500));
   }
 
   Future<void> loadAmenities() async {
@@ -61,21 +63,16 @@ class VenueController extends GetxController {
       error.value = '';
       final amenities =
           selectedAmenityIds.isEmpty ? null : selectedAmenityIds.join(',');
-      final fetched = searchQuery.value.isNotEmpty
-          ? await service.searchVenues(
-              q: searchQuery.value,
-              page: page.value,
-              pageSize: pageSize,
-            )
-          : await service.getVenues(
-              amenityIds: amenities,
-              page: page.value,
-              pageSize: pageSize,
-            );
+      final fetched = await service.getVenues(
+        q: searchQuery.value.isNotEmpty ? searchQuery.value : null,
+        amenityIds: amenities,
+        page: page.value,
+        pageSize: pageSize,
+      );
 
       page.value == 1 ? venues.assignAll(fetched) : venues.addAll(fetched);
       hasMore.value = fetched.length == pageSize;
-    } catch (_) {
+    } catch (e) {
       error.value = 'Không thể tải danh sách sân';
     } finally {
       isLoading.value = false;
@@ -93,6 +90,5 @@ class VenueController extends GetxController {
 
   void search(String query) {
     searchQuery.value = query.trim();
-    loadVenues();
   }
 }

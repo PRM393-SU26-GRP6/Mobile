@@ -29,6 +29,10 @@ class VenueFilterBar extends StatelessWidget {
           ),
         ),
         Obx(() {
+          // Explicitly access the list to register it as a dependency for Obx
+          // Since itemBuilder is lazy, GetX won't track variables read inside it
+          final _ = controller.selectedAmenityIds.length;
+          
           if (controller.allAmenities.isEmpty) {
             return const SizedBox.shrink();
           }

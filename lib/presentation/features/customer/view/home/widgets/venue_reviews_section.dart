@@ -61,7 +61,7 @@ class VenueReviewsSection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          Obx(() => _ReviewList(controller: controller)),
+          _ReviewList(controller: controller),
         ],
       ),
     );
@@ -75,64 +75,66 @@ class _ReviewList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (controller.isLoadingReviews.value) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 24),
-        child: Center(
-          child: CircularProgressIndicator(color: AppColors.accent),
-        ),
-      );
-    }
-
-    if (controller.reviews.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-        decoration: BoxDecoration(
-          color: AppColors.secondary.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.rate_review_outlined,
-              size: 20,
-              color: AppColors.textSecondary,
-            ),
-            SizedBox(width: 8),
-            Text(
-              'Chưa có bài đánh giá nào',
-              style: TextStyle(color: AppColors.textSecondary),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Column(
-      children: [
-        ...controller.reviews.map(
-          (review) => Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: VenueReviewCard(review: review),
+    return Obx(() {
+      if (controller.isLoadingReviews.value) {
+        return const Padding(
+          padding: EdgeInsets.symmetric(vertical: 24),
+          child: Center(
+            child: CircularProgressIndicator(color: AppColors.accent),
           ),
-        ),
-        if (controller.hasMoreReviews.value)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: OutlinedButton(
-              onPressed: controller.isLoadingMoreReviews.value
-                  ? null
-                  : controller.loadMoreReviews,
-              child: controller.isLoadingMoreReviews.value
-                  ? const SizedBox.square(
-                      dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Xem thêm đánh giá'),
+        );
+      }
+
+      if (controller.reviews.isEmpty) {
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+          decoration: BoxDecoration(
+            color: AppColors.secondary.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.rate_review_outlined,
+                size: 20,
+                color: AppColors.textSecondary,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Chưa có bài đánh giá nào',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+            ],
+          ),
+        );
+      }
+
+      return Column(
+        children: [
+          ...controller.reviews.map(
+            (review) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: VenueReviewCard(review: review),
             ),
           ),
-      ],
-    );
+          if (controller.hasMoreReviews.value)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: OutlinedButton(
+                onPressed: controller.isLoadingMoreReviews.value
+                    ? null
+                    : controller.loadMoreReviews,
+                child: controller.isLoadingMoreReviews.value
+                    ? const SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Xem thêm đánh giá'),
+              ),
+            ),
+        ],
+      );
+    });
   }
 }

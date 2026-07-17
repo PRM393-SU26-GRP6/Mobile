@@ -45,24 +45,19 @@ class SlotApiService {
   }
 
   /// POST /api/v1/slots/lock
-  /// Returns the persisted slot ID (including newly generated virtual slots).
+  /// Locks an existing persisted slot. The backend no longer creates virtual
+  /// slots from field/date/time data during the customer booking flow.
   Future<SlotLockResult> lockSlot({
-    String? slotId,
-    required String fieldId,
-    required String startTime,
-    required String endTime,
-    required String selectedDate,
+    required String slotId,
   }) async {
+    if (slotId.isEmpty) {
+      throw const FormatException('A persisted slotId is required');
+    }
+
     final headers = await _authHeaders();
     final response = await dio.post<Map<String, dynamic>>(
       '${Env.baseUrl}/api/v1/slots/lock',
-      data: {
-        if (slotId != null && slotId.isNotEmpty) 'slotId': slotId,
-        'fieldId': fieldId,
-        'startTime': startTime,
-        'endTime': endTime,
-        'selectedDate': selectedDate,
-      },
+      data: {'slotId': slotId},
       options: Options(headers: headers),
     );
     final data = response.data?['data'];

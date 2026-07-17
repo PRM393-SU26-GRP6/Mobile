@@ -5,7 +5,10 @@ import 'package:get/get.dart';
 
 /// Hiển thị dialog xác nhận đăng xuất. Dùng chung cho owner pages.
 Future<void> showOwnerLogoutDialog(BuildContext context) async {
-  return Get.dialog(
+  final authController = Get.find<AuthController>();
+  if (authController.isLoggingOut.value) return;
+
+  final shouldLogout = await Get.dialog<bool>(
     AlertDialog(
       title: const Text('Đăng xuất'),
       content: const Text('Bạn có muốn đăng xuất không?'),
@@ -19,15 +22,40 @@ Future<void> showOwnerLogoutDialog(BuildContext context) async {
             backgroundColor: Colors.red,
             foregroundColor: Colors.white,
           ),
-          onPressed: () {
-            Get.back();
-            Get.find<AuthController>().logout();
-          },
+          onPressed: () => Get.back(result: true),
           child: const Text('Đăng xuất'),
         ),
       ],
     ),
   );
+
+  if (shouldLogout != true) return;
+
+  Get.dialog<void>(
+    const PopScope(
+      canPop: false,
+      child: Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox.square(
+                  dimension: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                SizedBox(width: 14),
+                Text('Đang đăng xuất...'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+    barrierDismissible: false,
+  );
+  await authController.logout();
 }
 
 /// Hiển thị dialog xác nhận 2 nút Yes/No tổng quát.

@@ -69,6 +69,7 @@ class RegisterController extends GetxController {
   }
 
   Future<void> submitRegister() async {
+    FocusManager.instance.primaryFocus?.unfocus();
     if (fullNameController.text.isEmpty ||
         emailController.text.isEmpty ||
         phoneController.text.isEmpty ||
@@ -140,7 +141,7 @@ class RegisterController extends GetxController {
       }
       Get.snackbar('Lỗi', ApiErrorHandler.getMessage(e));
     } finally {
-      isLoading.value = false;
+      if (!isClosed) isLoading.value = false;
     }
   }
 

@@ -14,10 +14,12 @@ class AuthController extends GetxController {
   final passwordController = TextEditingController();
 
   final isLoading = false.obs;
+  final isLoggingOut = false.obs;
 
   AuthController({required this.userRepository});
 
   Future<void> login() async {
+    FocusManager.instance.primaryFocus?.unfocus();
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {
       Get.snackbar('Lỗi', 'Vui lòng nhập email và mật khẩu');
       return;
@@ -56,7 +58,7 @@ class AuthController extends GetxController {
       }
       Get.snackbar('Lỗi', ApiErrorHandler.getMessage(e));
     } finally {
-      isLoading.value = false;
+      if (!isClosed) isLoading.value = false;
     }
   }
 
@@ -71,13 +73,20 @@ class AuthController extends GetxController {
   }
 
   Future<void> logout() async {
-    if (Get.isRegistered<ApiServiceImpl>()) {
-      await Get.find<ApiServiceImpl>().logout();
+    if (isLoggingOut.value) return;
+    isLoggingOut.value = true;
+
+    try {
+      if (Get.isRegistered<ApiServiceImpl>()) {
+        await Get.find<ApiServiceImpl>().logout();
+      }
+      await SessionStateResetter.clearUserBoundState();
+    } finally {
+      emailController.clear();
+      passwordController.clear();
+      Get.offAllNamed(AppPages.login);
+      if (!isClosed) isLoggingOut.value = false;
     }
-    await SessionStateResetter.clearUserBoundState();
-    emailController.clear();
-    passwordController.clear();
-    Get.offAllNamed(AppPages.login);
   }
 
   @override

@@ -150,10 +150,10 @@ class _OtpInputState extends State<_OtpInput> {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(OtpController.otpLength, (index) {
-          return Container(
-            width: 46,
-            height: 60,
-            margin: const EdgeInsets.symmetric(horizontal: 4),
+          return Expanded(
+            child: Container(
+              height: 60,
+              margin: const EdgeInsets.symmetric(horizontal: 4),
             child: TextField(
               controller: _controllers[index],
               focusNode: _focusNodes[index],
@@ -186,7 +186,7 @@ class _OtpInputState extends State<_OtpInput> {
               onChanged: (value) => _onChanged(value, index),
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
-          );
+          ));
         }),
       );
     });
